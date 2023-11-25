@@ -1,3 +1,49 @@
+/*
+Как выглядит разрабатываемый язык программирования:
+
+program:
+  line |
+  line program
+
+line
+  : label
+  | instruction
+  | comment
+
+instruction
+   : addr operand
+   | nonaddr
+   | branch label
+   | io dev
+
+variable_declaration: <name> ':' <value>
+
+addr: AND | OR | ADD | SUB | CMP | LOOP | LD | JUMP | CALL | ST;
+nonaddr: NOP | HLT | CLA | NOT | CLC | CMC | ROL | ROR | ASL | ASR | SXTB | SWAB |
+         INC | DEC | NEG | POP | POPF | RET | IRET | PUSH | PUSHF | SWAP |
+         EI  | DI;
+branch: BEQ | BNE | BMI | BPL | BCS | BCC | BVS | BVC | BLT | BGE | BR;
+
+io:  IN | OUT | INT;
+dev: number;
+
+Пример:
+```asm
+; задание переменных в 16-ричной системе счисления:
+; <имя переменной>: <значение>
+X: 0x2
+
+; Начало прогрммы - точка входа с метки START
+; все операции работают с аккумулятором
+START:
+  CLA ; очистить аккумулятор
+  LD 42 ; загрузить в аккумулятор значение 42
+  ADD X ; прибавить к аккумулятору значение переменной X
+  NOP ; ничего не делать
+  HLT ; остановить выполнение программы
+```
+
+*/
 package main
 
 import (
@@ -18,9 +64,7 @@ const (
   OpEq
   OpGt
   OpJmp
-
-
-func symbolToOpCode
+)
 
 var (
   input_file = flag.String("input", "", "input file")
