@@ -8,26 +8,31 @@ Translator - полностью независимая программа.
 
 ## Как выглядит разрабатываемый язык программирования:
 program:
-  line |
-  line program
+
+	line |
+	line program
 
 line
-  : label
-  | instruction
-  | comment
+
+	: label
+	| instruction
+	| comment
 
 instruction
-   : addr operand
-   | nonaddr
-   | branch label
-   | io dev
+
+	: addr operand
+	| nonaddr
+	| branch label
+	| io dev
 
 variable_declaration: <name> ':' <value>
 
 addr: AND | OR | ADD | SUB | CMP | LOOP | LD | JUMP | CALL | ST;
 nonaddr: NOP | HLT | CLA | NOT | CLC | CMC | ROL | ROR | ASL | ASR | SXTB | SWAB |
-         INC | DEC | NEG | POP | POPF | RET | IRET | PUSH | PUSHF | SWAP |
-         EI  | DI;
+
+	INC | DEC | NEG | POP | POPF | RET | IRET | PUSH | PUSHF | SWAP |
+	EI  | DI;
+
 branch: BEQ | BNE | BMI | BPL | BCS | BCC | BVS | BVC | BLT | BGE | BR;
 
 io:  IN | OUT | INT;
@@ -42,39 +47,29 @@ X: 0x2
 ; Начало прогрммы - точка входа с метки START
 ; все операции работают с аккумулятором
 START:
-  CLA ; очистить аккумулятор
-  LD 42 ; загрузить в аккумулятор значение 42
-  ADD X ; прибавить к аккумулятору значение переменной X
-  NOP ; ничего не делать
-  HLT ; остановить выполнение программы
+
+	CLA ; очистить аккумулятор
+	LD 42 ; загрузить в аккумулятор значение 42
+	ADD X ; прибавить к аккумулятору значение переменной X
+	NOP ; ничего не делать
+	HLT ; остановить выполнение программы
+
 ```
 
 ## Реализация
 Трансляция проходит в 2 этапа:
 1. Парсинг строки в термы
 2. Трансляция термов в машинный код
-
 */
-package main
+package translator
 
 import (
+	"bytes"
 	"flag"
-	"fmt"
 	"io"
 	"log"
 	"os"
-)
-
-type OpCode int
-
-const (
-  OpHalt OpCode = iota
-  OpSet
-  OpPush
-  OpPop
-  OpEq
-  OpGt
-  OpJmp
+  "github.com/Moleus/comp-arch-lab3/pkg/isa"
 )
 
 var (
@@ -88,8 +83,35 @@ type Translator interface {
 }
 
 type translator struct {
-  labels map[string]int
   // TODO
+}
+
+func NewTranslator() Translator {
+  return &translator{}
+}
+
+func (t *translator) ParseTerms(input io.Reader) ([]string, error) {
+  // TODO
+  terms := []string{}
+  return terms, nil
+}
+
+func (t *translator) ConvertTermsToMachineCode(terms []string) (string, error) {
+  // TODO
+  return "", nil
+}
+
+func (t *translator) Translate(input io.Reader, output io.Writer) error {
+  terms, err := t.ParseTerms(input)
+  if err != nil {
+    return err
+  }
+  machineCode, err := t.ConvertTermsToMachineCode(terms)
+  if err != nil {
+    return err
+  }
+  output.Write(bytes.NewBufferString(machineCode).Bytes())
+  return nil
 }
 
 /*
@@ -127,6 +149,10 @@ func main() {
     output = f
   }
 
-  translator
+  translator := NewTranslator()
+  err := translator.Translate(input, output)
+  if err != nil {
+    log.Fatal(err)
+  }
 }
 
