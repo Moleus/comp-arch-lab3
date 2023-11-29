@@ -8,6 +8,8 @@ ISA - Instruction Set Architecture (Система команд)
 
 По сути занимается сериализацией и десериализаций программы в JSON
 
+Используется в machine.go, controlunit.go и datapath.go
+
 */
 package isa
 
@@ -24,6 +26,10 @@ type NoAddrInstr int
 
 const (
   AddrInstrHalt AddrInstr = iota
+)
 
 
+type Term struct {
+
+}
 

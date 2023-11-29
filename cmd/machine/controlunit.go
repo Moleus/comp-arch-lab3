@@ -16,4 +16,4 @@ hw - hardwired. Реализуется как часть модели. microcode
 4. Цикл исполнения (Execution)
 5. Цикл прерывания (Interruption) - нужен для ввода-вывода
 */
-package controlunit
+package machine

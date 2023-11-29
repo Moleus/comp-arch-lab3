@@ -7,3 +7,5 @@ Machine
 
 ControlUnit и DataPath находятся в отдельных файлах
 */
+
+package machine
