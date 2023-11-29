@@ -1,4 +1,5 @@
 /*
+Package translator:
 struct - Машинный код представляется в виде высокоуровневой структуры
 
 Translator - полностью независимая программа.
@@ -69,49 +70,48 @@ import (
 	"io"
 	"log"
 	"os"
-  "github.com/Moleus/comp-arch-lab3/pkg/isa"
 )
 
 var (
-  input_file = flag.String("input", "", "input file")
-  target_file = flag.String("target", "", "target file")
-  // flags
+	input_file  = flag.String("input", "", "input file")
+	target_file = flag.String("target", "", "target file")
+	// flags
 )
 
 type Translator interface {
-  Translate(input io.Reader, output io.Writer) error
+	Translate(input io.Reader, output io.Writer) error
 }
 
 type translator struct {
-  // TODO
+	// TODO
 }
 
 func NewTranslator() Translator {
-  return &translator{}
+	return &translator{}
 }
 
 func (t *translator) ParseTerms(input io.Reader) ([]string, error) {
-  // TODO
-  terms := []string{}
-  return terms, nil
+	// TODO
+	terms := []string{}
+	return terms, nil
 }
 
 func (t *translator) ConvertTermsToMachineCode(terms []string) (string, error) {
-  // TODO
-  return "", nil
+	// TODO
+	return "", nil
 }
 
 func (t *translator) Translate(input io.Reader, output io.Writer) error {
-  terms, err := t.ParseTerms(input)
-  if err != nil {
-    return err
-  }
-  machineCode, err := t.ConvertTermsToMachineCode(terms)
-  if err != nil {
-    return err
-  }
-  output.Write(bytes.NewBufferString(machineCode).Bytes())
-  return nil
+	terms, err := t.ParseTerms(input)
+	if err != nil {
+		return err
+	}
+	machineCode, err := t.ConvertTermsToMachineCode(terms)
+	if err != nil {
+		return err
+	}
+	output.Write(bytes.NewBufferString(machineCode).Bytes())
+	return nil
 }
 
 /*
@@ -123,36 +123,35 @@ input: `translator.bin <input_file> <target_file> [flags]`
 // if input is not provided then read from stdin
 // if target is not provided write to stdout
 func main() {
-  var input io.Reader
-  var output io.Writer
-  flag.Parse()
+	var input io.Reader
+	var output io.Writer
+	flag.Parse()
 
-  if *input_file == "" {
-    input = os.Stdin
-  } else {
-    f, err := os.Open(*input_file)
-    if err != nil {
-      log.Fatal(err)
-    }
-    defer f.Close()
-    input = f
-  }
+	if *input_file == "" {
+		input = os.Stdin
+	} else {
+		f, err := os.Open(*input_file)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer f.Close()
+		input = f
+	}
 
-  if *target_file == "" {
-    output = os.Stdout
-  } else {
-    f, err := os.Create(*target_file)
-    if err != nil {
-      log.Fatal(err)
-    }
-    defer f.Close()
-    output = f
-  }
+	if *target_file == "" {
+		output = os.Stdout
+	} else {
+		f, err := os.Create(*target_file)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer f.Close()
+		output = f
+	}
 
-  translator := NewTranslator()
-  err := translator.Translate(input, output)
-  if err != nil {
-    log.Fatal(err)
-  }
+	translator := NewTranslator()
+	err := translator.Translate(input, output)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
-

@@ -1,35 +1,51 @@
 /*
-ISA - Instruction Set Architecture (Система команд)
+Package isa: Instruction Set Architecture (Система команд)
 Фон-Неймановская архитектура
 
 Задачи:
 - читает машинный код из файла
 - записывает машинный код в файл
 
-По сути занимается сериализацией и десериализаций программы в JSON
+# По сути занимается сериализацией и десериализаций программы в JSON
 
 Используется в machine.go, controlunit.go и datapath.go
-
 */
 package isa
 
-import (
-  "fmt"
-  "io"
-  "log"
-)
-
 /* accumulator based ISA */
 
-type AddrInstr int
-type NoAddrInstr int
+// Instruction represents all supported instructions for our architecture
+type Instruction int
 
 const (
-  AddrInstrHalt AddrInstr = iota
+	InstructionAnd Instruction = iota
+	InstructionOr
+	InstructionAdd
+	InstructionSub
+	InstructionCmp
 )
 
+// AddressingType like relative direct
+type AddressingType int
 
-type Term struct {
+const (
+	DirectAbsolute AddressingType = iota
+	Indirect
+)
 
+type MemoryWord struct {
+	address int
+	label   string
+	value   int
 }
 
+type AddressingMode struct {
+	targetAddress  int
+	addressingType AddressingType
+}
+
+type InstructionWord struct {
+	MemoryWord
+	instruction    Instruction
+	addressingMode AddressingMode
+}
