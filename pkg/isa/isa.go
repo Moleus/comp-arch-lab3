@@ -12,6 +12,12 @@ Package isa: Instruction Set Architecture (Система команд)
 */
 package isa
 
+import (
+	"encoding/json"
+	"github.com/Moleus/comp-arch-lab3/cmd/translator"
+	"io"
+)
+
 /* accumulator based ISA */
 
 // Instruction represents all supported instructions for our architecture
@@ -48,4 +54,27 @@ type InstructionWord struct {
 	MemoryWord
 	instruction    Instruction
 	addressingMode AddressingMode
+}
+
+// TODO: think about dependencies and move MachineCodeTerm in ISA
+func ReadCode(input io.Reader) ([]translator.MachineCodeTerm, error) {
+	var machineCode []translator.MachineCodeTerm
+	decoder := json.NewDecoder(input)
+	err := decoder.Decode(&machineCode)
+	if err != nil {
+		return []translator.MachineCodeTerm{}, err
+	}
+	return machineCode, nil
+}
+
+func WriteCode(target io.Writer, machineCode []translator.MachineCodeTerm) error {
+	encodedCode, err := json.MarshalIndent(machineCode, "", "  ")
+	if err != nil {
+		return err
+	}
+	_, err = target.Write(encodedCode)
+	if err != nil {
+		return err
+	}
+	return nil
 }

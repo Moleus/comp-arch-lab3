@@ -65,9 +65,9 @@ START:
 package translator
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/Moleus/comp-arch-lab3/pkg/isa"
 	"io"
 	"log"
 	"os"
@@ -77,13 +77,13 @@ import (
 )
 
 var (
-	input_file  = flag.String("input", "", "input file")
-	target_file = flag.String("target", "", "target file")
+	inputFile  = flag.String("input", "", "input file")
+	targetFile = flag.String("target", "", "target file")
 	// flags
 )
 
 type Translator interface {
-	Translate(input string) (string, error)
+	Translate(input string) ([]MachineCodeTerm, error)
 }
 
 type translator struct {
@@ -242,6 +242,7 @@ type MachineCodeTerm struct {
 
 func (t *translator) ConvertTermsToMachineCode(instructions []ParsedInstruction) ([]MachineCodeTerm, error) {
 	var machineCode []MachineCodeTerm
+	// TODO: check instruction correctness
 	for i, instruction := range instructions {
 		// TODO: it can be variable, not instruction
 		newMachineCodeTerm := MachineCodeTerm{
@@ -256,28 +257,16 @@ func (t *translator) ConvertTermsToMachineCode(instructions []ParsedInstruction)
 	return machineCode, nil
 }
 
-func (t *translator) EncodeMachineCode(machineCode []MachineCodeTerm) (string, error) {
-	encodedCode, err := json.MarshalIndent(machineCode, "", "  ")
-	if err != nil {
-		return "", err
-	}
-	return string(encodedCode), nil
-}
-
-func (t *translator) Translate(input string) (string, error) {
+func (t *translator) Translate(input string) ([]MachineCodeTerm, error) {
 	parsedInstructions, err := t.ParseInstructions(input)
 	if err != nil {
-		return "", err
+		return []MachineCodeTerm{}, err
 	}
 	machineCode, err := t.ConvertTermsToMachineCode(parsedInstructions)
 	if err != nil {
-		return "", err
+		return []MachineCodeTerm{}, err
 	}
-	encodedMachineCode, err := t.EncodeMachineCode(machineCode)
-	if err != nil {
-		return "", err
-	}
-	return encodedMachineCode, nil
+	return machineCode, nil
 }
 
 /*
@@ -293,10 +282,10 @@ func main() {
 	var output io.Writer
 	flag.Parse()
 
-	if *input_file == "" {
+	if *inputFile == "" {
 		input = os.Stdin
 	} else {
-		f, err := os.Open(*input_file)
+		f, err := os.Open(*inputFile)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -309,10 +298,10 @@ func main() {
 		input = f
 	}
 
-	if *target_file == "" {
+	if *targetFile == "" {
 		output = os.Stdout
 	} else {
-		f, err := os.Create(*target_file)
+		f, err := os.Create(*targetFile)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -330,11 +319,12 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	result, err := translator.Translate(string(inputStr))
+	code, err := translator.Translate(string(inputStr))
 	if err != nil {
 		log.Fatal(err)
 	}
-	_, err = output.Write([]byte(result))
+
+	err = isa.WriteCode(output, code)
 	if err != nil {
 		log.Fatal(err)
 	}

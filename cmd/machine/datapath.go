@@ -29,3 +29,7 @@ PS - регистр флагов (состояния)
 */
 
 package machine
+
+type DataPath struct {
+	// TODO
+}

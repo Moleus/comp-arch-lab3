@@ -17,3 +17,6 @@ hw - hardwired. Реализуется как часть модели. microcode
 5. Цикл прерывания (Interruption) - нужен для ввода-вывода
 */
 package machine
+
+type ControlUnit struct {
+}
