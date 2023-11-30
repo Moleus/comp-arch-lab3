@@ -1,3 +1,4 @@
+; constants not supported yet
 CONST X: 123
 CONST Y: 456
 

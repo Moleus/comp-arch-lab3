@@ -5,7 +5,7 @@
     "opcode": "ADD",
     "operand": "5",
     "term_info": {
-      "line_num": 4,
+      "line_num": 5,
       "original_content": "START: ADD 5"
     }
   },
@@ -14,7 +14,7 @@
     "opcode": "MUL",
     "operand": "2",
     "term_info": {
-      "line_num": 5,
+      "line_num": 6,
       "original_content": "MUL 2"
     }
   },
@@ -22,7 +22,7 @@
     "index": 2,
     "opcode": "HLT",
     "term_info": {
-      "line_num": 6,
+      "line_num": 7,
       "original_content": "HLT"
     }
   }
