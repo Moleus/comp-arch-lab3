@@ -39,6 +39,12 @@ const (
 	Indirect
 )
 
+const (
+	WORD_WIDTH     = 16
+	WORD_MAX_VALUE = 1<<(WORD_WIDTH-1) - 1
+	WORD_MIN_VALUE = -1 << (WORD_WIDTH - 1)
+)
+
 type MemoryWord struct {
 	address int
 	label   string

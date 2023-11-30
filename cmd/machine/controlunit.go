@@ -18,5 +18,6 @@ hw - hardwired. Реализуется как часть модели. microcode
 */
 package machine
 
+// TODO: implement interfacte Debuggable to dump current CPU state
 type ControlUnit struct {
 }

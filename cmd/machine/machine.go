@@ -51,9 +51,9 @@ func simulation(machineCode []translator.MachineCodeTerm, dataInput string) Simu
 
 	log.Println("simulation finished")
 	return SimulationStatistics{
-		programOutput:      dataPath.programOutput,
-		instructionCounter: controlUnit.instructionCounter,
-		currentTick:        controlUnit.currentTick,
+		programOutput:      dataPath.ReadOutput(),
+		instructionCounter: controlUnit.InstructionCounter,
+		currentTick:        controlUnit.CurrentTick,
 	}
 }
 
