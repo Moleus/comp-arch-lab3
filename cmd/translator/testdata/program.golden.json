@@ -1,0 +1,29 @@
+[
+  {
+    "index": 0,
+    "label": "START",
+    "opcode": "ADD",
+    "operand": "5",
+    "term_info": {
+      "line_num": 4,
+      "original_content": "START: ADD 5"
+    }
+  },
+  {
+    "index": 1,
+    "opcode": "MUL",
+    "operand": "2",
+    "term_info": {
+      "line_num": 5,
+      "original_content": "MUL 2"
+    }
+  },
+  {
+    "index": 2,
+    "opcode": "HLT",
+    "term_info": {
+      "line_num": 6,
+      "original_content": "HLT"
+    }
+  }
+]

@@ -119,7 +119,7 @@ type ParseError struct {
 }
 
 func (e ParseError) Error() string {
-	return fmt.Sprintf("invalid instruction at %d: %s", e.line, e.content)
+	return fmt.Sprintf("invalid instruction at %d: '%s'", e.line, e.content)
 }
 
 func NewParseError(content string, line int) error {
@@ -128,7 +128,9 @@ func NewParseError(content string, line int) error {
 
 func ParseInstruction(line string, lineNumber int) (ParsedInstruction, error) {
 	// group2: label, group3: instruction, group4: operand
-	instructionRegexTmpl := `^((\w+)?\s*:)?\s*(\w+)\s*(\w+)$`
+	// TODO: parse single opcode HLT
+	// parse labels
+	instructionRegexTmpl := `^((\w+)?\s*:)?\s*(\w+)(\s+(\w+))?$`
 	instructionRegex := regexp.MustCompile(instructionRegexTmpl)
 	matches := instructionRegex.FindStringSubmatch(line)
 	if len(matches) == 0 {
@@ -138,7 +140,7 @@ func ParseInstruction(line string, lineNumber int) (ParsedInstruction, error) {
 	instruction := ParsedInstruction{
 		label:       matches[2],
 		instruction: matches[3],
-		operand:     matches[4],
+		operand:     matches[5],
 		metaInfo: TermMetaInfo{
 			LineNum:         lineNumber,
 			OriginalContent: line,
@@ -167,12 +169,34 @@ func ParseConstant(line string, lineNum int) (ParsedConstant, error) {
 	}, nil
 }
 
+func isConstant(line string) bool {
+	return strings.HasPrefix(line, "CONST")
+}
+
+func isEmpty(line string) bool {
+	// spaces and tabs are empty
+	emptyRegexTmpl := `^\s*$`
+	emptyRegex := regexp.MustCompile(emptyRegexTmpl)
+	return emptyRegex.MatchString(line)
+}
+
+func prepareLine(line string) string {
+	// remove comments
+	commentRegexTmpl := `;.*$`
+	commentRegex := regexp.MustCompile(commentRegexTmpl)
+	withoutComments := commentRegex.ReplaceAllString(line, "")
+	// remove trailing spaces
+	withoutSpaces := strings.TrimSpace(withoutComments)
+	return withoutSpaces
+}
+
 func (t *translator) ParseConstants(input string) ([]ParsedConstant, error) {
 	var constants []ParsedConstant
 
 	lines := strings.Split(input, "\n")
 	for i, line := range lines {
-		if !strings.HasPrefix(line, "CONST") {
+		line = prepareLine(line)
+		if !isConstant(line) || isEmpty(line) {
 			continue
 		}
 		constant, err := ParseConstant(line, i+1)
@@ -189,6 +213,10 @@ func (t *translator) ParseInstructions(input string) ([]ParsedInstruction, error
 
 	lines := strings.Split(input, "\n")
 	for i, line := range lines {
+		line = prepareLine(line)
+		if isConstant(line) || isEmpty(line) {
+			continue
+		}
 		instruction, err := ParseInstruction(line, i+1)
 		if err != nil {
 			return nil, err
@@ -206,8 +234,9 @@ type TermMetaInfo struct {
 
 type MachineCodeTerm struct {
 	Index    int          `json:"index"`
+	Label    string       `json:"label,omitempty"`
 	Opcode   string       `json:"opcode"`
-	Operand  string       `json:"operand"`
+	Operand  string       `json:"operand,omitempty"`
 	TermInfo TermMetaInfo `json:"term_info"`
 }
 
@@ -217,6 +246,7 @@ func (t *translator) ConvertTermsToMachineCode(instructions []ParsedInstruction)
 		// TODO: it can be variable, not instruction
 		newMachineCodeTerm := MachineCodeTerm{
 			Index:    i,
+			Label:    instruction.label,
 			Opcode:   instruction.instruction,
 			Operand:  instruction.operand,
 			TermInfo: instruction.metaInfo,
@@ -227,7 +257,7 @@ func (t *translator) ConvertTermsToMachineCode(instructions []ParsedInstruction)
 }
 
 func (t *translator) EncodeMachineCode(machineCode []MachineCodeTerm) (string, error) {
-	encodedCode, err := json.Marshal(machineCode)
+	encodedCode, err := json.MarshalIndent(machineCode, "", "  ")
 	if err != nil {
 		return "", err
 	}
