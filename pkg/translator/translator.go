@@ -232,11 +232,15 @@ func (t *translator) ConvertTermsToMachineCode(instructions []ParsedInstruction)
 	// TODO: check instruction correctness
 	for i, instruction := range instructions {
 		// TODO: it can be variable, not instruction
-		newMachineCodeTerm := MachineCodeTerm{
+    // TODO: convert labels to absolute addresses
+    operand := -1
+    // TODO: remove hardcode
+    opcode := isa.OpcodeAdd
+		newMachineCodeTerm := isa.MachineCodeTerm{
 			Index:    i,
 			Label:    instruction.label,
-			Opcode:   instruction.instruction,
-			Operand:  instruction.operand,
+			Opcode:   opcode,
+			Operand:  operand,
 			TermInfo: instruction.metaInfo,
 		}
 		machineCode = append(machineCode, newMachineCodeTerm)

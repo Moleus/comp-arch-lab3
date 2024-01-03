@@ -39,6 +39,17 @@ const (
   OpcodeIret
   OpcodeIn
   OpcodeOut
+
+  OpcodeLoad
+  OpcodeStore
+
+  OpcodePush
+  OpcodePop
+
+  OpcodeEi
+  OpcodeDi
+  OpcodeCla
+  OpcodeNop
 )
 
 type OpcodeType int
@@ -97,6 +108,38 @@ var (
       instructionType: OpcodeTypeIO,
       stringRepresentation: "OUT",
     },
+    OpcodeLoad: {
+      instructionType: OpcodeTypeAddress,
+      stringRepresentation: "LD",
+    },
+    OpcodeStore: {
+      instructionType: OpcodeTypeAddress,
+      stringRepresentation: "ST",
+    },
+    OpcodePush: {
+      instructionType: OpcodeTypeAddressless,
+      stringRepresentation: "PUSH",
+    },
+    OpcodePop: {
+      instructionType: OpcodeTypeAddressless,
+      stringRepresentation: "POP",
+    },
+    OpcodeEi: {
+      instructionType: OpcodeTypeAddressless,
+      stringRepresentation: "EI",
+    },
+    OpcodeDi: {
+      instructionType: OpcodeTypeAddressless,
+      stringRepresentation: "DI",
+    },
+    OpcodeCla: {
+      instructionType: OpcodeTypeAddressless,
+      stringRepresentation: "CLA",
+    },
+    OpcodeNop: {
+      instructionType: OpcodeTypeAddressless,
+      stringRepresentation: "NOP",
+    },
   }
 )
 
@@ -132,7 +175,7 @@ type MachineCodeTerm struct {
 	Index    int          `json:"index"`
 	Label    string       `json:"label,omitempty"`
 	Opcode   Opcode       `json:"opcode"`
-	Operand  string       `json:"operand,omitempty"`
+	Operand  int          `json:"operand,omitempty"`
 	TermInfo TermMetaInfo `json:"term_info"`
 }
 

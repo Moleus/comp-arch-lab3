@@ -16,6 +16,16 @@ const (
 	AluOperationMod
 	AluOperationRight
 	AluOperationLeft
+  AluOperationOr
+  AluOperationAnd
+)
+
+var (
+  opcodeToAluOperation = map[isa.Opcode]AluOperation{
+    isa.OpcodeAdd: AluOperationAdd,
+    isa.OpcodeSub: AluOperationSub,
+    isa.OpcodeCla: AluOperationRight,
+  }
 )
 
 type Alu struct {
@@ -43,6 +53,14 @@ func mod(left int, right int) int {
 	return left % right
 }
 
+func or(left int, right int) int {
+  return left | right
+}
+
+func and(left int, right int) int {
+  return left & right
+}
+
 func takeRight(left int, right int) int {
 	return right
 }
@@ -61,6 +79,8 @@ func NewAlu() *Alu {
 			AluOperationMod:   mod,
 			AluOperationRight: takeRight,
 			AluOperationLeft:  takeLeft,
+      AluOperationOr:    or,
+      AluOperationAnd:   and,
 		},
 	}
 }
@@ -104,8 +124,8 @@ type ExecutionParams struct {
   updateRegisters bool
 }
 
-func NewExecutionParams(operation AluOperation) ExecutionParams {
-  return ExecutionParams{
+func NewAluOp(operation AluOperation) *ExecutionParams {
+  return &ExecutionParams{
     operation: operation,
     left: 0,
     right: 0,
@@ -113,19 +133,19 @@ func NewExecutionParams(operation AluOperation) ExecutionParams {
   }
 }
 
-func (p *ExecutionParams) WithLeft(left int) ExecutionParams {
+func (p *ExecutionParams) SetLeft(left int) *ExecutionParams {
   p.left = left
-  return *p
+  return p
 }
 
-func (p *ExecutionParams) WithRight(right int) ExecutionParams {
+func (p *ExecutionParams) SetRight(right int) *ExecutionParams {
   p.right = right
-  return *p
+  return p
 }
 
-func (p *ExecutionParams) UpdateRegisters(updateRegisters bool) ExecutionParams {
+func (p *ExecutionParams) UpdateRegisters(updateRegisters bool) *ExecutionParams {
   p.updateRegisters = updateRegisters
-  return *p
+  return p
 }
 
 func (a *Alu) Execute(executionParams ExecutionParams) int {

@@ -37,6 +37,7 @@ package machine
 
 import (
 	"bytes"
+  "github.com/Moleus/comp-arch-lab3/pkg/isa"
 )
 
 type SignalDriven interface {
@@ -53,10 +54,24 @@ type Register int
 const (
   AC Register = iota
   IP
+  CR
+  PS
   SP
   DR
   AR
 )
+
+type RegisterValue struct {
+  value int
+}
+
+func (rv *RegisterValue) GetValue() int {
+  return rv.value
+}
+
+func (rv *RegisterValue) GetAddress() int {
+  return rv.value
+}
 
 type DataPath struct {
 	InstructionCounter int
@@ -64,7 +79,9 @@ type DataPath struct {
 	input              bytes.Buffer
 	output             bytes.Buffer
 	registers          map[Register]int
-	memory             Memory
+	memory             []int
+
+  Alu *Alu
 }
 
 func NewDataPath(dataInput bytes.Buffer) *DataPath {
@@ -81,4 +98,12 @@ func (dp *DataPath) SigLatchRegister(register Register, value int) {
 
 func (dp *DataPath) GetRegister(register Register) int {
   return dp.registers[register]
+}
+
+func (dp *DataPath) ReadMemory(address int) int {
+  return dp.memory[address]
+}
+
+func (dp *DataPath) WriteMemory() {
+  dp.memory[dp.GetRegister(AR)] = dp.GetRegister(DR)
 }
