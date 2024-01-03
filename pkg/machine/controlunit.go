@@ -41,6 +41,8 @@ type ControlUnit struct {
   dataPath *DataPath
   instructionCounter int
   currentTick int
+
+  logger *Logger
 }
 
 func (cu *ControlUnit) SigLatchReg(register Register, value int) {
@@ -53,7 +55,6 @@ func (cu *ControlUnit) GetReg(register Register) int {
 
 func (cu *ControlUnit) Tick() {
   cu.currentTick++
-
 }
 
 func (cu *ControlUnit) DecodeAndExecuteInstruction() error {
@@ -97,3 +98,5 @@ func (cu *ControlUnit) decodeAndExecuteBranchInstruction(instruction isa.Machine
   }
   return nil
 }
+
+func (cu *ControlUnit)
