@@ -83,7 +83,7 @@ var (
 )
 
 type Translator interface {
-	Translate(input string) ([]MachineCodeTerm, error)
+	Translate(input string) ([]isa.MachineCodeTerm, error)
 }
 
 type translator struct {
@@ -104,7 +104,7 @@ type ParsedInstruction struct {
 	label       string
 	instruction string
 	operand     string
-	metaInfo    TermMetaInfo
+	metaInfo    isa.TermMetaInfo
 }
 
 // ParsedConstant - объявленная константа в исходном коде
@@ -141,7 +141,7 @@ func ParseInstruction(line string, lineNumber int) (ParsedInstruction, error) {
 		label:       matches[2],
 		instruction: matches[3],
 		operand:     matches[5],
-		metaInfo: TermMetaInfo{
+		metaInfo: isa.TermMetaInfo{
 			LineNum:         lineNumber,
 			OriginalContent: line,
 		},
@@ -227,21 +227,8 @@ func (t *translator) ParseInstructions(input string) ([]ParsedInstruction, error
 	return instructions, nil
 }
 
-type TermMetaInfo struct {
-	LineNum         int    `json:"line_num"`
-	OriginalContent string `json:"original_content"`
-}
-
-type MachineCodeTerm struct {
-	Index    int          `json:"index"`
-	Label    string       `json:"label,omitempty"`
-	Opcode   string       `json:"opcode"`
-	Operand  string       `json:"operand,omitempty"`
-	TermInfo TermMetaInfo `json:"term_info"`
-}
-
-func (t *translator) ConvertTermsToMachineCode(instructions []ParsedInstruction) ([]MachineCodeTerm, error) {
-	var machineCode []MachineCodeTerm
+func (t *translator) ConvertTermsToMachineCode(instructions []ParsedInstruction) ([]isa.MachineCodeTerm, error) {
+	var machineCode []isa.MachineCodeTerm
 	// TODO: check instruction correctness
 	for i, instruction := range instructions {
 		// TODO: it can be variable, not instruction
@@ -257,14 +244,14 @@ func (t *translator) ConvertTermsToMachineCode(instructions []ParsedInstruction)
 	return machineCode, nil
 }
 
-func (t *translator) Translate(input string) ([]MachineCodeTerm, error) {
+func (t *translator) Translate(input string) ([]isa.MachineCodeTerm, error) {
 	parsedInstructions, err := t.ParseInstructions(input)
 	if err != nil {
-		return []MachineCodeTerm{}, err
+		return []isa.MachineCodeTerm{}, err
 	}
 	machineCode, err := t.ConvertTermsToMachineCode(parsedInstructions)
 	if err != nil {
-		return []MachineCodeTerm{}, err
+		return []isa.MachineCodeTerm{}, err
 	}
 	return machineCode, nil
 }

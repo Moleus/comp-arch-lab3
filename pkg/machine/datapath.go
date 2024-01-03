@@ -22,6 +22,9 @@ PS - регистр флагов (состояния)
 
 //TODO: написать набор функций, который позволят удобно читать из памяти в нужные регистры и обратно
 
+
+// TODO: как будет выглядеть DataPath на Golang?
+
 подумать про адресацию...
 
 # Реализация
@@ -30,7 +33,7 @@ PS - регистр флагов (состояния)
 Должна быть реализовано строковое предствление состояние процессора.
 */
 
-package datapath
+package machine
 
 import (
 	"bytes"
@@ -45,17 +48,22 @@ type Memory struct {
 	values []int
 }
 
-type Registers struct {
-	Accumulator        int
-	InstructionPointer int
-}
+type Register int
+
+const (
+  AC Register = iota
+  IP
+  SP
+  DR
+  AR
+)
 
 type DataPath struct {
 	InstructionCounter int
 	CurrentTick        int
 	input              bytes.Buffer
 	output             bytes.Buffer
-	registers          Registers
+	registers          map[Register]int
 	memory             Memory
 }
 
@@ -67,6 +75,10 @@ func (dp *DataPath) ReadOutput() string {
 	return dp.output.String()
 }
 
-func (dp *DataPath) SignalLatchAccumulator() {
-	dp.registers.Accumulator = dp.memory.values[dp.registers.InstructionPointer]
+func (dp *DataPath) SigLatchRegister(register Register, value int) {
+  dp.registers[register] = value
+}
+
+func (dp *DataPath) GetRegister(register Register) int {
+  return dp.registers[register]
 }

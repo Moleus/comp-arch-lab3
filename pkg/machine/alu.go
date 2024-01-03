@@ -1,6 +1,8 @@
-package datapath
+package machine
 
-import "github.com/Moleus/comp-arch-lab3/pkg/isa"
+import (
+	"github.com/Moleus/comp-arch-lab3/pkg/isa"
+)
 
 type BinaryOperationExec func(left int, right int) int
 
@@ -75,10 +77,11 @@ type FlagBit int
 const (
 	ZERO FlagBit = iota
 	NEGATIVE
+  CARRY
 )
 
 func (a *Alu) getBit(bit FlagBit) bool {
-	return (a.bitFlags >> bit) & 1
+	return (a.bitFlags >> bit) & 1 == 1
 }
 
 func (a *Alu) setBit(bit FlagBit, value bool) {
@@ -94,12 +97,45 @@ func (a *Alu) setFlags(value int) {
 	a.setBit(NEGATIVE, value < 0)
 }
 
-func (a *Alu) Execute(operation AluOperation, left int, right int) int {
-	if a.operation2func[operation] == nil {
+type ExecutionParams struct {
+  operation AluOperation
+  left int
+  right int
+  updateRegisters bool
+}
+
+func NewExecutionParams(operation AluOperation) ExecutionParams {
+  return ExecutionParams{
+    operation: operation,
+    left: 0,
+    right: 0,
+    updateRegisters: false,
+  }
+}
+
+func (p *ExecutionParams) WithLeft(left int) ExecutionParams {
+  p.left = left
+  return *p
+}
+
+func (p *ExecutionParams) WithRight(right int) ExecutionParams {
+  p.right = right
+  return *p
+}
+
+func (p *ExecutionParams) UpdateRegisters(updateRegisters bool) ExecutionParams {
+  p.updateRegisters = updateRegisters
+  return *p
+}
+
+func (a *Alu) Execute(executionParams ExecutionParams) int {
+	if a.operation2func[executionParams.operation] == nil {
 		panic("unknown operation")
 	}
-	output := a.operation2func[operation](left, right)
+	output := a.operation2func[executionParams.operation](executionParams.left, executionParams.right)
 	wrapOverflow(output)
-	a.setFlags(output)
+  if executionParams.updateRegisters {
+    a.setFlags(output)
+  }
 	return output
 }

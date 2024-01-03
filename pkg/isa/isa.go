@@ -14,66 +14,140 @@ package isa
 
 import (
 	"encoding/json"
-	"github.com/Moleus/comp-arch-lab3/cmd/translator"
 	"io"
 )
 
 /* accumulator based ISA */
 
 // Instruction represents all supported instructions for our architecture
-type Instruction int
-
-const (
-	InstructionAnd Instruction = iota
-	InstructionOr
-	InstructionAdd
-	InstructionSub
-	InstructionCmp
-)
-
-// AddressingType like relative direct
-type AddressingType int
-
-const (
-	DirectAbsolute AddressingType = iota
-	Indirect
-)
-
 const (
 	WORD_WIDTH     = 16
 	WORD_MAX_VALUE = 1<<(WORD_WIDTH-1) - 1
 	WORD_MIN_VALUE = -1 << (WORD_WIDTH - 1)
 )
 
-type MemoryWord struct {
-	address int
-	label   string
-	value   int
+type Opcode int
+
+const (
+  OpcodeAnd Opcode = iota
+  OpcodeOr
+  OpcodeAdd
+  OpcodeSub
+  OpcodeCmp
+  OpcodeJmp
+  OpcodeHlt
+  OpcodeIret
+  OpcodeIn
+  OpcodeOut
+)
+
+type OpcodeType int
+
+const (
+  OpcodeTypeAddress OpcodeType = iota
+  OpcodeTypeAddressless
+  OpcodeTypeBranch
+  OpcodeTypeIO
+)
+
+type OpcodeInfo struct {
+  instructionType OpcodeType
+  stringRepresentation string
 }
 
-type AddressingMode struct {
-	targetAddress  int
-	addressingType AddressingType
+var (
+  opcodeToInfo = map[Opcode]OpcodeInfo{
+    OpcodeAnd: {
+      instructionType: OpcodeTypeAddress,
+      stringRepresentation: "AND",
+    },
+    OpcodeOr: {
+      instructionType: OpcodeTypeAddress,
+      stringRepresentation: "OR",
+    },
+    OpcodeAdd: {
+      instructionType: OpcodeTypeAddress,
+      stringRepresentation: "ADD",
+    },
+    OpcodeSub: {
+      instructionType: OpcodeTypeAddress,
+      stringRepresentation: "SUB",
+    },
+    OpcodeCmp: {
+      instructionType: OpcodeTypeAddress,
+      stringRepresentation: "CMP",
+    },
+    OpcodeJmp: {
+      instructionType: OpcodeTypeBranch,
+      stringRepresentation: "JMP",
+    },
+    OpcodeHlt: {
+      instructionType: OpcodeTypeAddressless,
+      stringRepresentation: "HLT",
+    },
+    OpcodeIret: {
+      instructionType: OpcodeTypeAddressless,
+      stringRepresentation: "IRET",
+    },
+    OpcodeIn: {
+      instructionType: OpcodeTypeIO,
+      stringRepresentation: "IN",
+    },
+    OpcodeOut: {
+      instructionType: OpcodeTypeIO,
+      stringRepresentation: "OUT",
+    },
+  }
+)
+
+func (o Opcode) Type() OpcodeType {
+  return opcodeToInfo[o].instructionType
 }
 
-type InstructionWord struct {
-	MemoryWord
-	instruction    Instruction
-	addressingMode AddressingMode
+func (o Opcode) String() string {
+  return opcodeToInfo[o].stringRepresentation
+}
+
+func (o *Opcode) UnmarshalJSON(data []byte) error {
+  var opcode string
+  err := json.Unmarshal(data, &opcode)
+  if err != nil {
+    return err
+  }
+  for opcodeObj, opcodeInfo := range opcodeToInfo {
+    if opcodeInfo.stringRepresentation == opcode {
+      *o = opcodeObj
+    }
+  }
+
+  return nil
+}
+
+type TermMetaInfo struct {
+	LineNum         int    `json:"line_num"`
+	OriginalContent string `json:"original_content"`
+}
+
+type MachineCodeTerm struct {
+	Index    int          `json:"index"`
+	Label    string       `json:"label,omitempty"`
+	Opcode   Opcode       `json:"opcode"`
+	Operand  string       `json:"operand,omitempty"`
+	TermInfo TermMetaInfo `json:"term_info"`
 }
 
 // TODO: think about dependencies and move MachineCodeTerm in ISA
-func ReadCode(input io.Reader) ([]translator.MachineCodeTerm, error) {
-	var machineCode []translator.MachineCodeTerm
+func ReadCode(input io.Reader) ([]MachineCodeTerm, error) {
+	var machineCode []MachineCodeTerm
 	decoder := json.NewDecoder(input)
 	err := decoder.Decode(&machineCode)
 	if err != nil {
-		return []translator.MachineCodeTerm{}, err
+		return []MachineCodeTerm{}, err
 	}
 	return machineCode, nil
 }
 
-func WriteCode(target io.Writer, machineCode []translator.MachineCodeTerm) error {
+func WriteCode(target io.Writer, machineCode []MachineCodeTerm) error {
 	encodedCode, err := json.MarshalIndent(machineCode, "", "  ")
 	if err != nil {
 		return err
