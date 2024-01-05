@@ -101,6 +101,11 @@ func (dp *DataPath) GetFlags() BitFlags {
   }
 }
 
+func (dp *DataPath) AreInterruptsEnabled() bool {
+  // TODO: check binary logic
+  return dp.registers[PS] & 0x8 == 1 && dp.registers[PS] & 0x10 == 1
+}
+
 func (dp *DataPath) ReadOutput() string {
 	return dp.output.String()
 }

@@ -76,17 +76,24 @@ func (cu *ControlUnit) calculate(aluParams ExecutionParams) int {
   return cu.dataPath.Alu.Execute(aluParams)
 }
 
+func (cu *ControlUnit) RunInstructionCycle() error {
+  for {
+    err := cu.DecodeAndExecuteInstruction()
+    if err != nil {
+      return err
+    }
+    if cu.dataPath.AreInterruptsEnabled() {
+      cu.processInterrupt()
+    }
+    cu.instructionCounter++
+  }
+}
+
 func (cu *ControlUnit) DecodeAndExecuteInstruction() error {
   instruction := cu.program[cu.instructionCounter]
   instructionType := instruction.Opcode.Type()
 
-  // цикл выборки команды
-  // IP -> AR
-  cu.doInOneTick(cu.SigLatchRegFunc(AR, cu.calculate(cu.aluRegisterPassthrough(IP))))
-  // AR -> IP, IP + 1 -> IP
-  cu.doInOneTick(cu.SigLatchRegFunc(IP, cu.calculate(cu.aluIncrement(IP))), cu.SigLatchRegFunc(DR, cu.dataPath.ReadMemory(cu.GetReg(AR))))
-  // DR -> CR
-  cu.doInOneTick(cu.SigLatchRegFunc(AC, cu.calculate(cu.aluRegisterPassthrough(DR))))
+  cu.InstructionFetch()
 
   switch instructionType {
   case isa.OpcodeTypeAddress:
@@ -99,39 +106,55 @@ func (cu *ControlUnit) DecodeAndExecuteInstruction() error {
   return nil
 }
 
-func (cu *ControlUnit) aluIncrement(register Register) ExecutionParams {
-  return *NewAluOp(AluOperationAdd).SetLeft(1).SetRight(cu.GetReg(register))
+func (cu *ControlUnit) processInterrupt() {
+  // disable interrupts and save PS on stack
+  cu.doInOneTick(cu.SigLatchRegFunc(PS, cu.calculate(*NewAluOp(AluOperationAnd).SetLeft(cu.GetReg(PS)).SetRight(^(1 << 3)))))
+
+  cu.pushOnStack(IP)
+  cu.pushOnStack(PS)
 }
 
-func (cu *ControlUnit) aluDecrement(register Register) ExecutionParams {
-  return *NewAluOp(AluOperationSub).SetLeft(cu.GetReg(register)).SetRight(1)
+func (cu *ControlUnit) pushOnStack(register Register) {
+  // ~0 + SP → SP, AR; reg → DR; DR → MEM(AR)
+  cu.doInOneTick(
+    cu.SigLatchRegFunc(SP, cu.calculate(cu.aluDecrement(SP))),
+    cu.SigLatchRegFunc(AR, cu.calculate(cu.aluRegisterPassthrough(SP))),
+    )
+  cu.doInOneTick(cu.SigLatchRegFunc(DR, cu.calculate(cu.aluRegisterPassthrough(register))),)
+  cu.doInOneTick(cu.SigWriteMemoryFunc(),)
 }
 
-func (cu *ControlUnit) aluRegisterPassthrough(register Register) ExecutionParams {
-  // called for DR for address commands
-  return *NewAluOp(AluOperationAdd).SetRight(cu.GetReg(register))
+func (cu *ControlUnit) InstructionFetch() {
+  // цикл выборки команды
+  // IP -> AR
+  cu.doInOneTick(cu.SigLatchRegFunc(AR, cu.calculate(cu.aluRegisterPassthrough(IP))))
+  // AR -> IP, IP + 1 -> IP
+  cu.doInOneTick(cu.SigLatchRegFunc(IP, cu.calculate(cu.aluIncrement(IP))), cu.SigLatchRegFunc(DR, cu.dataPath.ReadMemory(cu.GetReg(AR))))
+  // DR -> CR
+  cu.doInOneTick(cu.SigLatchRegFunc(AC, cu.calculate(cu.aluRegisterPassthrough(DR))))
 }
 
-func (cu *ControlUnit) toAluOp(left Register, right Register, operation isa.Opcode) ExecutionParams {
-  aluOp := opcodeToAluOperation[operation]
-  return *NewAluOp(aluOp).SetLeft(cu.GetReg(left)).SetRight(cu.GetReg(right))
+func (cu *ControlUnit) AddressFetch() {
+  // цикл выборки адреса
+  // IP -> AR
+  cu.doInOneTick(cu.SigLatchRegFunc(AR, cu.calculate(cu.aluRegisterPassthrough(IP))))
+  // IP + 1 -> IP
+  cu.doInOneTick(cu.SigLatchRegFunc(IP, cu.calculate(cu.aluIncrement(IP))))
 }
 
-func (cu *ControlUnit) doInOneTick(singleTickOperation ...SingleTickOperation) {
-  for _, op := range singleTickOperation {
-    op()
-  }
-  cu.Tick()
+func (cu *ControlUnit) OperandFetch() {
+    // цикл выборки операнда
+    // DR -> AR
+    cu.doInOneTick(cu.SigLatchRegFunc(AR, cu.calculate(cu.aluRegisterPassthrough(DR))))
+    // memory[AR] -> DR
+    cu.doInOneTick(cu.SigLatchRegFunc(DR, cu.dataPath.ReadMemory(cu.GetReg(AR))))
+    // значение лежит в DR
 }
 
 // Пробуем реализовать без косвенной адресации. Только прямая абсолютная.
 func (cu *ControlUnit) decodeAndExecuteAddressInstruction(instruction isa.MachineCodeTerm) error {
-  // цикл выборки операнда
-  // DR -> AR
-  cu.doInOneTick(cu.SigLatchRegFunc(AR, cu.calculate(cu.aluRegisterPassthrough(DR))))
-  // memory[AR] -> DR
-  cu.doInOneTick(cu.SigLatchRegFunc(DR, cu.dataPath.ReadMemory(cu.GetReg(AR))))
-  // значение лежит в DR
+  cu.AddressFetch()
+  cu.OperandFetch()
 
   opcode := instruction.Opcode
   switch {
@@ -209,5 +232,30 @@ func (cu *ControlUnit) decodeAndExecuteBranchInstruction(instruction isa.Machine
     cu.doInOneTick(cu.SigLatchRegFunc(IP, cu.calculate(cu.aluRegisterPassthrough(AR))))
   }
   return nil
+}
+
+func (cu *ControlUnit) aluIncrement(register Register) ExecutionParams {
+  return *NewAluOp(AluOperationAdd).SetLeft(1).SetRight(cu.GetReg(register))
+}
+
+func (cu *ControlUnit) aluDecrement(register Register) ExecutionParams {
+  return *NewAluOp(AluOperationSub).SetLeft(cu.GetReg(register)).SetRight(1)
+}
+
+func (cu *ControlUnit) aluRegisterPassthrough(register Register) ExecutionParams {
+  // called for DR for address commands
+  return *NewAluOp(AluOperationAdd).SetRight(cu.GetReg(register))
+}
+
+func (cu *ControlUnit) toAluOp(left Register, right Register, operation isa.Opcode) ExecutionParams {
+  aluOp := opcodeToAluOperation[operation]
+  return *NewAluOp(aluOp).SetLeft(cu.GetReg(left)).SetRight(cu.GetReg(right))
+}
+
+func (cu *ControlUnit) doInOneTick(singleTickOperation ...SingleTickOperation) {
+  for _, op := range singleTickOperation {
+    op()
+  }
+  cu.Tick()
 }
 
