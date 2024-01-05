@@ -37,6 +37,8 @@ package machine
 
 import (
 	"bytes"
+
+	"github.com/Moleus/comp-arch-lab3/pkg/isa"
 )
 
 type SignalDriven interface {
@@ -82,6 +84,7 @@ type DataPath struct {
 	InstructionCounter int
 	CurrentTick        int
 	input              bytes.Buffer
+  // TODO: handle output
 	output             bytes.Buffer
 	registers          map[Register]int
 	memory             []int
@@ -90,7 +93,17 @@ type DataPath struct {
 }
 
 func NewDataPath(dataInput bytes.Buffer) *DataPath {
-	return &DataPath{input: dataInput}
+  registers := make(map[Register]int)
+  memory := make([]int, isa.ADDR_MAX_VALUE + 1)
+  alu := NewAlu()
+  registers[AC] = 0
+  registers[IP] = 0
+  registers[CR] = 0
+  registers[PS] = 0
+  registers[SP] = 0
+  registers[DR] = 0
+  registers[AR] = 0
+	return &DataPath{input: dataInput, memory: memory, registers: registers, Alu: alu}
 }
 
 func (dp *DataPath) GetFlags() BitFlags {
@@ -101,7 +114,7 @@ func (dp *DataPath) GetFlags() BitFlags {
   }
 }
 
-func (dp *DataPath) AreInterruptsEnabled() bool {
+func (dp *DataPath) IsInterruptRequired() bool {
   // TODO: check binary logic
   return dp.registers[PS] & 0x8 == 1 && dp.registers[PS] & 0x10 == 1
 }

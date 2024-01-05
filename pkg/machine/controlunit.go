@@ -47,6 +47,10 @@ type ControlUnit struct {
   logger *slog.Logger
 }
 
+func NewControlUnit(program []isa.MachineCodeTerm, dataPath *DataPath, logger *slog.Logger) *ControlUnit {
+  return &ControlUnit{program: program, dataPath: dataPath, logger: logger}
+}
+
 type SingleTickOperation func()
 
 func (cu *ControlUnit) SigLatchRegFunc(register Register, value int) func() {
