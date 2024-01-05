@@ -19,6 +19,7 @@ hw - hardwired. Реализуется как часть модели. microcode
 package machine
 
 import (
+	"fmt"
 	"log/slog"
 
 	"github.com/Moleus/comp-arch-lab3/pkg/isa"
@@ -82,7 +83,7 @@ func (cu *ControlUnit) RunInstructionCycle() error {
     if err != nil {
       return err
     }
-    if cu.dataPath.AreInterruptsEnabled() {
+    for cu.dataPath.IsInterruptRequired() {
       cu.processInterrupt()
     }
     cu.instructionCounter++
@@ -107,11 +108,23 @@ func (cu *ControlUnit) DecodeAndExecuteInstruction() error {
 }
 
 func (cu *ControlUnit) processInterrupt() {
+  // TODO: check PS bits!!! 5 - EI, 6 - IRQ
   // disable interrupts and save PS on stack
   cu.doInOneTick(cu.SigLatchRegFunc(PS, cu.calculate(*NewAluOp(AluOperationAnd).SetLeft(cu.GetReg(PS)).SetRight(^(1 << 3)))))
 
   cu.pushOnStack(IP)
   cu.pushOnStack(PS)
+
+  if err:= cu.RunInstructionCycle(); err != nil {
+    cu.logger.Debug(fmt.Sprintf("Interrupt error: %s", err.Error()))
+  }
+
+  cu.popFromStack(PS)
+  cu.popFromStack(IP)
+
+  // TODO: check PS bits and offset
+  // enable interrupts
+  cu.doInOneTick(cu.SigLatchRegFunc(PS, cu.calculate(*NewAluOp(AluOperationOr).SetLeft(cu.GetReg(PS)).SetRight(1 << 3))))
 }
 
 func (cu *ControlUnit) pushOnStack(register Register) {
@@ -122,6 +135,19 @@ func (cu *ControlUnit) pushOnStack(register Register) {
     )
   cu.doInOneTick(cu.SigLatchRegFunc(DR, cu.calculate(cu.aluRegisterPassthrough(register))),)
   cu.doInOneTick(cu.SigWriteMemoryFunc(),)
+}
+
+func (cu *ControlUnit) popFromStack(target Register) {
+  // SP + 1 -> SP, AR; mem[AR] -> DR; DR -> target
+  cu.doInOneTick(
+    cu.SigLatchRegFunc(SP, cu.calculate(cu.aluIncrement(SP))),
+    cu.SigLatchRegFunc(AR, cu.calculate(cu.aluRegisterPassthrough(SP))),
+    )
+  cu.doInOneTick(
+    cu.SigReadMemoryFunc(),)
+  cu.doInOneTick(
+    cu.SigLatchRegFunc(target, cu.calculate(cu.aluRegisterPassthrough(DR))),
+    )
 }
 
 func (cu *ControlUnit) InstructionFetch() {
@@ -258,4 +284,3 @@ func (cu *ControlUnit) doInOneTick(singleTickOperation ...SingleTickOperation) {
   }
   cu.Tick()
 }
-
