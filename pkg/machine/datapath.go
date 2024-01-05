@@ -37,7 +37,6 @@ package machine
 
 import (
 	"bytes"
-  "github.com/Moleus/comp-arch-lab3/pkg/isa"
 )
 
 type SignalDriven interface {
@@ -65,6 +64,12 @@ type RegisterValue struct {
   value int
 }
 
+type BitFlags struct {
+  ZERO bool
+  NEGATIVE bool
+  CARRY bool
+}
+
 func (rv *RegisterValue) GetValue() int {
   return rv.value
 }
@@ -86,6 +91,14 @@ type DataPath struct {
 
 func NewDataPath(dataInput bytes.Buffer) *DataPath {
 	return &DataPath{input: dataInput}
+}
+
+func (dp *DataPath) GetFlags() BitFlags {
+  return BitFlags{
+    ZERO: dp.registers[PS] & 0x1 == 1,
+    NEGATIVE: dp.registers[PS] & 0x2 == 1,
+    CARRY: dp.registers[PS] & 0x4 == 1,
+  }
 }
 
 func (dp *DataPath) ReadOutput() string {

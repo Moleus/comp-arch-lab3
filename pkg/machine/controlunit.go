@@ -20,10 +20,8 @@ package machine
 
 import (
 	"log/slog"
-	"reflect"
 
 	"github.com/Moleus/comp-arch-lab3/pkg/isa"
-	"github.com/containerd/containerd/pkg/registrar"
 )
 
 type ControlUnitError struct {
@@ -201,9 +199,14 @@ func (cu *ControlUnit) decodeAndExecuteAddresslessInstruction(instruction isa.Ma
 }
 
 func (cu *ControlUnit) decodeAndExecuteBranchInstruction(instruction isa.MachineCodeTerm) error {
-  switch instruction.Opcode {
-  case isa.OpcodeJmp:
-  // TODO: jump
+  flags := cu.dataPath.GetFlags()
+  opcode := instruction.Opcode
+
+  condition := opcode == isa.OpcodeJc && flags.CARRY || opcode == isa.OpcodeJnc && !flags.CARRY || opcode == isa.OpcodeJn && flags.NEGATIVE || opcode == isa.OpcodeJnneg && !flags.NEGATIVE
+
+  if condition {
+    // AR -> IP
+    cu.doInOneTick(cu.SigLatchRegFunc(IP, cu.calculate(cu.aluRegisterPassthrough(AR))))
   }
   return nil
 }

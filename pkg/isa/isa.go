@@ -34,7 +34,6 @@ const (
   OpcodeAdd
   OpcodeSub
   OpcodeCmp
-  OpcodeJmp
   OpcodeHlt
   OpcodeIret
   OpcodeIn
@@ -50,6 +49,14 @@ const (
   OpcodeDi
   OpcodeCla
   OpcodeNop
+
+  OpcodeJmp
+  OppcodeJz
+  OpcodeJnz
+  OpcodeJc
+  OpcodeJnc
+  OpcodeJn
+  OpcodeJnneg
 )
 
 type OpcodeType int
@@ -87,10 +94,6 @@ var (
     OpcodeCmp: {
       instructionType: OpcodeTypeAddress,
       stringRepresentation: "CMP",
-    },
-    OpcodeJmp: {
-      instructionType: OpcodeTypeBranch,
-      stringRepresentation: "JMP",
     },
     OpcodeHlt: {
       instructionType: OpcodeTypeAddressless,
@@ -139,6 +142,34 @@ var (
     OpcodeNop: {
       instructionType: OpcodeTypeAddressless,
       stringRepresentation: "NOP",
+    },
+    OpcodeJmp: {
+      instructionType: OpcodeTypeBranch,
+      stringRepresentation: "JMP",
+    },
+    OppcodeJz: {
+      instructionType: OpcodeTypeBranch,
+      stringRepresentation: "JZ",
+    },
+    OpcodeJnz: {
+      instructionType: OpcodeTypeBranch,
+      stringRepresentation: "JNZ",
+    },
+    OpcodeJc: {
+      instructionType: OpcodeTypeBranch,
+      stringRepresentation: "JC",
+    },
+    OpcodeJnc: {
+      instructionType: OpcodeTypeBranch,
+      stringRepresentation: "JNC",
+    },
+    OpcodeJn: {
+      instructionType: OpcodeTypeBranch,
+      stringRepresentation: "JN",
+    },
+    OpcodeJnneg: {
+      instructionType: OpcodeTypeBranch,
+      stringRepresentation: "JNN",
     },
   }
 )
