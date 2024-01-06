@@ -1,0 +1,11 @@
+translator_input: |-
+  null: word: 0
+  start: in
+    cmp null
+    jz end
+    out
+    jmp start
+  end: nop
+
+machine_input: |-
+  [{ "arrivesAt": 0, "char": "a" }]

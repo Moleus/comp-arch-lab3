@@ -11,6 +11,7 @@ ControlUnit и DataPath находятся в отдельных файлах
 package machine
 
 import (
+	"io"
 	"log"
 	"log/slog"
 
@@ -28,8 +29,8 @@ type SimulationStatistics struct {
 	currentTick        int
 }
 
-func RunSimulation(dataInput []isa.IoData, program []isa.MachineCodeTerm, logger *slog.Logger) SimulationStatistics {
-	datapath := NewDataPath(dataInput)
+func RunSimulation(dataInput []isa.IoData, program []isa.MachineCodeTerm, logger *slog.Logger, dataPathOutput io.Writer) {
+	datapath := NewDataPath(dataInput, dataPathOutput)
 	controlUnit := NewControlUnit(program, datapath, logger)
 
 	log.Println("starting simulation")
@@ -41,9 +42,4 @@ func RunSimulation(dataInput []isa.IoData, program []isa.MachineCodeTerm, logger
 	}
 
 	log.Println("simulation finished")
-	return SimulationStatistics{
-		programOutput:      datapath.ReadOutput(),
-		instructionCounter: controlUnit.instructionCounter,
-		currentTick:        controlUnit.currentTick,
-	}
 }

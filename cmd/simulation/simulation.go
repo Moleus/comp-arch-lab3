@@ -3,6 +3,7 @@ package simulation
 import (
 	"flag"
 	"fmt"
+	"io"
 	"log/slog"
 	"os"
 
@@ -65,10 +66,14 @@ func main() {
 
 	// TODO: read program, read data, flags etc
 	clock := &Clock{CurrentTick: 0}
-	logLevel := log.ParseLogLevel(*logLevel)
-	defaultHandler := slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: logLevel})
-	logger := slog.New(log.NewTickLoggerHandler(defaultHandler, clock))
+	logger := InitLogger(os.Stdout, clock, log.ParseLogLevel(*logLevel))
+	dataPathOutput := os.Stdout
 
-	machine.RunSimulation(ioData, machineCode, logger)
+	machine.RunSimulation(ioData, machineCode, logger, dataPathOutput)
 	// process simulation results
+}
+
+func InitLogger(logWriter io.Writer, clock log.GlobalTimer, logLevel slog.Level) *slog.Logger {
+	defaultHandler := slog.NewTextHandler(logWriter, &slog.HandlerOptions{Level: logLevel})
+	return slog.New(log.NewTickLoggerHandler(defaultHandler, clock))
 }

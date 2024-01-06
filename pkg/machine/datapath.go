@@ -36,7 +36,7 @@ PS - регистр флагов (состояния)
 package machine
 
 import (
-	"bytes"
+	"io"
 
 	"github.com/Moleus/comp-arch-lab3/pkg/isa"
 )
@@ -86,14 +86,14 @@ type DataPath struct {
 	// TODO: maybe move out from isa
 	input []isa.IoData
 	// TODO: handle output
-	output    bytes.Buffer
+	output    io.Writer
 	registers map[Register]int
 	memory    []int
 
 	Alu *Alu
 }
 
-func NewDataPath(dataInput []isa.IoData) *DataPath {
+func NewDataPath(dataInput []isa.IoData, output io.Writer) *DataPath {
 	registers := make(map[Register]int)
 	memory := make([]int, isa.ADDR_MAX_VALUE+1)
 	alu := NewAlu()
@@ -104,7 +104,7 @@ func NewDataPath(dataInput []isa.IoData) *DataPath {
 	registers[SP] = 0
 	registers[DR] = 0
 	registers[AR] = 0
-	return &DataPath{input: dataInput, memory: memory, registers: registers, Alu: alu}
+	return &DataPath{input: dataInput, output: output, memory: memory, registers: registers, Alu: alu}
 }
 
 func (dp *DataPath) GetFlags() BitFlags {
@@ -120,8 +120,11 @@ func (dp *DataPath) IsInterruptRequired() bool {
 	return dp.registers[PS]&0x8 == 1 && dp.registers[PS]&0x10 == 1
 }
 
-func (dp *DataPath) ReadOutput() string {
-	return dp.output.String()
+func (dp *DataPath) WriteOutput(character rune) {
+	_, err := dp.output.Write([]byte(string(character)))
+	if err != nil {
+		panic(err)
+	}
 }
 
 func (dp *DataPath) SigLatchRegister(register Register, value int) {
