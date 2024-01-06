@@ -66,6 +66,7 @@ package translator
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/Moleus/comp-arch-lab3/pkg/isa"
@@ -102,16 +103,17 @@ type ParsedInstruction struct {
 }
 
 type ParseError struct {
-	content string
-	line    int
+	message     string
+	lineContent string
+	line        int
 }
 
 func (e ParseError) Error() string {
-	return fmt.Sprintf("invalid instruction at %d: '%s'", e.line, e.content)
+	return fmt.Sprintf("Parse error at %d ('%s'): %s", e.line, e.lineContent, e.message)
 }
 
-func NewParseError(content string, line int) error {
-	return ParseError{content, line}
+func NewParseError(message string, lineContent string, line int) error {
+	return ParseError{message, lineContent, line}
 }
 
 func (t *AsmTranslator) Translate(input string) ([]isa.MachineCodeTerm, error) {
@@ -128,8 +130,9 @@ func (t *AsmTranslator) Translate(input string) ([]isa.MachineCodeTerm, error) {
 
 func (t *AsmTranslator) ParseInstructions(input string) error {
 	lines := strings.Split(input, "\n")
-	for _, line := range lines {
-		err := t.parseLine(line)
+	for i, line := range lines {
+		line := strings.TrimSpace(line)
+		err := t.parseLine(line, i+1)
 		if err != nil {
 			return err
 		}
@@ -138,9 +141,8 @@ func (t *AsmTranslator) ParseInstructions(input string) error {
 	return nil
 }
 
-func (t *AsmTranslator) parseLine(line string) error {
-	var instructions []ParsedInstruction
-
+func (t *AsmTranslator) parseLine(line string, lineNumber int) error {
+	metaInfo := isa.TermMetaInfo{LineNum: lineNumber, OriginalContent: line}
 	parts := strings.Fields(line)
 
 	if len(parts) == 0 {
@@ -148,32 +150,56 @@ func (t *AsmTranslator) parseLine(line string) error {
 	}
 
 	if parts[0] == "word:" {
-		return NewParseError(line, 0)
+		return NewParseError("Don't use `word` as a label. It's reserved", line, 0)
 	}
 
 	if isConstantDeclaration(parts) {
-		instructions = parseConstantDeclaration(parts)
-		for _, instructions := range instructions {
-			t.addConstant(instructions)
+		instructions, err := parseConstantDeclaration(parts)
+		if err != nil {
+			return NewParseError(fmt.Sprintf("failed to parse constant: %s", err.Error()), line, lineNumber)
+		}
+		for _, instruction := range instructions {
+			instruction.MetaInfo = metaInfo
+			t.addConstant(instruction)
 		}
 	} else {
 		instruction := t.parseInstructionDeclaration(parts)
+		instruction.MetaInfo = metaInfo
 		t.addInstruction(instruction)
 	}
 
 	return nil
 }
 
-func parseConstantDeclaration(parts []string) []ParsedInstruction {
+func parseConstantDeclaration(parts []string) ([]ParsedInstruction, error) {
 	label := strings.Split(parts[0], ":")[0]
-	operand := strings.Join(parts[2:], "")
-	values := strings.Split(operand, ",")
-	instructions := make([]ParsedInstruction, 0)
-	for _, value := range values {
-		instructions = append(instructions, parseConstValue(value)...)
+	operand := strings.Join(parts[2:], " ")
+	numberS, stringValue, found := strings.Cut(operand, ", ")
+	number, err := strconv.Atoi(numberS)
+	if err != nil {
+		return []ParsedInstruction{}, fmt.Errorf("failed to convert number to string: '%s'", operand)
 	}
-	instructions[0].Label = label
-	return instructions
+
+	if !found {
+		// this is a number constant
+		return []ParsedInstruction{{Label: label, Opcode: "nop", IsConstant: true, Operand: numberS}}, nil
+	}
+
+	symbolsCount := number
+
+	isQuotedString := strings.HasPrefix(stringValue, "'") && strings.HasSuffix(stringValue, "'")
+	if !isQuotedString {
+		return []ParsedInstruction{}, fmt.Errorf("invalid string declaration: '%s'", operand)
+	}
+
+	instructions := make([]ParsedInstruction, 1)
+	instructions[0] = ParsedInstruction{Label: label, Opcode: "nop", IsConstant: true, Operand: strconv.Itoa(symbolsCount)}
+	instructions = append(instructions, parseConstString(stringValue)...)
+	if len(instructions) != symbolsCount+1 {
+		return []ParsedInstruction{}, fmt.Errorf("number of symbols (%d) doesn't match the len of string (%d): '%s'", symbolsCount, len(instructions)-1, operand)
+	}
+
+	return instructions, nil
 }
 
 func (t *AsmTranslator) parseInstructionDeclaration(parts []string) ParsedInstruction {
@@ -188,15 +214,6 @@ func (t *AsmTranslator) parseInstructionDeclaration(parts []string) ParsedInstru
 		instruction.Operand = parts[1]
 	}
 	return instruction
-}
-
-func parseConstValue(value string) []ParsedInstruction {
-	isQuotedString := strings.HasPrefix(value, "'") && strings.HasSuffix(value, "'")
-	if isQuotedString {
-		return parseConstString(value)
-	} else {
-		return []ParsedInstruction{{Operand: value, IsConstant: true, Opcode: "nop"}}
-	}
 }
 
 func parseConstString(value string) []ParsedInstruction {

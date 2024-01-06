@@ -2,3 +2,5 @@
 !.gitignore
 simulation
 !simulation/
+translator
+!translator/

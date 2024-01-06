@@ -1,5 +1,5 @@
 hello: word: 12, 'Hello world!'
-addr: word: hello
+addr: word: 0
 cnt: word: 0
 out: word: 2047
 

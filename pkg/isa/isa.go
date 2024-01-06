@@ -244,18 +244,6 @@ func ReadCode(input io.Reader) ([]MachineCodeTerm, error) {
 	return machineCode, nil
 }
 
-func WriteCode(target io.Writer, machineCode []MachineCodeTerm) error {
-	encodedCode, err := json.MarshalIndent(machineCode, "", "  ")
-	if err != nil {
-		return err
-	}
-	_, err = target.Write(encodedCode)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 func SerializeCode(machineCode []MachineCodeTerm) ([]byte, error) {
 	return json.MarshalIndent(machineCode, "", "  ")
 }
