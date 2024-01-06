@@ -18,18 +18,18 @@ var (
 )
 
 func readAssemblyCode(inputFile string) ([]byte, error) {
-  if inputFile == "" {
-    return io.ReadAll(os.Stdin)
-  }
-  return os.ReadFile(inputFile)
+	if inputFile == "" {
+		return io.ReadAll(os.Stdin)
+	}
+	return os.ReadFile(inputFile)
 }
 
 func writeMachineCode(machineCode []byte, targetFile string) error {
-  if targetFile == "" {
-    _, err := io.Copy(os.Stdout, bytes.NewReader(machineCode))
-    return err
-  }
-  return os.WriteFile(targetFile, machineCode, 0644)
+	if targetFile == "" {
+		_, err := io.Copy(os.Stdout, bytes.NewReader(machineCode))
+		return err
+	}
+	return os.WriteFile(targetFile, machineCode, 0644)
 }
 
 /*
@@ -38,33 +38,33 @@ func writeMachineCode(machineCode []byte, targetFile string) error {
 input: `translator -input <input_file> -target <target_file>`
 */
 func main() {
-  flag.Parse()
+	flag.Parse()
 
-  var assemblyCode []byte
-  var translationOutput []isa.MachineCodeTerm
+	var assemblyCode []byte
+	var translationOutput []isa.MachineCodeTerm
 
-  assemblyCode, err := readAssemblyCode(*inputFile)
-  if err != nil {
-    fmt.Fprintf(os.Stderr, "Error while reading input file: %s", err.Error())
-    os.Exit(1)
-  }
+	assemblyCode, err := readAssemblyCode(*inputFile)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error while reading input file: %s", err.Error())
+		os.Exit(1)
+	}
 
-  translator := t.NewTranslator()
-  translationOutput, err = translator.Translate(string(assemblyCode))
-  if err != nil {
-    fmt.Fprintf(os.Stderr, "Error while translating assembly code: %s", err.Error())
-    os.Exit(1)
-  }
+	translator := t.NewTranslator()
+	translationOutput, err = translator.Translate(string(assemblyCode))
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error while translating assembly code: %s", err.Error())
+		os.Exit(1)
+	}
 
-  serializationOutput, err := isa.SerializeCode(translationOutput)
-  if err != nil {
-    fmt.Fprintf(os.Stderr, "Error while serializing machine code: %s", err.Error())
-    os.Exit(1)
-  }
+	serializationOutput, err := isa.SerializeCode(translationOutput)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error while serializing machine code: %s", err.Error())
+		os.Exit(1)
+	}
 
-  err = writeMachineCode(serializationOutput, *targetFile)
-  if err != nil {
-    fmt.Fprintf(os.Stderr, "Error while writing machine code: %s", err.Error())
-    os.Exit(1)
-  }
+	err = writeMachineCode(serializationOutput, *targetFile)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error while writing machine code: %s", err.Error())
+		os.Exit(1)
+	}
 }

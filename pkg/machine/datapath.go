@@ -53,71 +53,71 @@ type Memory struct {
 type Register int
 
 const (
-  AC Register = iota
-  IP
-  CR
-  PS
-  SP
-  DR
-  AR
+	AC Register = iota
+	IP
+	CR
+	PS
+	SP
+	DR
+	AR
 )
 
 type RegisterValue struct {
-  value int
+	value int
 }
 
 type BitFlags struct {
-  ZERO bool
-  NEGATIVE bool
-  CARRY bool
+	ZERO     bool
+	NEGATIVE bool
+	CARRY    bool
 }
 
 func (rv *RegisterValue) GetValue() int {
-  return rv.value
+	return rv.value
 }
 
 func (rv *RegisterValue) GetAddress() int {
-  return rv.value
+	return rv.value
 }
 
 type DataPath struct {
 	InstructionCounter int
 	CurrentTick        int
-  // TODO: maybe move out from isa
-	input              []isa.IoData
-  // TODO: handle output
-	output             bytes.Buffer
-	registers          map[Register]int
-	memory             []int
+	// TODO: maybe move out from isa
+	input []isa.IoData
+	// TODO: handle output
+	output    bytes.Buffer
+	registers map[Register]int
+	memory    []int
 
-  Alu *Alu
+	Alu *Alu
 }
 
 func NewDataPath(dataInput []isa.IoData) *DataPath {
-  registers := make(map[Register]int)
-  memory := make([]int, isa.ADDR_MAX_VALUE + 1)
-  alu := NewAlu()
-  registers[AC] = 0
-  registers[IP] = 0
-  registers[CR] = 0
-  registers[PS] = 0
-  registers[SP] = 0
-  registers[DR] = 0
-  registers[AR] = 0
+	registers := make(map[Register]int)
+	memory := make([]int, isa.ADDR_MAX_VALUE+1)
+	alu := NewAlu()
+	registers[AC] = 0
+	registers[IP] = 0
+	registers[CR] = 0
+	registers[PS] = 0
+	registers[SP] = 0
+	registers[DR] = 0
+	registers[AR] = 0
 	return &DataPath{input: dataInput, memory: memory, registers: registers, Alu: alu}
 }
 
 func (dp *DataPath) GetFlags() BitFlags {
-  return BitFlags{
-    ZERO: dp.registers[PS] & 0x1 == 1,
-    NEGATIVE: dp.registers[PS] & 0x2 == 1,
-    CARRY: dp.registers[PS] & 0x4 == 1,
-  }
+	return BitFlags{
+		ZERO:     dp.registers[PS]&0x1 == 1,
+		NEGATIVE: dp.registers[PS]&0x2 == 1,
+		CARRY:    dp.registers[PS]&0x4 == 1,
+	}
 }
 
 func (dp *DataPath) IsInterruptRequired() bool {
-  // TODO: check binary logic
-  return dp.registers[PS] & 0x8 == 1 && dp.registers[PS] & 0x10 == 1
+	// TODO: check binary logic
+	return dp.registers[PS]&0x8 == 1 && dp.registers[PS]&0x10 == 1
 }
 
 func (dp *DataPath) ReadOutput() string {
@@ -125,17 +125,17 @@ func (dp *DataPath) ReadOutput() string {
 }
 
 func (dp *DataPath) SigLatchRegister(register Register, value int) {
-  dp.registers[register] = value
+	dp.registers[register] = value
 }
 
 func (dp *DataPath) GetRegister(register Register) int {
-  return dp.registers[register]
+	return dp.registers[register]
 }
 
 func (dp *DataPath) ReadMemory(address int) int {
-  return dp.memory[address]
+	return dp.memory[address]
 }
 
 func (dp *DataPath) WriteMemory() {
-  dp.memory[dp.GetRegister(AR)] = dp.GetRegister(DR)
+	dp.memory[dp.GetRegister(AR)] = dp.GetRegister(DR)
 }

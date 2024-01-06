@@ -16,16 +16,16 @@ const (
 	AluOperationMod
 	AluOperationRight
 	AluOperationLeft
-  AluOperationOr
-  AluOperationAnd
+	AluOperationOr
+	AluOperationAnd
 )
 
 var (
-  opcodeToAluOperation = map[isa.Opcode]AluOperation{
-    isa.OpcodeAdd: AluOperationAdd,
-    isa.OpcodeSub: AluOperationSub,
-    isa.OpcodeCla: AluOperationRight,
-  }
+	opcodeToAluOperation = map[isa.Opcode]AluOperation{
+		isa.OpcodeAdd: AluOperationAdd,
+		isa.OpcodeSub: AluOperationSub,
+		isa.OpcodeCla: AluOperationRight,
+	}
 )
 
 type Alu struct {
@@ -54,11 +54,11 @@ func mod(left int, right int) int {
 }
 
 func or(left int, right int) int {
-  return left | right
+	return left | right
 }
 
 func and(left int, right int) int {
-  return left & right
+	return left & right
 }
 
 func takeRight(left int, right int) int {
@@ -79,8 +79,8 @@ func NewAlu() *Alu {
 			AluOperationMod:   mod,
 			AluOperationRight: takeRight,
 			AluOperationLeft:  takeLeft,
-      AluOperationOr:    or,
-      AluOperationAnd:   and,
+			AluOperationOr:    or,
+			AluOperationAnd:   and,
 		},
 	}
 }
@@ -97,11 +97,11 @@ type FlagBit int
 const (
 	ZERO FlagBit = iota
 	NEGATIVE
-  CARRY
+	CARRY
 )
 
 func (a *Alu) getBit(bit FlagBit) bool {
-	return (a.bitFlags >> bit) & 1 == 1
+	return (a.bitFlags>>bit)&1 == 1
 }
 
 func (a *Alu) setBit(bit FlagBit, value bool) {
@@ -118,34 +118,34 @@ func (a *Alu) setFlags(value int) {
 }
 
 type ExecutionParams struct {
-  operation AluOperation
-  left int
-  right int
-  updateRegisters bool
+	operation       AluOperation
+	left            int
+	right           int
+	updateRegisters bool
 }
 
 func NewAluOp(operation AluOperation) *ExecutionParams {
-  return &ExecutionParams{
-    operation: operation,
-    left: 0,
-    right: 0,
-    updateRegisters: false,
-  }
+	return &ExecutionParams{
+		operation:       operation,
+		left:            0,
+		right:           0,
+		updateRegisters: false,
+	}
 }
 
 func (p *ExecutionParams) SetLeft(left int) *ExecutionParams {
-  p.left = left
-  return p
+	p.left = left
+	return p
 }
 
 func (p *ExecutionParams) SetRight(right int) *ExecutionParams {
-  p.right = right
-  return p
+	p.right = right
+	return p
 }
 
 func (p *ExecutionParams) UpdateRegisters(updateRegisters bool) *ExecutionParams {
-  p.updateRegisters = updateRegisters
-  return p
+	p.updateRegisters = updateRegisters
+	return p
 }
 
 func (a *Alu) Execute(executionParams ExecutionParams) int {
@@ -154,8 +154,8 @@ func (a *Alu) Execute(executionParams ExecutionParams) int {
 	}
 	output := a.operation2func[executionParams.operation](executionParams.left, executionParams.right)
 	wrapOverflow(output)
-  if executionParams.updateRegisters {
-    a.setFlags(output)
-  }
+	if executionParams.updateRegisters {
+		a.setFlags(output)
+	}
 	return output
 }
