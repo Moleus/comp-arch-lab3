@@ -14,8 +14,9 @@ package isa
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
-
+	"strings"
 )
 
 /* accumulator based ISA */
@@ -25,179 +26,192 @@ const (
 	WORD_WIDTH     = 16
 	WORD_MAX_VALUE = 1<<(WORD_WIDTH-1) - 1
 	WORD_MIN_VALUE = -1 << (WORD_WIDTH - 1)
-  ADDR_WIDTH     = 11
-  ADDR_MAX_VALUE = 1<<(ADDR_WIDTH-1) - 1
+	ADDR_WIDTH     = 11
+	ADDR_MAX_VALUE = 1<<(ADDR_WIDTH-1) - 1
 )
 
 type Opcode int
 
 const (
-  OpcodeAnd Opcode = iota
-  OpcodeOr
-  OpcodeAdd
-  OpcodeSub
-  OpcodeCmp
-  OpcodeHlt
-  OpcodeIret
-  OpcodeIn
-  OpcodeOut
+	OpcodeAnd Opcode = iota
+	OpcodeOr
+	OpcodeAdd
+	OpcodeSub
+	OpcodeCmp
+	OpcodeHlt
+	OpcodeIret
+	OpcodeIn
+	OpcodeOut
 
-  OpcodeLoad
-  OpcodeStore
+	OpcodeLoad
+	OpcodeStore
 
-  OpcodePush
-  OpcodePop
+	OpcodePush
+	OpcodePop
 
-  OpcodeEi
-  OpcodeDi
-  OpcodeCla
-  OpcodeNop
+	OpcodeEi
+	OpcodeDi
+	OpcodeCla
+	OpcodeNop
 
-  OpcodeJmp
-  OppcodeJz
-  OpcodeJnz
-  OpcodeJc
-  OpcodeJnc
-  OpcodeJn
-  OpcodeJnneg
+	OpcodeJmp
+	OppcodeJz
+	OpcodeJnz
+	OpcodeJc
+	OpcodeJnc
+	OpcodeJn
+	OpcodeJnneg
 )
 
 type OpcodeType int
 
 const (
-  OpcodeTypeAddress OpcodeType = iota
-  OpcodeTypeAddressless
-  OpcodeTypeBranch
-  OpcodeTypeIO
+	OpcodeTypeAddress OpcodeType = iota
+	OpcodeTypeAddressless
+	OpcodeTypeBranch
+	OpcodeTypeIO
 )
 
 type OpcodeInfo struct {
-  instructionType OpcodeType
-  stringRepresentation string
+	instructionType      OpcodeType
+	stringRepresentation string
 }
 
 var (
-  opcodeToInfo = map[Opcode]OpcodeInfo{
-    OpcodeAnd: {
-      instructionType: OpcodeTypeAddress,
-      stringRepresentation: "AND",
-    },
-    OpcodeOr: {
-      instructionType: OpcodeTypeAddress,
-      stringRepresentation: "OR",
-    },
-    OpcodeAdd: {
-      instructionType: OpcodeTypeAddress,
-      stringRepresentation: "ADD",
-    },
-    OpcodeSub: {
-      instructionType: OpcodeTypeAddress,
-      stringRepresentation: "SUB",
-    },
-    OpcodeCmp: {
-      instructionType: OpcodeTypeAddress,
-      stringRepresentation: "CMP",
-    },
-    OpcodeHlt: {
-      instructionType: OpcodeTypeAddressless,
-      stringRepresentation: "HLT",
-    },
-    OpcodeIret: {
-      instructionType: OpcodeTypeAddressless,
-      stringRepresentation: "IRET",
-    },
-    OpcodeIn: {
-      instructionType: OpcodeTypeIO,
-      stringRepresentation: "IN",
-    },
-    OpcodeOut: {
-      instructionType: OpcodeTypeIO,
-      stringRepresentation: "OUT",
-    },
-    OpcodeLoad: {
-      instructionType: OpcodeTypeAddress,
-      stringRepresentation: "LD",
-    },
-    OpcodeStore: {
-      instructionType: OpcodeTypeAddress,
-      stringRepresentation: "ST",
-    },
-    OpcodePush: {
-      instructionType: OpcodeTypeAddressless,
-      stringRepresentation: "PUSH",
-    },
-    OpcodePop: {
-      instructionType: OpcodeTypeAddressless,
-      stringRepresentation: "POP",
-    },
-    OpcodeEi: {
-      instructionType: OpcodeTypeAddressless,
-      stringRepresentation: "EI",
-    },
-    OpcodeDi: {
-      instructionType: OpcodeTypeAddressless,
-      stringRepresentation: "DI",
-    },
-    OpcodeCla: {
-      instructionType: OpcodeTypeAddressless,
-      stringRepresentation: "CLA",
-    },
-    OpcodeNop: {
-      instructionType: OpcodeTypeAddressless,
-      stringRepresentation: "NOP",
-    },
-    OpcodeJmp: {
-      instructionType: OpcodeTypeBranch,
-      stringRepresentation: "JMP",
-    },
-    OppcodeJz: {
-      instructionType: OpcodeTypeBranch,
-      stringRepresentation: "JZ",
-    },
-    OpcodeJnz: {
-      instructionType: OpcodeTypeBranch,
-      stringRepresentation: "JNZ",
-    },
-    OpcodeJc: {
-      instructionType: OpcodeTypeBranch,
-      stringRepresentation: "JC",
-    },
-    OpcodeJnc: {
-      instructionType: OpcodeTypeBranch,
-      stringRepresentation: "JNC",
-    },
-    OpcodeJn: {
-      instructionType: OpcodeTypeBranch,
-      stringRepresentation: "JN",
-    },
-    OpcodeJnneg: {
-      instructionType: OpcodeTypeBranch,
-      stringRepresentation: "JNN",
-    },
-  }
+	opcodeToInfo = map[Opcode]OpcodeInfo{
+		OpcodeAnd: {
+			instructionType:      OpcodeTypeAddress,
+			stringRepresentation: "AND",
+		},
+		OpcodeOr: {
+			instructionType:      OpcodeTypeAddress,
+			stringRepresentation: "OR",
+		},
+		OpcodeAdd: {
+			instructionType:      OpcodeTypeAddress,
+			stringRepresentation: "ADD",
+		},
+		OpcodeSub: {
+			instructionType:      OpcodeTypeAddress,
+			stringRepresentation: "SUB",
+		},
+		OpcodeCmp: {
+			instructionType:      OpcodeTypeAddress,
+			stringRepresentation: "CMP",
+		},
+		OpcodeHlt: {
+			instructionType:      OpcodeTypeAddressless,
+			stringRepresentation: "HLT",
+		},
+		OpcodeIret: {
+			instructionType:      OpcodeTypeAddressless,
+			stringRepresentation: "IRET",
+		},
+		OpcodeIn: {
+			instructionType:      OpcodeTypeIO,
+			stringRepresentation: "IN",
+		},
+		OpcodeOut: {
+			instructionType:      OpcodeTypeIO,
+			stringRepresentation: "OUT",
+		},
+		OpcodeLoad: {
+			instructionType:      OpcodeTypeAddress,
+			stringRepresentation: "LD",
+		},
+		OpcodeStore: {
+			instructionType:      OpcodeTypeAddress,
+			stringRepresentation: "ST",
+		},
+		OpcodePush: {
+			instructionType:      OpcodeTypeAddressless,
+			stringRepresentation: "PUSH",
+		},
+		OpcodePop: {
+			instructionType:      OpcodeTypeAddressless,
+			stringRepresentation: "POP",
+		},
+		OpcodeEi: {
+			instructionType:      OpcodeTypeAddressless,
+			stringRepresentation: "EI",
+		},
+		OpcodeDi: {
+			instructionType:      OpcodeTypeAddressless,
+			stringRepresentation: "DI",
+		},
+		OpcodeCla: {
+			instructionType:      OpcodeTypeAddressless,
+			stringRepresentation: "CLA",
+		},
+		OpcodeNop: {
+			instructionType:      OpcodeTypeAddressless,
+			stringRepresentation: "NOP",
+		},
+		OpcodeJmp: {
+			instructionType:      OpcodeTypeBranch,
+			stringRepresentation: "JMP",
+		},
+		OppcodeJz: {
+			instructionType:      OpcodeTypeBranch,
+			stringRepresentation: "JZ",
+		},
+		OpcodeJnz: {
+			instructionType:      OpcodeTypeBranch,
+			stringRepresentation: "JNZ",
+		},
+		OpcodeJc: {
+			instructionType:      OpcodeTypeBranch,
+			stringRepresentation: "JC",
+		},
+		OpcodeJnc: {
+			instructionType:      OpcodeTypeBranch,
+			stringRepresentation: "JNC",
+		},
+		OpcodeJn: {
+			instructionType:      OpcodeTypeBranch,
+			stringRepresentation: "JN",
+		},
+		OpcodeJnneg: {
+			instructionType:      OpcodeTypeBranch,
+			stringRepresentation: "JNN",
+		},
+	}
 )
 
 func (o Opcode) Type() OpcodeType {
-  return opcodeToInfo[o].instructionType
+	return opcodeToInfo[o].instructionType
 }
 
 func (o Opcode) String() string {
-  return opcodeToInfo[o].stringRepresentation
+	return opcodeToInfo[o].stringRepresentation
+}
+
+func (o Opcode) MarshalJSON() ([]byte, error) {
+	return json.Marshal(o.String())
 }
 
 func (o *Opcode) UnmarshalJSON(data []byte) error {
-  var opcode string
-  err := json.Unmarshal(data, &opcode)
-  if err != nil {
-    return err
-  }
-  for opcodeObj, opcodeInfo := range opcodeToInfo {
-    if opcodeInfo.stringRepresentation == opcode {
-      *o = opcodeObj
-    }
-  }
+	var opcode string
+	err := json.Unmarshal(data, &opcode)
+	if err != nil {
+		return err
+	}
+	for opcodeObj, opcodeInfo := range opcodeToInfo {
+		if opcodeInfo.stringRepresentation == opcode {
+			*o = opcodeObj
+		}
+	}
 
-  return nil
+	return nil
+}
+
+func GetOpcodeFromString(opcode string) (Opcode, error) {
+	for opcodeObj, opcodeInfo := range opcodeToInfo {
+		if strings.ToLower(opcodeInfo.stringRepresentation) == opcode {
+			return opcodeObj, nil
+		}
+	}
+	return OpcodeNop, fmt.Errorf("unknown opcode: %s", opcode)
 }
 
 type TermMetaInfo struct {
@@ -207,15 +221,16 @@ type TermMetaInfo struct {
 
 type MachineCodeTerm struct {
 	Index    int          `json:"index"`
-	Label    string       `json:"label,omitempty"`
+	Label    *string      `json:"label,omitempty"`
 	Opcode   Opcode       `json:"opcode"`
-	Operand  int          `json:"operand,omitempty"`
+	Operand  *int         `json:"operand,omitempty"`
+	Constant *string      `json:"constant,omitempty"`
 	TermInfo TermMetaInfo `json:"term_info"`
 }
 
 type IoData struct {
-  arrivesAt int
-  char rune
+	arrivesAt int
+	char      rune
 }
 
 // TODO: think about dependencies and move MachineCodeTerm in ISA
@@ -242,27 +257,27 @@ func WriteCode(target io.Writer, machineCode []MachineCodeTerm) error {
 }
 
 func SerializeCode(machineCode []MachineCodeTerm) ([]byte, error) {
-  return json.MarshalIndent(machineCode, "", "  ")
+	return json.MarshalIndent(machineCode, "", "  ")
 }
 
 func ReadIoData(input io.Reader) ([]IoData, error) {
-  var ioData []IoData
-  decoder := json.NewDecoder(input)
-  err := decoder.Decode(&ioData)
-  if err != nil {
-    return []IoData{}, err
-  }
-  return ioData, nil
+	var ioData []IoData
+	decoder := json.NewDecoder(input)
+	err := decoder.Decode(&ioData)
+	if err != nil {
+		return []IoData{}, err
+	}
+	return ioData, nil
 }
 
 func WriteIoData(target io.Writer, ioData []IoData) error {
-  encodedData, err := json.MarshalIndent(ioData, "", "  ")
-  if err != nil {
-    return err
-  }
-  _, err = target.Write(encodedData)
-  if err != nil {
-    return err
-  }
-  return nil
+	encodedData, err := json.MarshalIndent(ioData, "", "  ")
+	if err != nil {
+		return err
+	}
+	_, err = target.Write(encodedData)
+	if err != nil {
+		return err
+	}
+	return nil
 }

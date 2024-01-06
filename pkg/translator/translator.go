@@ -65,52 +65,40 @@ START:
 package translator
 
 import (
-	"flag"
 	"fmt"
-	"github.com/Moleus/comp-arch-lab3/pkg/isa"
-	"io"
-	"log"
-	"os"
-	"regexp"
-	"strconv"
 	"strings"
-)
 
-var (
-	inputFile  = flag.String("input", "", "input file")
-	targetFile = flag.String("target", "", "target file")
-	// flags
+	"github.com/Moleus/comp-arch-lab3/pkg/isa"
 )
 
 type Translator interface {
 	Translate(input string) ([]isa.MachineCodeTerm, error)
 }
 
-type translator struct {
-	// TODO
+type AsmTranslator struct {
+	instructions []ParsedInstruction
+	currentIndex int
 }
 
 func NewTranslator() Translator {
-	return &translator{}
+	instructions := make([]ParsedInstruction, 0)
+	return &AsmTranslator{instructions: instructions, currentIndex: 0}
 }
 
 // ParsedInstruction
 // Каждая инструкция находится на новой строке.
 // Метки должны находиться на той же строке, что и инструкции
 // возможный вариант строки с инструкцией:
+// <label>: <instruction> <label> ; comment
 // <label>: <instruction> <operand>
 // <instruction> <operand>
 type ParsedInstruction struct {
-	label       string
-	instruction string
-	operand     string
-	metaInfo    isa.TermMetaInfo
-}
-
-// ParsedConstant - объявленная константа в исходном коде
-type ParsedConstant struct {
-	label string
-	value int
+	Index      int
+	Label      string
+	Opcode     string
+	IsConstant bool
+	Operand    string
+	MetaInfo   isa.TermMetaInfo
 }
 
 type ParseError struct {
@@ -126,137 +114,154 @@ func NewParseError(content string, line int) error {
 	return ParseError{content, line}
 }
 
-func ParseInstruction(line string, lineNumber int) (ParsedInstruction, error) {
-	// group2: label, group3: instruction, group4: operand
-	// TODO: parse single opcode HLT
-	// parse labels
-	instructionRegexTmpl := `^((\w+)?\s*:)?\s*(\w+)(\s+(\w+))?$`
-	instructionRegex := regexp.MustCompile(instructionRegexTmpl)
-	matches := instructionRegex.FindStringSubmatch(line)
-	if len(matches) == 0 {
-		return ParsedInstruction{}, NewParseError(line, lineNumber)
+func (t *AsmTranslator) Translate(input string) ([]isa.MachineCodeTerm, error) {
+	if err := t.ParseInstructions(input); err != nil {
+		return []isa.MachineCodeTerm{}, err
 	}
-	// TODO: debug matches
-	instruction := ParsedInstruction{
-		label:       matches[2],
-		instruction: matches[3],
-		operand:     matches[5],
-		metaInfo: isa.TermMetaInfo{
-			LineNum:         lineNumber,
-			OriginalContent: line,
-		},
-	}
-	return instruction, nil
-}
-
-// ParseConstant takes a line and returns a constant if any
-// Constant input is represented as
-// CONST <label>: <value>
-func ParseConstant(line string, lineNum int) (ParsedConstant, error) {
-	constantRegexTmpl := `^CONST\s+(\w+)\s*:\s*(\d+)$`
-	constantRegex := regexp.MustCompile(constantRegexTmpl)
-	matches := constantRegex.FindStringSubmatch(line)
-	if len(matches) == 0 {
-		return ParsedConstant{}, NewParseError(line, lineNum)
-	}
-	value, err := strconv.Atoi(matches[2])
+	t.instructions = addIndicies(t.instructions)
+	machineCode, err := t.convertTermsToMachineCode()
 	if err != nil {
-		return ParsedConstant{}, NewParseError(line, lineNum)
+		return []isa.MachineCodeTerm{}, err
 	}
-	return ParsedConstant{
-		label: matches[1],
-		value: value,
-	}, nil
+	return machineCode, nil
 }
 
-func isConstant(line string) bool {
-	return strings.HasPrefix(line, "CONST")
-}
-
-func isEmpty(line string) bool {
-	// spaces and tabs are empty
-	emptyRegexTmpl := `^\s*$`
-	emptyRegex := regexp.MustCompile(emptyRegexTmpl)
-	return emptyRegex.MatchString(line)
-}
-
-func prepareLine(line string) string {
-	// remove comments
-	commentRegexTmpl := `;.*$`
-	commentRegex := regexp.MustCompile(commentRegexTmpl)
-	withoutComments := commentRegex.ReplaceAllString(line, "")
-	// remove trailing spaces
-	withoutSpaces := strings.TrimSpace(withoutComments)
-	return withoutSpaces
-}
-
-func (t *translator) ParseConstants(input string) ([]ParsedConstant, error) {
-	var constants []ParsedConstant
-
+func (t *AsmTranslator) ParseInstructions(input string) error {
 	lines := strings.Split(input, "\n")
-	for i, line := range lines {
-		line = prepareLine(line)
-		if !isConstant(line) || isEmpty(line) {
-			continue
-		}
-		constant, err := ParseConstant(line, i+1)
+	for _, line := range lines {
+		err := t.parseLine(line)
 		if err != nil {
-			return nil, err
+			return err
 		}
-		constants = append(constants, constant)
 	}
-	return constants, nil
+
+	return nil
 }
 
-func (t *translator) ParseInstructions(input string) ([]ParsedInstruction, error) {
+func (t *AsmTranslator) parseLine(line string) error {
 	var instructions []ParsedInstruction
 
-	lines := strings.Split(input, "\n")
-	for i, line := range lines {
-		line = prepareLine(line)
-		if isConstant(line) || isEmpty(line) {
-			continue
+	parts := strings.Fields(line)
+
+	if len(parts) == 0 {
+		return nil
+	}
+
+	if parts[0] == "word:" {
+		return NewParseError(line, 0)
+	}
+
+	if isConstantDeclaration(parts) {
+		instructions = parseConstantDeclaration(parts)
+		for _, instructions := range instructions {
+			t.addConstant(instructions)
 		}
-		instruction, err := ParseInstruction(line, i+1)
+	} else {
+		instruction := t.parseInstructionDeclaration(parts)
+		t.addInstruction(instruction)
+	}
+
+	return nil
+}
+
+func parseConstantDeclaration(parts []string) []ParsedInstruction {
+	label := strings.Split(parts[0], ":")[0]
+	operand := strings.Join(parts[2:], "")
+	values := strings.Split(operand, ",")
+	instructions := make([]ParsedInstruction, 0)
+	for _, value := range values {
+		instructions = append(instructions, parseConstValue(value)...)
+	}
+	instructions[0].Label = label
+	return instructions
+}
+
+func (t *AsmTranslator) parseInstructionDeclaration(parts []string) ParsedInstruction {
+	instruction := ParsedInstruction{}
+	if hasLabel(parts) {
+		label := strings.Split(parts[0], ":")[0]
+		instruction.Label = label
+		parts = parts[1:]
+	}
+	instruction.Opcode = parts[0]
+	if len(parts) > 1 {
+		instruction.Operand = parts[1]
+	}
+	return instruction
+}
+
+func parseConstValue(value string) []ParsedInstruction {
+	isQuotedString := strings.HasPrefix(value, "'") && strings.HasSuffix(value, "'")
+	if isQuotedString {
+		return parseConstString(value)
+	} else {
+		return []ParsedInstruction{{Operand: value, IsConstant: true, Opcode: "nop"}}
+	}
+}
+
+func parseConstString(value string) []ParsedInstruction {
+	value = strings.Trim(value, "'")
+	instructions := make([]ParsedInstruction, 0)
+	for _, char := range value {
+		instructions = append(instructions, ParsedInstruction{Operand: string(char), IsConstant: true, Opcode: "nop"})
+	}
+	return instructions
+}
+
+func (t *AsmTranslator) addConstant(instruction ParsedInstruction) {
+	t.addInstruction(instruction)
+}
+
+func (t *AsmTranslator) addInstruction(instruction ParsedInstruction) {
+	instruction.Index = t.currentIndex
+	t.instructions = append(t.instructions, instruction)
+	t.currentIndex++
+}
+
+func (t *AsmTranslator) labelToAddress(label string) (int, error) {
+	for _, instruction := range t.instructions {
+		if instruction.Label == label {
+			return instruction.Index, nil
+		}
+	}
+	return 0, fmt.Errorf("label '%s' not found", label)
+}
+
+func (t *AsmTranslator) convertTermsToMachineCode() ([]isa.MachineCodeTerm, error) {
+	var machineCode = make([]isa.MachineCodeTerm, len(t.instructions))
+	for i, instruction := range t.instructions {
+		var label *string
+		var operand *int
+		var constant *string
+		if instruction.Label != "" {
+			label = new(string)
+			*label = instruction.Label
+		}
+		if instruction.Operand != "" && !instruction.IsConstant {
+			address, err := t.labelToAddress(instruction.Operand)
+			if err != nil {
+				return []isa.MachineCodeTerm{}, err
+			}
+			operand = new(int)
+			*operand = address
+		}
+		if instruction.IsConstant {
+			constant = new(string)
+			*constant = instruction.Operand
+		}
+		opcode, err := isa.GetOpcodeFromString(instruction.Opcode)
 		if err != nil {
-			return nil, err
+			return []isa.MachineCodeTerm{}, err
 		}
-		instructions = append(instructions, instruction)
-	}
-
-	return instructions, nil
-}
-
-func (t *translator) ConvertTermsToMachineCode(instructions []ParsedInstruction) ([]isa.MachineCodeTerm, error) {
-	var machineCode []isa.MachineCodeTerm
-	// TODO: check instruction correctness
-	for i, instruction := range instructions {
-		// TODO: it can be variable, not instruction
-    // TODO: convert labels to absolute addresses
-    operand := -1
-    // TODO: remove hardcode
-    opcode := isa.OpcodeAdd
 		newMachineCodeTerm := isa.MachineCodeTerm{
-			Index:    i,
-			Label:    instruction.label,
+			Index:    instruction.Index,
+			Label:    label,
 			Opcode:   opcode,
+			Constant: constant,
 			Operand:  operand,
-			TermInfo: instruction.metaInfo,
+			TermInfo: instruction.MetaInfo,
 		}
-		machineCode = append(machineCode, newMachineCodeTerm)
+		machineCode[i] = newMachineCodeTerm
 	}
 	return machineCode, nil
 }
-
-func (t *translator) Translate(input string) ([]isa.MachineCodeTerm, error) {
-	parsedInstructions, err := t.ParseInstructions(input)
-	if err != nil {
-		return []isa.MachineCodeTerm{}, err
-	}
-	machineCode, err := t.ConvertTermsToMachineCode(parsedInstructions)
-	if err != nil {
-		return []isa.MachineCodeTerm{}, err
-	}
-	return machineCode, nil
-}
-

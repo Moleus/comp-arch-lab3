@@ -1,28 +1,17 @@
-package translator_test
+package translator
 
 import (
 	"bytes"
-	"github.com/Moleus/comp-arch-lab3/cmd/translator"
-	"gotest.tools/v3/golden"
-	"os"
+	"strings"
 	"testing"
+
+	"github.com/Moleus/comp-arch-lab3/pkg/isa"
+	"gotest.tools/v3/assert"
+	"gotest.tools/v3/golden"
 )
 
-func updateGoldenProgram(t *testing.T, content string) {
-	_ = os.Mkdir("testdata", 0755)
-	f, err := os.Create("testdata/program.golden.json")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer f.Close()
-	_, err = f.WriteString(content)
-	if err != nil {
-		t.Fatal(err)
-	}
-}
-
 func TestTranslator(t *testing.T) {
-	tr := translator.NewTranslator()
+	tr := NewTranslator()
 	f := golden.Open(t, "program.input.asm")
 	defer f.Close()
 
@@ -35,12 +24,82 @@ func TestTranslator(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	result, err := tr.Translate(contents)
+	machineCode, err := tr.Translate(contents)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if golden.FlagUpdate() {
-		updateGoldenProgram(t, result)
-	}
-	golden.Assert(t, result, "program.golden.json")
+  serialized, err := isa.SerializeCode(machineCode)
+
+	golden.Assert(t, string(serialized), "program.golden.json")
+}
+
+
+func TestParseConstant(t *testing.T) {
+  tests := []struct {
+    name string
+    input string
+    expected []ParsedInstruction
+  }{
+    {
+      name: "parse numeric constant",
+      input: "label: word: 123",
+      expected: []ParsedInstruction{{
+        Index: 0,
+        Label: "label",
+        Opcode: "nop",
+        Operand: "123",
+        IsConstant: true,
+      }},
+    },
+    {
+      name: "parse string constant",
+      input: "label: word: 'he'",
+      expected: []ParsedInstruction{{
+        Index: 0,
+        Label: "label",
+        Opcode: "nop",
+        Operand: "h",
+        IsConstant: true,
+      }, {
+        Index: 0,
+        Label: "",
+        Opcode: "nop",
+        Operand: "e",
+        IsConstant: true,
+      }},
+    },
+    {
+      name: "parse multiple values",
+      input: "label: word: 123, 'ab'",
+      expected: []ParsedInstruction{{
+        Index: 0,
+        Label: "label",
+        Opcode: "nop",
+        Operand: "123",
+        IsConstant: true,
+      }, {
+        Index: 0,
+        Label: "",
+        Opcode: "nop",
+        Operand: "a",
+        IsConstant: true,
+      }, {
+        Index: 0,
+        Label: "",
+        Opcode: "nop",
+        Operand: "b",
+        IsConstant: true,
+      }},
+    },
+  }
+
+  for _, test := range tests {
+    t.Run(test.name, func(t *testing.T) {
+      parts := strings.Fields(test.input)
+      instructions := parseConstantDeclaration(parts)
+      for i, instruction := range instructions {
+        assert.Equal(t, instruction, test.expected[i])
+      }
+    })
+  }
 }

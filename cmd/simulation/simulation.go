@@ -29,12 +29,12 @@ func main() {
   flag.Parse()
 
   if *programCodeFilename == "" {
-    fmt.Sprintln(os.Stderr, "Program file is not specified")
+    fmt.Fprintln(os.Stderr, "Program file is not specified")
     flag.Usage()
   }
 
   if *dataInputFilename == "" {
-    fmt.Sprintln(os.Stderr, "IO data file is not specified")
+    fmt.Fprintln(os.Stderr, "IO data file is not specified")
     flag.Usage()
   }
 

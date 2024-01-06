@@ -1,7 +1,14 @@
-; constants not supported yet
-CONST X: 123
-CONST Y: 456
+hello: word: 12, 'Hello world!'
+addr: word: hello
+cnt: word: 0
+out: word: 2047
 
-START: ADD 5
-    MUL 2
-    HLT
+start: ld hello
+  st cnt
+  loop: ld addr
+      st addr
+      ld cnt
+      st cnt
+      jz end
+      jmp loop
+  end: hlt
