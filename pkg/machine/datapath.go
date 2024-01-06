@@ -83,7 +83,8 @@ func (rv *RegisterValue) GetAddress() int {
 type DataPath struct {
 	InstructionCounter int
 	CurrentTick        int
-	input              bytes.Buffer
+  // TODO: maybe move out from isa
+	input              []isa.IoData
   // TODO: handle output
 	output             bytes.Buffer
 	registers          map[Register]int
@@ -92,7 +93,7 @@ type DataPath struct {
   Alu *Alu
 }
 
-func NewDataPath(dataInput bytes.Buffer) *DataPath {
+func NewDataPath(dataInput []isa.IoData) *DataPath {
   registers := make(map[Register]int)
   memory := make([]int, isa.ADDR_MAX_VALUE + 1)
   alu := NewAlu()

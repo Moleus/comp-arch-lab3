@@ -45,3 +45,19 @@ func (h *TickLoggerHandler) Handle(ctx context.Context, r slog.Record) error {
 type GlobalTimer interface {
 	GetCurrentTick() int
 }
+
+func ParseLogLevel(level string) slog.Level {
+  switch level {
+  case "debug":
+    return slog.LevelDebug
+  case "info":
+    return slog.LevelInfo
+  case "warn":
+    return slog.LevelWarn
+  case "error":
+    return slog.LevelError
+  default:
+    panic(fmt.Sprintf("Unknown log level %s", level))
+  }
+}
+

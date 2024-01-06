@@ -15,6 +15,7 @@ package isa
 import (
 	"encoding/json"
 	"io"
+
 )
 
 /* accumulator based ISA */
@@ -212,6 +213,11 @@ type MachineCodeTerm struct {
 	TermInfo TermMetaInfo `json:"term_info"`
 }
 
+type IoData struct {
+  arrivesAt int
+  char rune
+}
+
 // TODO: think about dependencies and move MachineCodeTerm in ISA
 func ReadCode(input io.Reader) ([]MachineCodeTerm, error) {
 	var machineCode []MachineCodeTerm
@@ -233,4 +239,26 @@ func WriteCode(target io.Writer, machineCode []MachineCodeTerm) error {
 		return err
 	}
 	return nil
+}
+
+func ReadIoData(input io.Reader) ([]IoData, error) {
+  var ioData []IoData
+  decoder := json.NewDecoder(input)
+  err := decoder.Decode(&ioData)
+  if err != nil {
+    return []IoData{}, err
+  }
+  return ioData, nil
+}
+
+func WriteIoData(target io.Writer, ioData []IoData) error {
+  encodedData, err := json.MarshalIndent(ioData, "", "  ")
+  if err != nil {
+    return err
+  }
+  _, err = target.Write(encodedData)
+  if err != nil {
+    return err
+  }
+  return nil
 }
