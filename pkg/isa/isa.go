@@ -241,6 +241,10 @@ func WriteCode(target io.Writer, machineCode []MachineCodeTerm) error {
 	return nil
 }
 
+func SerializeCode(machineCode []MachineCodeTerm) ([]byte, error) {
+  return json.MarshalIndent(machineCode, "", "  ")
+}
+
 func ReadIoData(input io.Reader) ([]IoData, error) {
   var ioData []IoData
   decoder := json.NewDecoder(input)
