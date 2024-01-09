@@ -12,7 +12,7 @@ hw - hardwired. Реализуется как часть модели. microcode
 Цикл команды (стр. 53):
 1. Цикл выборки команды (Instruction Fetch)
 2. Цикл выборки адреса (Address Fetch)
-3. Цикл выборки операнда (Operand Fetch)
+3. Цикл выборки операнда (Value Fetch)
 4. Цикл исполнения (Execution)
 5. Цикл прерывания (Interruption) - нужен для ввода-вывода
 */
@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"github.com/Moleus/comp-arch-lab3/pkg/isa"
 	"io"
+	"strings"
 )
 
 type ControlUnitError struct {
@@ -50,12 +51,23 @@ type ControlUnit struct {
 }
 
 func NewControlUnit(program isa.Program, dataPath *DataPath, stateOutput io.Writer) *ControlUnit {
+	mapMemory(dataPath, program.Instructions)
 	return &ControlUnit{program: program, dataPath: dataPath, stateOutput: stateOutput}
+}
+
+func mapMemory(dataPath *DataPath, instructions []isa.MachineCodeTerm) {
+	for _, instruction := range instructions {
+		if instruction.Opcode.Type() == isa.OpcodeTypeAddress && instruction.Operand == nil {
+			panic(fmt.Sprintf("address instruction without operand: %s", instruction.Opcode))
+		}
+		instructionWord := isa.NewMemoryWord(instruction)
+		dataPath.memory[instruction.Index] = instructionWord
+	}
 }
 
 type SingleTickOperation func()
 
-func (cu *ControlUnit) SigLatchRegFunc(register Register, value int) func() {
+func (cu *ControlUnit) SigLatchRegFunc(register Register, value isa.MachineWord) func() {
 	return func() {
 		cu.dataPath.SigLatchRegister(register, value)
 	}
@@ -68,14 +80,14 @@ func (cu *ControlUnit) SigWriteMemoryFunc() func() {
 }
 
 func (cu *ControlUnit) SigReadMemoryFunc() func() {
-	return cu.SigLatchRegFunc(DR, cu.dataPath.ReadMemory(cu.GetReg(AR)))
+	return cu.SigLatchRegFunc(DR, cu.dataPath.ReadMemory(cu.GetReg(AR).Value))
 }
 
-func (cu *ControlUnit) GetReg(register Register) int {
+func (cu *ControlUnit) GetReg(register Register) isa.MachineWord {
 	return cu.dataPath.GetRegister(register)
 }
 
-func (cu *ControlUnit) calculate(aluParams ExecutionParams) int {
+func (cu *ControlUnit) calculate(aluParams ExecutionParams) isa.MachineWord {
 	return cu.dataPath.Alu.Execute(aluParams)
 }
 
@@ -100,9 +112,9 @@ func (cu *ControlUnit) RunInstructionCycle() error {
 }
 
 func (cu *ControlUnit) DecodeAndExecuteInstruction() error {
-	instruction := cu.program.Instructions[cu.GetReg(IP)]
-	instructionType := instruction.Opcode.Type()
 	cu.InstructionFetch()
+	instruction := cu.GetReg(CR)
+	instructionType := instruction.Opcode.Type()
 
 	switch instructionType {
 	case isa.OpcodeTypeAddress:
@@ -119,7 +131,7 @@ func (cu *ControlUnit) processInterrupt() {
 	// TODO: check PS bits!!! 5 - EI, 6 - IRQ
 	// disable interrupts and save PS on stack
 	cu.doInOneTick("0 -> PS[3]",
-		cu.SigLatchRegFunc(PS, cu.calculate(*NewAluOp(AluOperationAnd).SetLeft(cu.GetReg(PS)).SetRight(^(1 << 3)))))
+		cu.SigLatchRegFunc(PS, cu.calculate(*NewAluOp(AluOperationAnd).SetLeft(cu.GetReg(PS)).SetRightValue(^(1 << 3)))))
 
 	cu.pushOnStack(IP)
 	cu.pushOnStack(PS)
@@ -133,7 +145,7 @@ func (cu *ControlUnit) processInterrupt() {
 
 	// TODO: check PS bits and offset
 	// enable interrupts
-	cu.doInOneTick("1 -> PS[3]", cu.SigLatchRegFunc(PS, cu.calculate(*NewAluOp(AluOperationOr).SetLeft(cu.GetReg(PS)).SetRight(1 << 3))))
+	cu.doInOneTick("1 -> PS[3]", cu.SigLatchRegFunc(PS, cu.calculate(*NewAluOp(AluOperationOr).SetLeft(cu.GetReg(PS)).SetRightValue(1 << 3))))
 }
 
 func (cu *ControlUnit) pushOnStack(register Register) {
@@ -160,7 +172,7 @@ func (cu *ControlUnit) popFromStack(target Register) {
 func (cu *ControlUnit) InstructionFetch() {
 	// цикл выборки команды
 	cu.doInOneTick("IP -> AR", cu.SigLatchRegFunc(AR, cu.calculate(cu.aluRegisterPassthrough(IP))))
-	cu.doInOneTick("IP + 1 -> IP; mem[AR] -> DR", cu.SigLatchRegFunc(IP, cu.calculate(cu.aluIncrement(IP))), cu.SigLatchRegFunc(DR, cu.dataPath.ReadMemory(cu.GetReg(AR))))
+	cu.doInOneTick("IP + 1 -> IP; mem[AR] -> DR", cu.SigLatchRegFunc(IP, cu.calculate(cu.aluIncrement(IP))), cu.SigLatchRegFunc(DR, cu.dataPath.ReadMemory(cu.GetReg(AR).Value)))
 	cu.doInOneTick("DR -> CR", cu.SigLatchRegFunc(CR, cu.calculate(cu.aluRegisterPassthrough(DR))))
 }
 
@@ -174,12 +186,12 @@ func (cu *ControlUnit) AddressFetch() {
 func (cu *ControlUnit) OperandFetch() {
 	// цикл выборки операнда
 	cu.doInOneTick("DR -> AR", cu.SigLatchRegFunc(AR, cu.calculate(cu.aluRegisterPassthrough(DR))))
-	cu.doInOneTick("mem[AR] -> DR", cu.SigLatchRegFunc(DR, cu.dataPath.ReadMemory(cu.GetReg(AR))))
+	cu.doInOneTick("mem[AR] -> DR", cu.SigLatchRegFunc(DR, cu.dataPath.ReadMemory(cu.GetReg(AR).Value)))
 	// значение лежит в DR
 }
 
 // Пробуем реализовать без косвенной адресации. Только прямая абсолютная.
-func (cu *ControlUnit) decodeAndExecuteAddressInstruction(instruction isa.MachineCodeTerm) error {
+func (cu *ControlUnit) decodeAndExecuteAddressInstruction(instruction isa.MachineWord) error {
 	//cu.AddressFetch()
 	cu.OperandFetch()
 
@@ -198,7 +210,7 @@ func (cu *ControlUnit) decodeAndExecuteAddressInstruction(instruction isa.Machin
 	return nil
 }
 
-func (cu *ControlUnit) decodeAndExecuteAddresslessInstruction(instruction isa.MachineCodeTerm) error {
+func (cu *ControlUnit) decodeAndExecuteAddresslessInstruction(instruction isa.MachineWord) error {
 	switch instruction.Opcode {
 	case isa.OpcodeHlt:
 		cu.doInOneTick("HLT", func() {})
@@ -229,9 +241,9 @@ func (cu *ControlUnit) decodeAndExecuteAddresslessInstruction(instruction isa.Ma
 		)
 
 	case isa.OpcodeEi:
-		cu.doInOneTick("1 -> PS[4]", cu.SigLatchRegFunc(PS, cu.calculate(*NewAluOp(AluOperationOr).SetLeft(cu.GetReg(PS)).SetRight(1 << 4))))
+		cu.doInOneTick("1 -> PS[4]", cu.SigLatchRegFunc(PS, cu.calculate(*NewAluOp(AluOperationOr).SetLeft(cu.GetReg(PS)).SetRightValue(1 << 4))))
 	case isa.OpcodeDi:
-		cu.doInOneTick("0 -> PS[4]", cu.SigLatchRegFunc(PS, cu.calculate(*NewAluOp(AluOperationAnd).SetLeft(cu.GetReg(PS)).SetRight(^(1 << 4)))))
+		cu.doInOneTick("0 -> PS[4]", cu.SigLatchRegFunc(PS, cu.calculate(*NewAluOp(AluOperationAnd).SetLeft(cu.GetReg(PS)).SetRightValue(^(1 << 4)))))
 	case isa.OpcodeCla:
 		// 0 -> AC
 		cu.doInOneTick("0 -> AC", cu.SigLatchRegFunc(AC, cu.calculate(cu.toAluOp(AC, 0, instruction.Opcode))))
@@ -240,12 +252,12 @@ func (cu *ControlUnit) decodeAndExecuteAddresslessInstruction(instruction isa.Ma
 	default:
 		// unary arithmetic operation
 		cu.doInOneTick("AC +- -> AC", // TODO: think about better way to pass left/right if unnecessary
-			cu.SigLatchRegFunc(AC, cu.calculate(cu.toAluOp(AC, AC, instruction.Opcode))))
+			cu.SigLatchRegFunc(AC, cu.calculate(cu.toAluOp(AC, 0, instruction.Opcode))))
 	}
 	return nil
 }
 
-func (cu *ControlUnit) decodeAndExecuteBranchInstruction(instruction isa.MachineCodeTerm) error {
+func (cu *ControlUnit) decodeAndExecuteBranchInstruction(instruction isa.MachineWord) error {
 	flags := cu.dataPath.GetFlags()
 	opcode := instruction.Opcode
 
@@ -258,16 +270,16 @@ func (cu *ControlUnit) decodeAndExecuteBranchInstruction(instruction isa.Machine
 }
 
 func (cu *ControlUnit) aluIncrement(register Register) ExecutionParams {
-	return *NewAluOp(AluOperationAdd).SetLeft(1).SetRight(cu.GetReg(register))
+	return *NewAluOp(AluOperationAdd).SetLeft(cu.GetReg(register)).SetRightValue(1)
 }
 
 func (cu *ControlUnit) aluDecrement(register Register) ExecutionParams {
-	return *NewAluOp(AluOperationSub).SetLeft(cu.GetReg(register)).SetRight(1)
+	return *NewAluOp(AluOperationSub).SetLeft(cu.GetReg(register)).SetRightValue(1)
 }
 
 func (cu *ControlUnit) aluRegisterPassthrough(register Register) ExecutionParams {
 	// called for DR for address commands
-	return *NewAluOp(AluOperationAdd).SetRight(cu.GetReg(register))
+	return *NewAluOp(AluOperationAdd).SetLeft(cu.GetReg(register))
 }
 
 func (cu *ControlUnit) toAluOp(left Register, right Register, operation isa.Opcode) ExecutionParams {
@@ -276,7 +288,7 @@ func (cu *ControlUnit) toAluOp(left Register, right Register, operation isa.Opco
 }
 
 func (cu *ControlUnit) presetInstructionCounter(value int) {
-	cu.dataPath.SigLatchRegister(IP, value)
+	cu.dataPath.SigLatchRegister(IP, isa.NewConstantNumber(value))
 	cu.instructionCounter = value
 }
 
@@ -297,12 +309,13 @@ func (cu *ControlUnit) tick() {
 func (cu *ControlUnit) dumpState(currentOperationDescription string) error {
 	// tick number.
 	// PS: NZC
-	memByAR := cu.dataPath.ReadMemory(cu.GetReg(AR))
+	memByAR := cu.dataPath.ReadMemory(cu.GetReg(AR).Value)
 	statusFlags := cu.dataPath.GetFlags()
 	formattedFlags := formatFlags(statusFlags)
 
 	instructionRepr := cu.formatCurrentInstruction()
-	outputRow := fmt.Sprintf("%-29s | AC: %d | IP: %d | SP: %d | AR: %d | DR: %d | PS: %s | mem[AR]: %d | CR: %s", currentOperationDescription, cu.GetReg(AC), cu.GetReg(IP), cu.GetReg(SP), cu.GetReg(AR), cu.GetReg(DR), formattedFlags, memByAR, instructionRepr)
+	registersRepr := cu.formatRegistersState()
+	outputRow := fmt.Sprintf("%-29s | %s | %s | mem[AR]: %d | CR: %s", currentOperationDescription, registersRepr, formattedFlags, memByAR, instructionRepr)
 	_, err := cu.stateOutput.Write([]byte(outputRow + "\n"))
 	if err != nil {
 		return fmt.Errorf("failed to write state: %w", err)
@@ -338,14 +351,23 @@ func formatFlags(flags BitFlags) string {
 }
 
 func (cu *ControlUnit) formatCurrentInstruction() string {
-	currentInstruction := cu.program.Instructions[cu.instructionCounter]
-	var instructionRepr string = "-"
-	if currentInstruction.Constant != nil {
-		instructionRepr = fmt.Sprintf("%s %s", currentInstruction.Opcode, *currentInstruction.Constant)
-	} else if currentInstruction.Operand != nil {
-		instructionRepr = fmt.Sprintf("%s %d", currentInstruction.Opcode, *currentInstruction.Operand)
-	} else {
-		instructionRepr = fmt.Sprintf("%s", currentInstruction.Opcode.String())
+	currentInstruction := cu.dataPath.GetRegister(CR)
+	switch currentInstruction.ValueType {
+	case isa.ValueTypeNumber:
+		return fmt.Sprintf("%s %d", currentInstruction.Opcode, currentInstruction.Value)
+	case isa.ValueTypeChar:
+		return fmt.Sprintf("%s '%c'", currentInstruction.Opcode, currentInstruction.Value)
+	case isa.ValueTypeNone:
+		return fmt.Sprintf("%s", currentInstruction.Opcode)
+	default:
+		panic(fmt.Sprintf("unknown operand type: %d", currentInstruction.ValueType))
 	}
-	return instructionRepr
+}
+
+func (cu *ControlUnit) formatRegistersState() string {
+	var strRegisters = make([]string, 0)
+	for register, value := range cu.dataPath.registers {
+		strRegisters = append(strRegisters, fmt.Sprintf("%s: %2d", register, value.Value))
+	}
+	return strings.Join(strRegisters, ", ")
 }

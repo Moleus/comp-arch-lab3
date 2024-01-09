@@ -92,3 +92,11 @@ func runTest(t *testing.T, input TestInput, goldenFile string) {
 		t.Fatal(err)
 	}
 }
+
+func TestCharEncoding(t *testing.T) {
+	char := 'a'
+	buffer := bytes.NewBuffer([]byte{})
+	buffer.WriteByte(byte(char))
+
+	t.Log(buffer.String())
+}

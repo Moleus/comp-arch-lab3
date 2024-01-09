@@ -61,11 +61,11 @@ func and(left int, right int) int {
 	return left & right
 }
 
-func takeRight(left int, right int) int {
+func takeRight(_ int, right int) int {
 	return right
 }
 
-func takeLeft(left int, right int) int {
+func takeLeft(left int, _ int) int {
 	return left
 }
 
@@ -119,27 +119,37 @@ func (a *Alu) setFlags(value int) {
 
 type ExecutionParams struct {
 	operation       AluOperation
-	left            int
-	right           int
+	left            isa.MachineWord
+	right           isa.MachineWord
 	updateRegisters bool
 }
 
 func NewAluOp(operation AluOperation) *ExecutionParams {
 	return &ExecutionParams{
 		operation:       operation,
-		left:            0,
-		right:           0,
+		left:            isa.NewConstantNumber(0),
+		right:           isa.NewConstantNumber(0),
 		updateRegisters: false,
 	}
 }
 
-func (p *ExecutionParams) SetLeft(left int) *ExecutionParams {
+func (p *ExecutionParams) SetLeft(left isa.MachineWord) *ExecutionParams {
 	p.left = left
 	return p
 }
 
-func (p *ExecutionParams) SetRight(right int) *ExecutionParams {
+func (p *ExecutionParams) SetLeftValue(left int) *ExecutionParams {
+	p.left = isa.NewConstantNumber(left)
+	return p
+}
+
+func (p *ExecutionParams) SetRight(right isa.MachineWord) *ExecutionParams {
 	p.right = right
+	return p
+}
+
+func (p *ExecutionParams) SetRightValue(right int) *ExecutionParams {
+	p.right = isa.NewConstantNumber(right)
 	return p
 }
 
@@ -148,14 +158,16 @@ func (p *ExecutionParams) UpdateRegisters(updateRegisters bool) *ExecutionParams
 	return p
 }
 
-func (a *Alu) Execute(executionParams ExecutionParams) int {
+func (a *Alu) Execute(executionParams ExecutionParams) isa.MachineWord {
 	if a.operation2func[executionParams.operation] == nil {
 		panic("unknown operation")
 	}
-	output := a.operation2func[executionParams.operation](executionParams.left, executionParams.right)
+	output := a.operation2func[executionParams.operation](executionParams.left.Value, executionParams.right.Value)
+	result := executionParams.left
+	result.Value = output
 	wrapOverflow(output)
 	if executionParams.updateRegisters {
 		a.setFlags(output)
 	}
-	return output
+	return result
 }

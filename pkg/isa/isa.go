@@ -33,7 +33,8 @@ const (
 type Opcode int
 
 const (
-	OpcodeAnd Opcode = iota
+	OpcodeNop Opcode = iota
+	OpcodeAnd
 	OpcodeOr
 	OpcodeAdd
 	OpcodeSub
@@ -52,7 +53,6 @@ const (
 	OpcodeEi
 	OpcodeDi
 	OpcodeCla
-	OpcodeNop
 
 	OpcodeJmp
 	OppcodeJz
@@ -219,13 +219,48 @@ type Program struct {
 	Instructions []MachineCodeTerm
 }
 
+type MachineWord struct {
+	Opcode    Opcode
+	Value     int
+	ValueType ValueType
+}
+
+func NewConstantNumber(value int) MachineWord {
+	return MachineWord{
+		Opcode:    OpcodeNop,
+		Value:     value,
+		ValueType: ValueTypeNumber,
+	}
+}
+
+func NewMemoryWord(term MachineCodeTerm) MachineWord {
+	operand := -1
+	if term.Operand != nil {
+		operand = *term.Operand
+	}
+	return MachineWord{
+		Opcode:    term.Opcode,
+		Value:     operand,
+		ValueType: term.OperandType,
+	}
+}
+
+type ValueType int
+
+const (
+	ValueTypeNone ValueType = iota
+	ValueTypeNumber
+	ValueTypeChar
+	ValueTypeAddress
+)
+
 type MachineCodeTerm struct {
-	Index    int          `json:"index"`
-	Label    *string      `json:"label,omitempty"`
-	Opcode   Opcode       `json:"opcode"`
-	Operand  *int         `json:"operand,omitempty"`
-	Constant *string      `json:"constant,omitempty"`
-	TermInfo TermMetaInfo `json:"term_info"`
+	Index       int          `json:"index"`
+	Label       *string      `json:"label,omitempty"`
+	Opcode      Opcode       `json:"opcode"`
+	Operand     *int         `json:"operand,omitempty"`
+	OperandType ValueType    `json:"operand_type,omitempty"`
+	TermInfo    TermMetaInfo `json:"term_info"`
 }
 
 type TermMetaInfo struct {

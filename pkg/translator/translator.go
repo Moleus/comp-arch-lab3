@@ -95,12 +95,13 @@ func NewTranslator() Translator {
 // <label>: <instruction> <operand>
 // <instruction> <operand>
 type ParsedInstruction struct {
-	Index      int
-	Label      string
-	Opcode     string
-	IsConstant bool
-	Operand    string
-	MetaInfo   isa.TermMetaInfo
+	Index        int
+	Label        string
+	Opcode       string
+	ValueType    isa.ValueType
+	Operand      int
+	LabelOperand string
+	MetaInfo     isa.TermMetaInfo
 }
 
 type ParseError struct {
@@ -183,7 +184,7 @@ func parseConstantDeclaration(parts []string) ([]ParsedInstruction, error) {
 
 	if !found {
 		// this is a number constant
-		return []ParsedInstruction{{Label: label, Opcode: "nop", IsConstant: true, Operand: numberS}}, nil
+		return []ParsedInstruction{{Label: label, Opcode: "nop", ValueType: isa.ValueTypeNumber, Operand: number}}, nil
 	}
 
 	symbolsCount := number
@@ -194,7 +195,7 @@ func parseConstantDeclaration(parts []string) ([]ParsedInstruction, error) {
 	}
 
 	instructions := make([]ParsedInstruction, 1)
-	instructions[0] = ParsedInstruction{Label: label, Opcode: "nop", IsConstant: true, Operand: strconv.Itoa(symbolsCount)}
+	instructions[0] = ParsedInstruction{Label: label, Opcode: "nop", ValueType: isa.ValueTypeNumber, Operand: symbolsCount}
 	instructions = append(instructions, parseConstString(stringValue)...)
 	if len(instructions) != symbolsCount+1 {
 		return []ParsedInstruction{}, fmt.Errorf("number of symbols (%d) doesn't match the len of string (%d): '%s'", symbolsCount, len(instructions)-1, operand)
@@ -212,7 +213,8 @@ func (t *AsmTranslator) parseInstructionDeclaration(parts []string) ParsedInstru
 	}
 	instruction.Opcode = parts[0]
 	if len(parts) > 1 {
-		instruction.Operand = parts[1]
+		instruction.ValueType = isa.ValueTypeAddress
+		instruction.LabelOperand = parts[1]
 	}
 	return instruction
 }
@@ -221,7 +223,7 @@ func parseConstString(value string) []ParsedInstruction {
 	value = strings.Trim(value, "'")
 	instructions := make([]ParsedInstruction, 0)
 	for _, char := range value {
-		instructions = append(instructions, ParsedInstruction{Operand: string(char), IsConstant: true, Opcode: "nop"})
+		instructions = append(instructions, ParsedInstruction{Operand: int(char), ValueType: isa.ValueTypeChar, Opcode: "nop"})
 	}
 	return instructions
 }
@@ -245,28 +247,19 @@ func (t *AsmTranslator) labelToAddress(label string) (int, error) {
 	return 0, fmt.Errorf("label '%s' not found", label)
 }
 
-func (t *AsmTranslator) convertTermsToMachineCode() ([]isa.MachineCodeTerm, error) {
-	var machineCode = make([]isa.MachineCodeTerm, len(t.instructions))
+func (t *AsmTranslator) convertTermsToMachineCode() (machineCode []isa.MachineCodeTerm, err error) {
+	machineCode = make([]isa.MachineCodeTerm, len(t.instructions))
 	for i, instruction := range t.instructions {
 		var label *string
-		var operand *int
-		var constant *string
 		if instruction.Label != "" {
 			label = new(string)
 			*label = instruction.Label
 		}
-		if instruction.Operand != "" && !instruction.IsConstant {
-			address, err := t.labelToAddress(instruction.Operand)
-			if err != nil {
-				return []isa.MachineCodeTerm{}, err
-			}
-			operand = new(int)
-			*operand = address
+		operand, err := t.inferOperand(instruction)
+		if err != nil {
+			return []isa.MachineCodeTerm{}, err
 		}
-		if instruction.IsConstant {
-			constant = new(string)
-			*constant = instruction.Operand
-		}
+
 		opcode, err := isa.GetOpcodeFromString(instruction.Opcode)
 		if err != nil {
 			return []isa.MachineCodeTerm{}, err
@@ -275,7 +268,6 @@ func (t *AsmTranslator) convertTermsToMachineCode() ([]isa.MachineCodeTerm, erro
 			Index:    instruction.Index,
 			Label:    label,
 			Opcode:   opcode,
-			Constant: constant,
 			Operand:  operand,
 			TermInfo: instruction.MetaInfo,
 		}
@@ -283,6 +275,29 @@ func (t *AsmTranslator) convertTermsToMachineCode() ([]isa.MachineCodeTerm, erro
 	}
 	return machineCode, nil
 }
+
+func (t *AsmTranslator) inferOperand(instruction ParsedInstruction) (*int, error) {
+	var operand = new(int)
+	var err error
+
+	switch instruction.ValueType {
+	case isa.ValueTypeNone:
+		return nil, nil
+	case isa.ValueTypeChar, isa.ValueTypeNumber:
+		*operand = instruction.Operand
+		return operand, nil
+	case isa.ValueTypeAddress:
+		// label
+		if instruction.LabelOperand == "" {
+			panic(fmt.Sprintf("label operand is empty: %s", instruction.Opcode))
+		}
+		*operand, err = t.labelToAddress(instruction.LabelOperand)
+		return operand, err
+	default:
+		panic(fmt.Sprintf("unknown operand type: %d", instruction.ValueType))
+	}
+}
+
 func addStartAddress(machineCode []isa.MachineCodeTerm) (isa.Program, error) {
 	startTerm := slices.IndexFunc(machineCode, func(term isa.MachineCodeTerm) bool {
 		return term.Label != nil && *term.Label == "start"

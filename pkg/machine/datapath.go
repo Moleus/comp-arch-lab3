@@ -42,15 +42,6 @@ import (
 	"github.com/Moleus/comp-arch-lab3/pkg/isa"
 )
 
-type SignalDriven interface {
-	SignalLatchAccumulator()
-	// TODO: decide on other signals
-}
-
-type Memory struct {
-	values []int
-}
-
 type Register int
 
 const (
@@ -99,37 +90,33 @@ type DataPath struct {
 	inputBuffer []isa.IoData
 	// TODO: handle outputBuffer
 	outputBuffer io.Writer
-	registers    map[Register]int
-	memory       []int
+	registers    map[Register]isa.MachineWord
+	memory       []isa.MachineWord
 
 	Alu *Alu
 }
 
 func NewDataPath(dataInput []isa.IoData, output io.Writer) *DataPath {
-	registers := make(map[Register]int)
-	memory := make([]int, isa.ADDR_MAX_VALUE+1)
+	registers := make(map[Register]isa.MachineWord)
+	for _, register := range []Register{AC, IP, CR, PS, SP, DR, AR} {
+		registers[register] = isa.NewConstantNumber(0)
+	}
+	memory := make([]isa.MachineWord, isa.ADDR_MAX_VALUE+1)
 	alu := NewAlu()
-	registers[AC] = 0
-	registers[IP] = 0
-	registers[CR] = 0
-	registers[PS] = 0
-	registers[SP] = 0
-	registers[DR] = 0
-	registers[AR] = 0
 	return &DataPath{inputBuffer: dataInput, outputBuffer: output, memory: memory, registers: registers, Alu: alu}
 }
 
 func (dp *DataPath) GetFlags() BitFlags {
 	return BitFlags{
-		ZERO:     dp.registers[PS]&0x1 == 1,
-		NEGATIVE: dp.registers[PS]&0x2 == 1,
-		CARRY:    dp.registers[PS]&0x4 == 1,
+		ZERO:     dp.registers[PS].Value&0x1 == 1,
+		NEGATIVE: dp.registers[PS].Value&0x2 == 1,
+		CARRY:    dp.registers[PS].Value&0x4 == 1,
 	}
 }
 
 func (dp *DataPath) IsInterruptRequired() bool {
 	// TODO: check binary logic
-	return dp.registers[PS]&0x8 == 1 && dp.registers[PS]&0x10 == 1
+	return dp.registers[PS].Value&0x8 == 1 && dp.registers[PS].Value&0x10 == 1
 }
 
 func (dp *DataPath) WriteOutput(character rune) {
@@ -139,18 +126,20 @@ func (dp *DataPath) WriteOutput(character rune) {
 	}
 }
 
-func (dp *DataPath) SigLatchRegister(register Register, value int) {
+func (dp *DataPath) SigLatchRegister(register Register, value isa.MachineWord) {
 	dp.registers[register] = value
 }
 
-func (dp *DataPath) GetRegister(register Register) int {
+func (dp *DataPath) GetRegister(register Register) isa.MachineWord {
 	return dp.registers[register]
 }
 
-func (dp *DataPath) ReadMemory(address int) int {
+func (dp *DataPath) ReadMemory(address int) isa.MachineWord {
 	return dp.memory[address]
 }
 
 func (dp *DataPath) WriteMemory() {
-	dp.memory[dp.GetRegister(AR)] = dp.GetRegister(DR)
+	// we need to store u8 bytes in memory
+	// we need to store instructions and their parameters in memory
+	dp.memory[dp.GetRegister(AR).Value] = dp.GetRegister(DR)
 }
