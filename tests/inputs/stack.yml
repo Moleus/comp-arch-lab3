@@ -10,4 +10,4 @@ translator_input: |-
   hlt
 
 machine_input: |-
-  [{ "arrivesAt": 0, "char": "a" }]
+  [{ "ArrivesAt": 0, "Char": "a" }]

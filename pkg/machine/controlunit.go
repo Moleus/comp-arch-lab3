@@ -25,6 +25,10 @@ import (
 	"strings"
 )
 
+const (
+	InterruptVectorFirst = 0x0
+)
+
 type ControlUnitError struct {
 	message string
 }
@@ -45,14 +49,16 @@ type ControlUnit struct {
 	// Счетчик команд
 	instructionCounter int
 	// Счетчик тактов
-	tickCounter int
+	clock *Clock
+
+	inputPointer int
 
 	stateOutput io.Writer
 }
 
-func NewControlUnit(program isa.Program, dataPath *DataPath, stateOutput io.Writer) *ControlUnit {
+func NewControlUnit(program isa.Program, dataPath *DataPath, stateOutput io.Writer, clock *Clock) *ControlUnit {
 	mapMemory(dataPath, program.Instructions)
-	return &ControlUnit{program: program, dataPath: dataPath, stateOutput: stateOutput}
+	return &ControlUnit{program: program, dataPath: dataPath, stateOutput: stateOutput, clock: clock}
 }
 
 func mapMemory(dataPath *DataPath, instructions []isa.MachineCodeTerm) {
@@ -95,9 +101,7 @@ func (cu *ControlUnit) RunInstructionCycle() error {
 		if err != nil {
 			return err
 		}
-		for cu.dataPath.IsInterruptRequired() {
-			cu.processInterrupt()
-		}
+		cu.interruption()
 		err = cu.dumpInstructionEnd()
 		if err != nil {
 			return err
@@ -120,29 +124,10 @@ func (cu *ControlUnit) DecodeAndExecuteInstruction() error {
 		return cu.decodeAndExecuteAddresslessInstruction(instruction)
 	case isa.OpcodeTypeBranch:
 		return cu.decodeAndExecuteBranchInstruction(instruction)
+	case isa.OpcodeTypeIO:
+		return cu.executeIOInstruction(instruction)
 	}
 	return nil
-}
-
-func (cu *ControlUnit) processInterrupt() {
-	// TODO: check PS bits!!! 5 - EI, 6 - IRQ
-	// disable interrupts and save PS on stack
-	cu.doInOneTick("0 -> PS[3]",
-		cu.SigLatchRegFunc(PS, cu.calculate(*NewAluOp(AluOperationAnd).SetLeft(cu.GetReg(PS)).SetRightValue(^(1 << 3)))))
-
-	cu.pushOnStack(IP)
-	cu.pushOnStack(PS)
-
-	if err := cu.RunInstructionCycle(); err != nil {
-		panic(err)
-	}
-
-	cu.popFromStack(PS)
-	cu.popFromStack(IP)
-
-	// TODO: check PS bits and offset
-	// enable interrupts
-	cu.doInOneTick("1 -> PS[3]", cu.SigLatchRegFunc(PS, cu.calculate(*NewAluOp(AluOperationOr).SetLeft(cu.GetReg(PS)).SetRightValue(1 << 3))))
 }
 
 func (cu *ControlUnit) pushOnStack(register Register) {
@@ -191,7 +176,6 @@ func (cu *ControlUnit) OperandFetch() {
 
 // Пробуем реализовать без косвенной адресации. Только прямая абсолютная.
 func (cu *ControlUnit) decodeAndExecuteAddressInstruction(instruction isa.MachineWord) error {
-	//cu.AddressFetch()
 	cu.OperandFetch()
 
 	opcode := instruction.Opcode
@@ -222,9 +206,9 @@ func (cu *ControlUnit) decodeAndExecuteAddresslessInstruction(instruction isa.Ma
 	case isa.OpcodePop:
 		cu.popFromStack(AC)
 	case isa.OpcodeEi:
-		cu.doInOneTick("1 -> PS[4]", cu.SigLatchRegFunc(PS, cu.calculate(*NewAluOp(AluOperationOr).SetLeft(cu.GetReg(PS)).SetRightValue(1 << 4))))
+		cu.doInOneTick("1 -> PS[EI]", cu.SigLatchRegFunc(PS, cu.calculate(*NewAluOp(AluOperationOr).SetLeft(cu.GetReg(PS)).SetRightValue(StatusRegisterEnableInterruptBit))))
 	case isa.OpcodeDi:
-		cu.doInOneTick("0 -> PS[4]", cu.SigLatchRegFunc(PS, cu.calculate(*NewAluOp(AluOperationAnd).SetLeft(cu.GetReg(PS)).SetRightValue(^(1 << 4)))))
+		cu.doInOneTick("0 -> PS[EI]", cu.SigLatchRegFunc(PS, cu.calculate(*NewAluOp(AluOperationAnd).SetLeft(cu.GetReg(PS)).SetRightValue(^(StatusRegisterEnableInterruptBit)))))
 	case isa.OpcodeCla:
 		// 0 -> AC
 		cu.doInOneTick("0 -> AC", cu.SigLatchRegFunc(AC, cu.calculate(cu.toAluOp(AC, 0, instruction.Opcode))))
@@ -246,6 +230,53 @@ func (cu *ControlUnit) decodeAndExecuteBranchInstruction(instruction isa.Machine
 
 	if condition {
 		cu.doInOneTick("AR -> IP", cu.SigLatchRegFunc(IP, cu.calculate(cu.aluRegisterPassthrough(AR))))
+	}
+	return nil
+}
+
+func (cu *ControlUnit) interruption() {
+	cu.dataPath.SigCheckIrq()
+	for cu.dataPath.IsInterruptRequired() {
+		cu.processInterrupt()
+	}
+}
+
+func (cu *ControlUnit) processInterrupt() {
+	// TODO: check PS bits!!! 5 - EI, 6 - IRQ
+	// disable interrupts and save PS on stack
+	cu.doInOneTick("0 -> PS[EI]",
+		cu.SigLatchRegFunc(PS, cu.calculate(*NewAluOp(AluOperationAnd).SetLeft(cu.GetReg(PS)).SetRightValue(^(StatusRegisterEnableInterruptBit)))))
+
+	cu.pushOnStack(IP)
+	cu.pushOnStack(PS)
+
+	// читаем по адресу ветора прерывания
+	cu.doInOneTick("intVec -> AR", cu.SigLatchRegFunc(AR, cu.calculate(*NewAluOp(AluOperationAdd).SetLeftValue(InterruptVectorFirst))))
+	cu.doInOneTick("mem[AR] -> DR", cu.SigReadMemoryFunc())
+
+	cu.doInOneTick("DR -> IP", cu.SigLatchRegFunc(IP, cu.calculate(cu.aluRegisterPassthrough(DR))))
+
+	if err := cu.RunInstructionCycle(); err != nil {
+		panic(err)
+	}
+
+	cu.popFromStack(PS)
+	cu.popFromStack(IP)
+
+	// TODO: maybe set PS and DR -> PS??
+	// TODO: check PS bits and offset
+	// enable interrupts
+	cu.doInOneTick("1 -> PS[EI]", cu.SigLatchRegFunc(PS, cu.calculate(*NewAluOp(AluOperationOr).SetLeft(cu.GetReg(PS)).SetRightValue(StatusRegisterEnableInterruptBit))))
+}
+
+func (cu *ControlUnit) executeIOInstruction(instruction isa.MachineWord) error {
+	switch instruction.Opcode {
+	case isa.OpcodeIn:
+		cu.doInOneTick("IN -> AC", cu.dataPath.SigWritePortOut)
+	case isa.OpcodeOut:
+		cu.doInOneTick("AC -> OUT", cu.dataPath.SigReadPortIn)
+	default:
+		return fmt.Errorf("unknown IO instruction: %s", instruction.Opcode)
 	}
 	return nil
 }
@@ -284,7 +315,7 @@ func (cu *ControlUnit) doInOneTick(description string, singleTickOperation ...Si
 }
 
 func (cu *ControlUnit) tick() {
-	cu.tickCounter++
+	cu.clock.currentTick++
 }
 
 func (cu *ControlUnit) dumpState(currentOperationDescription string) error {

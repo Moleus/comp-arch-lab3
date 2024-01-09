@@ -1,0 +1,21 @@
+translator_input: |-
+  int_addr: word: interrupt
+  line_end: word: 10
+  stop_input: word: 0
+  start: ei
+    loop: load stop_input
+    jmz loop
+    hlt
+
+  interrupt: push
+    in
+    cmp line_end            ; check is it end of string
+    jmnz print              ; print if not end-of-line
+    load stop_input         ; increase flag
+    inc
+    store stop_input
+    jmp end
+    print: store (out)      ; output symbol
+    end: pop                ; restore accumulator
+    iret
+

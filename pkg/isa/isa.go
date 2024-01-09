@@ -233,6 +233,14 @@ func NewConstantNumber(value int) MachineWord {
 	}
 }
 
+func NewMemoryWordFromIO(ioData IoData) MachineWord {
+	return MachineWord{
+		Opcode:    OpcodeNop,
+		Value:     int(ioData.Char[0]),
+		ValueType: ValueTypeChar,
+	}
+}
+
 func NewMemoryWord(instruction MachineCodeTerm) MachineWord {
 	if instruction.Opcode.Type() == OpcodeTypeAddress && instruction.Operand == nil {
 		panic(fmt.Sprintf("address instruction without operand: %s", instruction.Opcode))
@@ -273,8 +281,8 @@ type TermMetaInfo struct {
 }
 
 type IoData struct {
-	arrivesAt int
-	char      rune
+	ArrivesAt int
+	Char      string
 }
 
 // TODO: think about dependencies and move MachineCodeTerm in ISA

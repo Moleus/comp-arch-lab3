@@ -29,8 +29,9 @@ type SimulationStatistics struct {
 }
 
 func RunSimulation(dataInput []isa.IoData, program isa.Program, dataPathOutput io.Writer, controlUnitStateOutput io.Writer) {
-	datapath := NewDataPath(dataInput, dataPathOutput)
-	controlUnit := NewControlUnit(program, datapath, controlUnitStateOutput)
+	clock := &Clock{currentTick: 0}
+	datapath := NewDataPath(dataInput, dataPathOutput, clock)
+	controlUnit := NewControlUnit(program, datapath, controlUnitStateOutput, clock)
 
 	log.Println("starting simulation")
 

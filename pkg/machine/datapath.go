@@ -54,9 +54,17 @@ const (
 	AR
 )
 
-type RegisterValue struct {
-	value int
-}
+const (
+	StatusRegisterCarryBit            = 0x0
+	StatusRegisterZeroBit             = 0x2
+	StatusRegisterNegativeBit         = 0x3
+	StatusRegisterEnableInterruptBit  = 0x5
+	StatusRegisterRequestInterruptBit = 0x6
+)
+
+const (
+	AccumulatorIOReadyBit = 0x6
+)
 
 type BitFlags struct {
 	ZERO     bool
@@ -93,10 +101,12 @@ type DataPath struct {
 	registers    map[Register]isa.MachineWord
 	memory       []isa.MachineWord
 
+	clock TickProvider
+
 	Alu *Alu
 }
 
-func NewDataPath(dataInput []isa.IoData, output io.Writer) *DataPath {
+func NewDataPath(dataInput []isa.IoData, output io.Writer, clock TickProvider) *DataPath {
 	registers := make(map[Register]isa.MachineWord)
 	for _, register := range []Register{AC, IP, CR, PS, SP, DR, AR} {
 		registers[register] = isa.NewConstantNumber(0)
@@ -104,20 +114,19 @@ func NewDataPath(dataInput []isa.IoData, output io.Writer) *DataPath {
 	registers[SP] = isa.NewConstantNumber(isa.AddrMaxValue + 1)
 	memory := make([]isa.MachineWord, isa.AddrMaxValue+1)
 	alu := NewAlu()
-	return &DataPath{inputBuffer: dataInput, outputBuffer: output, memory: memory, registers: registers, Alu: alu}
+	return &DataPath{inputBuffer: dataInput, outputBuffer: output, memory: memory, registers: registers, Alu: alu, clock: clock}
 }
 
 func (dp *DataPath) GetFlags() BitFlags {
 	return BitFlags{
-		ZERO:     dp.registers[PS].Value&0x1 == 1,
-		NEGATIVE: dp.registers[PS].Value&0x2 == 1,
-		CARRY:    dp.registers[PS].Value&0x4 == 1,
+		ZERO:     dp.registers[PS].Value&StatusRegisterZeroBit == 1,
+		NEGATIVE: dp.registers[PS].Value&StatusRegisterNegativeBit == 1,
+		CARRY:    dp.registers[PS].Value&StatusRegisterCarryBit == 1,
 	}
 }
 
 func (dp *DataPath) IsInterruptRequired() bool {
-	// TODO: check binary logic
-	return dp.registers[PS].Value&0x8 == 1 && dp.registers[PS].Value&0x10 == 1
+	return dp.registers[PS].Value&StatusRegisterEnableInterruptBit == 1 && dp.registers[PS].Value&StatusRegisterRequestInterruptBit == 1
 }
 
 func (dp *DataPath) WriteOutput(character rune) {
@@ -129,6 +138,45 @@ func (dp *DataPath) WriteOutput(character rune) {
 
 func (dp *DataPath) SigLatchRegister(register Register, value isa.MachineWord) {
 	dp.registers[register] = value
+}
+
+func (dp *DataPath) SigCheckIrq() {
+	if dp.isInputReady() {
+		dp.setIoState(true)
+	}
+}
+
+func (dp *DataPath) SigReadPortIn() {
+	inReady := dp.isInputReady()
+	if !inReady {
+		dp.setIoState(inReady)
+		return
+	}
+	ioData := dp.inputBuffer[0]
+	dp.registers[AC] = isa.NewMemoryWordFromIO(ioData)
+	dp.inputBuffer = dp.inputBuffer[1:]
+	// don't override AC but only set IO ready bit
+	dp.setIoState(inReady)
+}
+
+func (dp *DataPath) isInputReady() bool {
+	return len(dp.inputBuffer) > 0 && dp.inputBuffer[0].ArrivesAt <= dp.clock.GetCurrentTick()
+}
+
+func (dp *DataPath) setIoState(isReady bool) {
+	reg := dp.registers[AC]
+	if isReady {
+		reg.Value |= AccumulatorIOReadyBit
+	} else {
+		reg.Value &= ^(AccumulatorIOReadyBit)
+	}
+	dp.registers[AC] = reg
+}
+
+func (dp *DataPath) SigWritePortOut() {
+	if _, err := dp.outputBuffer.Write([]byte{byte(dp.registers[AC].Value)}); err != nil {
+		panic(err)
+	}
 }
 
 func (dp *DataPath) GetRegister(register Register) isa.MachineWord {
