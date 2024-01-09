@@ -1,0 +1,73 @@
+translator_output: |-
+    {
+      "StartAddress": 2,
+      "Instructions": [
+        {
+          "index": 0,
+          "label": "a",
+          "opcode": "NOP",
+          "constant": "5",
+          "term_info": {
+            "line_num": 1,
+            "original_content": "a: word: 5"
+          }
+        },
+        {
+          "index": 1,
+          "label": "b",
+          "opcode": "NOP",
+          "constant": "10",
+          "term_info": {
+            "line_num": 2,
+            "original_content": "b: word: 10"
+          }
+        },
+        {
+          "index": 2,
+          "label": "start",
+          "opcode": "LD",
+          "operand": 0,
+          "term_info": {
+            "line_num": 3,
+            "original_content": "start: ld a"
+          }
+        },
+        {
+          "index": 3,
+          "opcode": "ADD",
+          "operand": 1,
+          "term_info": {
+            "line_num": 4,
+            "original_content": "add b"
+          }
+        },
+        {
+          "index": 4,
+          "opcode": "HLT",
+          "term_info": {
+            "line_num": 5,
+            "original_content": "hlt"
+          }
+        }
+      ]
+    }
+stdout: '[{ "arrivesAt": 0, "char": "a" }]'
+log: |
+    IP -> AR                      | AC: 0 | IP: 2 | SP: 0 | AR: 2 | DR: 0 | PS: !Z !N !C | mem[AR]: 0 | CR: LD 0
+    IP + 1 -> IP; mem[AR] -> DR   | AC: 0 | IP: 3 | SP: 0 | AR: 2 | DR: 0 | PS: !Z !N !C | mem[AR]: 0 | CR: LD 0
+    DR -> CR                      | AC: 0 | IP: 3 | SP: 0 | AR: 2 | DR: 0 | PS: !Z !N !C | mem[AR]: 0 | CR: LD 0
+    DR -> AR                      | AC: 0 | IP: 3 | SP: 0 | AR: 0 | DR: 0 | PS: !Z !N !C | mem[AR]: 0 | CR: LD 0
+    mem[AR] -> DR                 | AC: 0 | IP: 3 | SP: 0 | AR: 0 | DR: 0 | PS: !Z !N !C | mem[AR]: 0 | CR: LD 0
+    DR -> AC                      | AC: 0 | IP: 3 | SP: 0 | AR: 0 | DR: 0 | PS: !Z !N !C | mem[AR]: 0 | CR: LD 0
+
+    IP -> AR                      | AC: 0 | IP: 3 | SP: 0 | AR: 3 | DR: 0 | PS: !Z !N !C | mem[AR]: 0 | CR: ADD 1
+    IP + 1 -> IP; mem[AR] -> DR   | AC: 0 | IP: 4 | SP: 0 | AR: 3 | DR: 0 | PS: !Z !N !C | mem[AR]: 0 | CR: ADD 1
+    DR -> CR                      | AC: 0 | IP: 4 | SP: 0 | AR: 3 | DR: 0 | PS: !Z !N !C | mem[AR]: 0 | CR: ADD 1
+    DR -> AR                      | AC: 0 | IP: 4 | SP: 0 | AR: 0 | DR: 0 | PS: !Z !N !C | mem[AR]: 0 | CR: ADD 1
+    mem[AR] -> DR                 | AC: 0 | IP: 4 | SP: 0 | AR: 0 | DR: 0 | PS: !Z !N !C | mem[AR]: 0 | CR: ADD 1
+    AC +- DR -> AC                | AC: 0 | IP: 4 | SP: 0 | AR: 0 | DR: 0 | PS: !Z !N !C | mem[AR]: 0 | CR: ADD 1
+
+    IP -> AR                      | AC: 0 | IP: 4 | SP: 0 | AR: 4 | DR: 0 | PS: !Z !N !C | mem[AR]: 0 | CR: HLT
+    IP + 1 -> IP; mem[AR] -> DR   | AC: 0 | IP: 5 | SP: 0 | AR: 4 | DR: 0 | PS: !Z !N !C | mem[AR]: 0 | CR: HLT
+    DR -> CR                      | AC: 0 | IP: 5 | SP: 0 | AR: 4 | DR: 0 | PS: !Z !N !C | mem[AR]: 0 | CR: HLT
+    HLT                           | AC: 0 | IP: 5 | SP: 0 | AR: 4 | DR: 0 | PS: !Z !N !C | mem[AR]: 0 | CR: HLT

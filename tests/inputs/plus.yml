@@ -1,0 +1,9 @@
+translator_input: |-
+  a: word: 5
+  b: word: 10
+  start: ld a
+    add b
+  hlt
+
+machine_input: |-
+  [{ "arrivesAt": 0, "char": "a" }]

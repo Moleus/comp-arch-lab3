@@ -214,9 +214,9 @@ func GetOpcodeFromString(opcode string) (Opcode, error) {
 	return OpcodeNop, fmt.Errorf("unknown opcode: %s", opcode)
 }
 
-type TermMetaInfo struct {
-	LineNum         int    `json:"line_num"`
-	OriginalContent string `json:"original_content"`
+type Program struct {
+	StartAddress int
+	Instructions []MachineCodeTerm
 }
 
 type MachineCodeTerm struct {
@@ -228,24 +228,29 @@ type MachineCodeTerm struct {
 	TermInfo TermMetaInfo `json:"term_info"`
 }
 
+type TermMetaInfo struct {
+	LineNum         int    `json:"line_num"`
+	OriginalContent string `json:"original_content"`
+}
+
 type IoData struct {
 	arrivesAt int
 	char      rune
 }
 
 // TODO: think about dependencies and move MachineCodeTerm in ISA
-func ReadCode(input io.Reader) ([]MachineCodeTerm, error) {
-	var machineCode []MachineCodeTerm
+func ReadCode(input io.Reader) (Program, error) {
+	var program Program
 	decoder := json.NewDecoder(input)
-	err := decoder.Decode(&machineCode)
+	err := decoder.Decode(&program)
 	if err != nil {
-		return []MachineCodeTerm{}, err
+		return Program{}, err
 	}
-	return machineCode, nil
+	return program, nil
 }
 
-func SerializeCode(machineCode []MachineCodeTerm) ([]byte, error) {
-	return json.MarshalIndent(machineCode, "", "  ")
+func SerializeCode(program Program) ([]byte, error) {
+	return json.MarshalIndent(program, "", "  ")
 }
 
 func ReadIoData(input io.Reader) ([]IoData, error) {

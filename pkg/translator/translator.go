@@ -66,6 +66,7 @@ package translator
 
 import (
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -73,7 +74,7 @@ import (
 )
 
 type Translator interface {
-	Translate(input string) ([]isa.MachineCodeTerm, error)
+	Translate(input string) (isa.Program, error)
 }
 
 type AsmTranslator struct {
@@ -116,16 +117,16 @@ func NewParseError(message string, lineContent string, line int) error {
 	return ParseError{message, lineContent, line}
 }
 
-func (t *AsmTranslator) Translate(input string) ([]isa.MachineCodeTerm, error) {
+func (t *AsmTranslator) Translate(input string) (isa.Program, error) {
 	if err := t.ParseInstructions(input); err != nil {
-		return []isa.MachineCodeTerm{}, err
+		return isa.Program{}, err
 	}
 	t.instructions = addIndicies(t.instructions)
 	machineCode, err := t.convertTermsToMachineCode()
 	if err != nil {
-		return []isa.MachineCodeTerm{}, err
+		return isa.Program{}, err
 	}
-	return machineCode, nil
+	return addStartAddress(machineCode)
 }
 
 func (t *AsmTranslator) ParseInstructions(input string) error {
@@ -281,4 +282,18 @@ func (t *AsmTranslator) convertTermsToMachineCode() ([]isa.MachineCodeTerm, erro
 		machineCode[i] = newMachineCodeTerm
 	}
 	return machineCode, nil
+}
+func addStartAddress(machineCode []isa.MachineCodeTerm) (isa.Program, error) {
+	startTerm := slices.IndexFunc(machineCode, func(term isa.MachineCodeTerm) bool {
+		return term.Label != nil && *term.Label == "start"
+	})
+	if startTerm == -1 {
+		return isa.Program{}, fmt.Errorf("start label not found")
+	}
+	startAddress := machineCode[startTerm].Index
+
+	return isa.Program{
+		StartAddress: startAddress,
+		Instructions: machineCode,
+	}, nil
 }

@@ -3,12 +3,9 @@ package simulation
 import (
 	"flag"
 	"fmt"
-	"io"
-	"log/slog"
 	"os"
 
 	"github.com/Moleus/comp-arch-lab3/pkg/isa"
-	log "github.com/Moleus/comp-arch-lab3/pkg/logging"
 	"github.com/Moleus/comp-arch-lab3/pkg/machine"
 )
 
@@ -52,7 +49,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	machineCode, err := isa.ReadCode(f)
+	program, err := isa.ReadCode(f)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error while reading program file: %s", err.Error())
 		os.Exit(1)
@@ -65,15 +62,9 @@ func main() {
 	}
 
 	// TODO: read program, read data, flags etc
-	clock := &Clock{CurrentTick: 0}
-	logger := InitLogger(os.Stdout, clock, log.ParseLogLevel(*logLevel))
 	dataPathOutput := os.Stdout
+	controlUnitStateOutput := os.Stdout
 
-	machine.RunSimulation(ioData, machineCode, logger, dataPathOutput)
+	machine.RunSimulation(ioData, program, dataPathOutput, controlUnitStateOutput)
 	// process simulation results
-}
-
-func InitLogger(logWriter io.Writer, clock log.GlobalTimer, logLevel slog.Level) *slog.Logger {
-	defaultHandler := slog.NewTextHandler(logWriter, &slog.HandlerOptions{Level: logLevel})
-	return slog.New(log.NewTickLoggerHandler(defaultHandler, clock))
 }

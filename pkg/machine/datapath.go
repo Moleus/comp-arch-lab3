@@ -36,6 +36,7 @@ PS - регистр флагов (состояния)
 package machine
 
 import (
+	"fmt"
 	"io"
 
 	"github.com/Moleus/comp-arch-lab3/pkg/isa"
@@ -72,23 +73,34 @@ type BitFlags struct {
 	CARRY    bool
 }
 
-func (rv *RegisterValue) GetValue() int {
-	return rv.value
-}
-
-func (rv *RegisterValue) GetAddress() int {
-	return rv.value
+func (r Register) String() string {
+	switch r {
+	case AC:
+		return "AC"
+	case IP:
+		return "IP"
+	case CR:
+		return "CR"
+	case PS:
+		return "PS"
+	case SP:
+		return "SP"
+	case DR:
+		return "DR"
+	case AR:
+		return "AR"
+	default:
+		panic(fmt.Sprintf("unknown register: %d", r))
+	}
 }
 
 type DataPath struct {
-	InstructionCounter int
-	CurrentTick        int
 	// TODO: maybe move out from isa
-	input []isa.IoData
-	// TODO: handle output
-	output    io.Writer
-	registers map[Register]int
-	memory    []int
+	inputBuffer []isa.IoData
+	// TODO: handle outputBuffer
+	outputBuffer io.Writer
+	registers    map[Register]int
+	memory       []int
 
 	Alu *Alu
 }
@@ -104,7 +116,7 @@ func NewDataPath(dataInput []isa.IoData, output io.Writer) *DataPath {
 	registers[SP] = 0
 	registers[DR] = 0
 	registers[AR] = 0
-	return &DataPath{input: dataInput, output: output, memory: memory, registers: registers, Alu: alu}
+	return &DataPath{inputBuffer: dataInput, outputBuffer: output, memory: memory, registers: registers, Alu: alu}
 }
 
 func (dp *DataPath) GetFlags() BitFlags {
@@ -121,7 +133,7 @@ func (dp *DataPath) IsInterruptRequired() bool {
 }
 
 func (dp *DataPath) WriteOutput(character rune) {
-	_, err := dp.output.Write([]byte(string(character)))
+	_, err := dp.outputBuffer.Write([]byte(string(character)))
 	if err != nil {
 		panic(err)
 	}

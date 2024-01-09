@@ -11,11 +11,10 @@ ControlUnit и DataPath находятся в отдельных файлах
 package machine
 
 import (
+	"fmt"
+	"github.com/Moleus/comp-arch-lab3/pkg/isa"
 	"io"
 	"log"
-	"log/slog"
-
-	"github.com/Moleus/comp-arch-lab3/pkg/isa"
 )
 
 type Machine struct {
@@ -29,16 +28,16 @@ type SimulationStatistics struct {
 	currentTick        int
 }
 
-func RunSimulation(dataInput []isa.IoData, program []isa.MachineCodeTerm, logger *slog.Logger, dataPathOutput io.Writer) {
+func RunSimulation(dataInput []isa.IoData, program isa.Program, dataPathOutput io.Writer, controlUnitStateOutput io.Writer) {
 	datapath := NewDataPath(dataInput, dataPathOutput)
-	controlUnit := NewControlUnit(program, datapath, logger)
+	controlUnit := NewControlUnit(program, datapath, controlUnitStateOutput)
 
 	log.Println("starting simulation")
 
 	err := controlUnit.RunInstructionCycle()
 	if err != nil {
 		// TODO: ignore NOP errors
-		logger.Error(err.Error())
+		fmt.Print(err)
 	}
 
 	log.Println("simulation finished")

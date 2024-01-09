@@ -41,7 +41,6 @@ func main() {
 	flag.Parse()
 
 	var assemblyCode []byte
-	var translationOutput []isa.MachineCodeTerm
 
 	assemblyCode, err := readAssemblyCode(*inputFile)
 	if err != nil {
@@ -50,7 +49,7 @@ func main() {
 	}
 
 	translator := t.NewTranslator()
-	translationOutput, err = translator.Translate(string(assemblyCode))
+	translationOutput, err := translator.Translate(string(assemblyCode))
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error while translating assembly code: %s", err.Error())
 		os.Exit(1)
