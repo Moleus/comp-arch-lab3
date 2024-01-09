@@ -42,6 +42,12 @@ func TestSimplePlusProgram(t *testing.T) {
 	runTest(t, input, goldenFilename)
 }
 
+func TestSimpleStack(t *testing.T) {
+	input := parseInputFile(t, "stack.yml")
+	goldenFilename := "golden/stack.yml"
+	runTest(t, input, goldenFilename)
+}
+
 func parseInputFile(t *testing.T, filename string) TestInput {
 	inputContent, err := os.ReadFile("inputs/" + filename)
 	if err != nil {
@@ -91,12 +97,4 @@ func runTest(t *testing.T, input TestInput, goldenFile string) {
 	if err := os.WriteFile(goldenFile, yamlOutput, 0644); err != nil {
 		t.Fatal(err)
 	}
-}
-
-func TestCharEncoding(t *testing.T) {
-	char := 'a'
-	buffer := bytes.NewBuffer([]byte{})
-	buffer.WriteByte(byte(char))
-
-	t.Log(buffer.String())
 }

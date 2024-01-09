@@ -86,8 +86,8 @@ func NewAlu() *Alu {
 }
 
 func wrapOverflow(value int) int {
-	if value > isa.WORD_MAX_VALUE || value < isa.WORD_MIN_VALUE {
-		return (value+(isa.WORD_MAX_VALUE+1))%(2*(isa.WORD_MAX_VALUE+1)) - isa.WORD_MAX_VALUE - 1
+	if value > isa.WordMaxValue || value < isa.WordMinValue {
+		return (value+(isa.WordMaxValue+1))%(2*(isa.WordMaxValue+1)) - isa.WordMaxValue - 1
 	}
 	return value
 }

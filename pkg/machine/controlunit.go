@@ -146,8 +146,10 @@ func (cu *ControlUnit) processInterrupt() {
 }
 
 func (cu *ControlUnit) pushOnStack(register Register) {
-	cu.doInOneTick("SP -> AR; SP - 1 -> SP",
+	cu.doInOneTick("SP - 1 -> SP",
 		cu.SigLatchRegFunc(SP, cu.calculate(cu.aluDecrement(SP))),
+	)
+	cu.doInOneTick("SP -> AR",
 		cu.SigLatchRegFunc(AR, cu.calculate(cu.aluRegisterPassthrough(SP))),
 	)
 	cu.doInOneTick(fmt.Sprintf("%s -> DR", register), cu.SigLatchRegFunc(DR, cu.calculate(cu.aluRegisterPassthrough(register))))
@@ -155,11 +157,11 @@ func (cu *ControlUnit) pushOnStack(register Register) {
 }
 
 func (cu *ControlUnit) popFromStack(target Register) {
-	cu.doInOneTick("SP + 1 -> SP; SP -> AR",
-		cu.SigLatchRegFunc(SP, cu.calculate(cu.aluIncrement(SP))),
+	cu.doInOneTick("SP -> AR",
 		cu.SigLatchRegFunc(AR, cu.calculate(cu.aluRegisterPassthrough(SP))),
 	)
-	cu.doInOneTick("mem[AR] -> DR",
+	cu.doInOneTick("mem[AR] -> DR; SP + 1 -> SP",
+		cu.SigLatchRegFunc(SP, cu.calculate(cu.aluIncrement(SP))),
 		cu.SigReadMemoryFunc())
 	cu.doInOneTick(fmt.Sprintf("DR -> %s", target),
 		cu.SigLatchRegFunc(target, cu.calculate(cu.aluRegisterPassthrough(DR))),
@@ -216,27 +218,9 @@ func (cu *ControlUnit) decodeAndExecuteAddresslessInstruction(instruction isa.Ma
 		cu.doInOneTick("IRET", func() {})
 		return NewControlUnitError("Interrupt return")
 	case isa.OpcodePush:
-		//  AC -> DR, SP -> AR, SP - 1 -> SP, DR -> mem[AR]
-		cu.doInOneTick("AC -> DR",
-			cu.SigLatchRegFunc(DR, cu.calculate(cu.aluRegisterPassthrough(AC))),
-		)
-		cu.doInOneTick("SP -> AR",
-			cu.SigLatchRegFunc(AR, cu.calculate(cu.aluRegisterPassthrough(SP))),
-		)
-		cu.doInOneTick("SP - 1 -> SP; DR -> mem[AR]",
-			cu.SigLatchRegFunc(SP, cu.calculate(cu.aluDecrement(SP))),
-			cu.SigWriteMemoryFunc(),
-		)
+		cu.pushOnStack(AC)
 	case isa.OpcodePop:
-		// SP + 1 -> SP, SP -> AR, mem[SP] -> DR, DR -> AC
-		cu.doInOneTick("SP + 1 -> SP",
-			cu.SigLatchRegFunc(SP, cu.calculate(cu.aluIncrement(SP))),
-		)
-		cu.doInOneTick("SP -> AR; mem[AR] -> DR",
-			cu.SigLatchRegFunc(AR, cu.calculate(cu.aluRegisterPassthrough(SP))),
-			cu.SigReadMemoryFunc(),
-		)
-
+		cu.popFromStack(AC)
 	case isa.OpcodeEi:
 		cu.doInOneTick("1 -> PS[4]", cu.SigLatchRegFunc(PS, cu.calculate(*NewAluOp(AluOperationOr).SetLeft(cu.GetReg(PS)).SetRightValue(1 << 4))))
 	case isa.OpcodeDi:

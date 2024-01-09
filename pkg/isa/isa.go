@@ -23,11 +23,11 @@ import (
 
 // Instruction represents all supported instructions for our architecture
 const (
-	WORD_WIDTH     = 16
-	WORD_MAX_VALUE = 1<<(WORD_WIDTH-1) - 1
-	WORD_MIN_VALUE = -1 << (WORD_WIDTH - 1)
-	ADDR_WIDTH     = 11
-	ADDR_MAX_VALUE = 1<<(ADDR_WIDTH-1) - 1
+	WordWidth    = 16
+	WordMaxValue = 1<<(WordWidth-1) - 1
+	WordMinValue = -1 << (WordWidth - 1)
+	AddrWidth    = 11
+	AddrMaxValue = 1<<(AddrWidth-1) - 1
 )
 
 type Opcode int

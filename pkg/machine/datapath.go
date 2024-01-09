@@ -101,7 +101,8 @@ func NewDataPath(dataInput []isa.IoData, output io.Writer) *DataPath {
 	for _, register := range []Register{AC, IP, CR, PS, SP, DR, AR} {
 		registers[register] = isa.NewConstantNumber(0)
 	}
-	memory := make([]isa.MachineWord, isa.ADDR_MAX_VALUE+1)
+	registers[SP] = isa.NewConstantNumber(isa.AddrMaxValue + 1)
+	memory := make([]isa.MachineWord, isa.AddrMaxValue+1)
 	alu := NewAlu()
 	return &DataPath{inputBuffer: dataInput, outputBuffer: output, memory: memory, registers: registers, Alu: alu}
 }
