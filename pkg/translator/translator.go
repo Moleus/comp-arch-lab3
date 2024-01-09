@@ -264,12 +264,18 @@ func (t *AsmTranslator) convertTermsToMachineCode() (machineCode []isa.MachineCo
 		if err != nil {
 			return []isa.MachineCodeTerm{}, err
 		}
+
+		operandType := instruction.ValueType
+		if operandType == isa.ValueTypeAddress {
+			operandType = isa.ValueTypeNumber
+		}
 		newMachineCodeTerm := isa.MachineCodeTerm{
-			Index:    instruction.Index,
-			Label:    label,
-			Opcode:   opcode,
-			Operand:  operand,
-			TermInfo: instruction.MetaInfo,
+			Index:       instruction.Index,
+			Label:       label,
+			Opcode:      opcode,
+			Operand:     operand,
+			OperandType: operandType,
+			TermInfo:    instruction.MetaInfo,
 		}
 		machineCode[i] = newMachineCodeTerm
 	}

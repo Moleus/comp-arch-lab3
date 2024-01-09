@@ -57,9 +57,6 @@ func NewControlUnit(program isa.Program, dataPath *DataPath, stateOutput io.Writ
 
 func mapMemory(dataPath *DataPath, instructions []isa.MachineCodeTerm) {
 	for _, instruction := range instructions {
-		if instruction.Opcode.Type() == isa.OpcodeTypeAddress && instruction.Operand == nil {
-			panic(fmt.Sprintf("address instruction without operand: %s", instruction.Opcode))
-		}
 		instructionWord := isa.NewMemoryWord(instruction)
 		dataPath.memory[instruction.Index] = instructionWord
 	}
@@ -309,13 +306,13 @@ func (cu *ControlUnit) tick() {
 func (cu *ControlUnit) dumpState(currentOperationDescription string) error {
 	// tick number.
 	// PS: NZC
-	memByAR := cu.dataPath.ReadMemory(cu.GetReg(AR).Value)
+	memByAR := cu.formatMemByAR(cu.GetReg(AR))
 	statusFlags := cu.dataPath.GetFlags()
 	formattedFlags := formatFlags(statusFlags)
 
 	instructionRepr := cu.formatCurrentInstruction()
 	registersRepr := cu.formatRegistersState()
-	outputRow := fmt.Sprintf("%-29s | %s | %s | mem[AR]: %d | CR: %s", currentOperationDescription, registersRepr, formattedFlags, memByAR, instructionRepr)
+	outputRow := fmt.Sprintf("%-29s | %s | %s | mem[AR]: %s | CR: %s", currentOperationDescription, registersRepr, formattedFlags, memByAR, instructionRepr)
 	_, err := cu.stateOutput.Write([]byte(outputRow + "\n"))
 	if err != nil {
 		return fmt.Errorf("failed to write state: %w", err)
@@ -370,4 +367,23 @@ func (cu *ControlUnit) formatRegistersState() string {
 		strRegisters = append(strRegisters, fmt.Sprintf("%s: %2d", register, value.Value))
 	}
 	return strings.Join(strRegisters, ", ")
+}
+
+func (cu *ControlUnit) formatMemByAR(arRegister isa.MachineWord) string {
+	memContent := cu.dataPath.ReadMemory(arRegister.Value)
+
+	argument := fmt.Sprintf("%d", memContent.Value)
+	if isa.ValueTypeChar == memContent.ValueType {
+		argument = fmt.Sprintf("'%c'", memContent.Value)
+	}
+
+	if memContent.Opcode == isa.OpcodeNop {
+		return fmt.Sprintf("%s", argument)
+	}
+
+	if memContent.ValueType == isa.ValueTypeNone {
+		return fmt.Sprintf("%s", memContent.Opcode)
+	}
+
+	return fmt.Sprintf("%s %s", memContent.Opcode, argument)
 }

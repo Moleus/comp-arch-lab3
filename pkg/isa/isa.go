@@ -233,15 +233,19 @@ func NewConstantNumber(value int) MachineWord {
 	}
 }
 
-func NewMemoryWord(term MachineCodeTerm) MachineWord {
+func NewMemoryWord(instruction MachineCodeTerm) MachineWord {
+	if instruction.Opcode.Type() == OpcodeTypeAddress && instruction.Operand == nil {
+		panic(fmt.Sprintf("address instruction without operand: %s", instruction.Opcode))
+	}
+
 	operand := -1
-	if term.Operand != nil {
-		operand = *term.Operand
+	if instruction.Operand != nil {
+		operand = *instruction.Operand
 	}
 	return MachineWord{
-		Opcode:    term.Opcode,
+		Opcode:    instruction.Opcode,
 		Value:     operand,
-		ValueType: term.OperandType,
+		ValueType: instruction.OperandType,
 	}
 }
 
