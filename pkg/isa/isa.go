@@ -238,7 +238,7 @@ func NewMemoryWord(instruction MachineCodeTerm) MachineWord {
 		panic(fmt.Sprintf("address instruction without operand: %s", instruction.Opcode))
 	}
 
-	operand := -1
+	operand := 0
 	if instruction.Operand != nil {
 		operand = *instruction.Operand
 	}

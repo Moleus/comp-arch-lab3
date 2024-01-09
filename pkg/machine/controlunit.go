@@ -363,8 +363,14 @@ func (cu *ControlUnit) formatCurrentInstruction() string {
 
 func (cu *ControlUnit) formatRegistersState() string {
 	var strRegisters = make([]string, 0)
-	for register, value := range cu.dataPath.registers {
-		strRegisters = append(strRegisters, fmt.Sprintf("%s: %2d", register, value.Value))
+	registers := []Register{AC, IP, CR, PS, SP, DR, AR}
+	for _, register := range registers {
+		value := cu.GetReg(register)
+		valueToPrint := fmt.Sprintf("%2d", value.Value)
+		if register == CR {
+			valueToPrint = printInstruction(value)
+		}
+		strRegisters = append(strRegisters, fmt.Sprintf("%s: %s", register, valueToPrint))
 	}
 	return strings.Join(strRegisters, ", ")
 }
@@ -386,4 +392,12 @@ func (cu *ControlUnit) formatMemByAR(arRegister isa.MachineWord) string {
 	}
 
 	return fmt.Sprintf("%s %s", memContent.Opcode, argument)
+}
+
+func printInstruction(word isa.MachineWord) string {
+	// opcode + optional value
+	if word.ValueType != isa.ValueTypeNone {
+		return fmt.Sprintf("%3s %d", word.Opcode, word.Value)
+	}
+	return fmt.Sprintf("%5s", word.Opcode)
 }

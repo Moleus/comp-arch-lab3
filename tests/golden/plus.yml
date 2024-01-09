@@ -57,21 +57,21 @@ translator_output: |-
     }
 stdout: '[{ "arrivesAt": 0, "char": "a" }]'
 log: |
-    IP -> AR                      | AR:  2, AC:  0, IP:  2, CR:  0, PS:  0, SP:  0, DR:  0 | !Z !N !C | mem[AR]: LD 0 | CR: NOP 0
-    IP + 1 -> IP; mem[AR] -> DR   | SP:  0, DR:  0, AR:  2, AC:  0, IP:  3, CR:  0, PS:  0 | !Z !N !C | mem[AR]: LD 0 | CR: NOP 0
-    DR -> CR                      | AC:  0, IP:  3, CR:  0, PS:  0, SP:  0, DR:  0, AR:  2 | !Z !N !C | mem[AR]: LD 0 | CR: LD 0
-    DR -> AR                      | AR:  0, AC:  0, IP:  3, CR:  0, PS:  0, SP:  0, DR:  0 | !Z !N !C | mem[AR]: 5 | CR: LD 0
-    mem[AR] -> DR                 | IP:  3, CR:  0, PS:  0, SP:  0, DR:  5, AR:  0, AC:  0 | !Z !N !C | mem[AR]: 5 | CR: LD 0
-    DR -> AC                      | CR:  0, PS:  0, SP:  0, DR:  5, AR:  0, AC:  5, IP:  3 | !Z !N !C | mem[AR]: 5 | CR: LD 0
+    IP -> AR                      | AC:  0, IP:  2, CR: NOP 0, PS:  0, SP:  0, DR:  0, AR:  2 | !Z !N !C | mem[AR]: LD 0 | CR: NOP 0
+    IP + 1 -> IP; mem[AR] -> DR   | AC:  0, IP:  3, CR: NOP 0, PS:  0, SP:  0, DR:  0, AR:  2 | !Z !N !C | mem[AR]: LD 0 | CR: NOP 0
+    DR -> CR                      | AC:  0, IP:  3, CR:  LD 0, PS:  0, SP:  0, DR:  0, AR:  2 | !Z !N !C | mem[AR]: LD 0 | CR: LD 0
+    DR -> AR                      | AC:  0, IP:  3, CR:  LD 0, PS:  0, SP:  0, DR:  0, AR:  0 | !Z !N !C | mem[AR]: 5 | CR: LD 0
+    mem[AR] -> DR                 | AC:  0, IP:  3, CR:  LD 0, PS:  0, SP:  0, DR:  5, AR:  0 | !Z !N !C | mem[AR]: 5 | CR: LD 0
+    DR -> AC                      | AC:  5, IP:  3, CR:  LD 0, PS:  0, SP:  0, DR:  5, AR:  0 | !Z !N !C | mem[AR]: 5 | CR: LD 0
 
-    IP -> AR                      | DR:  5, AR:  3, AC:  5, IP:  3, CR:  0, PS:  0, SP:  0 | !Z !N !C | mem[AR]: ADD 1 | CR: LD 0
-    IP + 1 -> IP; mem[AR] -> DR   | IP:  4, CR:  0, PS:  0, SP:  0, DR:  1, AR:  3, AC:  5 | !Z !N !C | mem[AR]: ADD 1 | CR: LD 0
-    DR -> CR                      | AR:  3, AC:  5, IP:  4, CR:  1, PS:  0, SP:  0, DR:  1 | !Z !N !C | mem[AR]: ADD 1 | CR: ADD 1
-    DR -> AR                      | AC:  5, IP:  4, CR:  1, PS:  0, SP:  0, DR:  1, AR:  1 | !Z !N !C | mem[AR]: 10 | CR: ADD 1
-    mem[AR] -> DR                 | CR:  1, PS:  0, SP:  0, DR: 10, AR:  1, AC:  5, IP:  4 | !Z !N !C | mem[AR]: 10 | CR: ADD 1
-    AC +- DR -> AC                | AC: 15, IP:  4, CR:  1, PS:  0, SP:  0, DR: 10, AR:  1 | !Z !N !C | mem[AR]: 10 | CR: ADD 1
+    IP -> AR                      | AC:  5, IP:  3, CR:  LD 0, PS:  0, SP:  0, DR:  5, AR:  3 | !Z !N !C | mem[AR]: ADD 1 | CR: LD 0
+    IP + 1 -> IP; mem[AR] -> DR   | AC:  5, IP:  4, CR:  LD 0, PS:  0, SP:  0, DR:  1, AR:  3 | !Z !N !C | mem[AR]: ADD 1 | CR: LD 0
+    DR -> CR                      | AC:  5, IP:  4, CR: ADD 1, PS:  0, SP:  0, DR:  1, AR:  3 | !Z !N !C | mem[AR]: ADD 1 | CR: ADD 1
+    DR -> AR                      | AC:  5, IP:  4, CR: ADD 1, PS:  0, SP:  0, DR:  1, AR:  1 | !Z !N !C | mem[AR]: 10 | CR: ADD 1
+    mem[AR] -> DR                 | AC:  5, IP:  4, CR: ADD 1, PS:  0, SP:  0, DR: 10, AR:  1 | !Z !N !C | mem[AR]: 10 | CR: ADD 1
+    AC +- DR -> AC                | AC: 15, IP:  4, CR: ADD 1, PS:  0, SP:  0, DR: 10, AR:  1 | !Z !N !C | mem[AR]: 10 | CR: ADD 1
 
-    IP -> AR                      | CR:  1, PS:  0, SP:  0, DR: 10, AR:  4, AC: 15, IP:  4 | !Z !N !C | mem[AR]: HLT | CR: ADD 1
-    IP + 1 -> IP; mem[AR] -> DR   | AC: 15, IP:  5, CR:  1, PS:  0, SP:  0, DR: -1, AR:  4 | !Z !N !C | mem[AR]: HLT | CR: ADD 1
-    DR -> CR                      | CR: -1, PS:  0, SP:  0, DR: -1, AR:  4, AC: 15, IP:  5 | !Z !N !C | mem[AR]: HLT | CR: HLT
-    HLT                           | AR:  4, AC: 15, IP:  5, CR: -1, PS:  0, SP:  0, DR: -1 | !Z !N !C | mem[AR]: HLT | CR: HLT
+    IP -> AR                      | AC: 15, IP:  4, CR: ADD 1, PS:  0, SP:  0, DR: 10, AR:  4 | !Z !N !C | mem[AR]: HLT | CR: ADD 1
+    IP + 1 -> IP; mem[AR] -> DR   | AC: 15, IP:  5, CR: ADD 1, PS:  0, SP:  0, DR: -1, AR:  4 | !Z !N !C | mem[AR]: HLT | CR: ADD 1
+    DR -> CR                      | AC: 15, IP:  5, CR:   HLT, PS:  0, SP:  0, DR: -1, AR:  4 | !Z !N !C | mem[AR]: HLT | CR: HLT
+    HLT                           | AC: 15, IP:  5, CR:   HLT, PS:  0, SP:  0, DR: -1, AR:  4 | !Z !N !C | mem[AR]: HLT | CR: HLT
