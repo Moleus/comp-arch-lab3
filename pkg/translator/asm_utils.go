@@ -17,3 +17,18 @@ func addIndicies(instructions []ParsedInstruction) []ParsedInstruction {
 	}
 	return instructions
 }
+
+func isNumber(value string) bool {
+	for _, char := range value {
+		if char < '0' || char > '9' {
+			return false
+		}
+	}
+	return true
+}
+
+func wrapInSlice(instruction ParsedInstruction, err error) ([]ParsedInstruction, error) {
+	instructions := make([]ParsedInstruction, 0)
+	instructions = append(instructions, instruction)
+	return instructions, err
+}

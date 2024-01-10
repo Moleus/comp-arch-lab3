@@ -1,0 +1,136 @@
+translator_output: |-
+    {
+      "StartAddress": 3,
+      "Instructions": [
+        {
+          "index": 0,
+          "label": "a",
+          "opcode": "NOP",
+          "operand": 5,
+          "operand_type": 1,
+          "term_info": {
+            "line_num": 1,
+            "original_content": "a: word: 5"
+          }
+        },
+        {
+          "index": 1,
+          "label": "b",
+          "opcode": "NOP",
+          "operand": 10,
+          "operand_type": 1,
+          "term_info": {
+            "line_num": 2,
+            "original_content": "b: word: 10"
+          }
+        },
+        {
+          "index": 2,
+          "label": "c",
+          "opcode": "NOP",
+          "operand": 7,
+          "operand_type": 1,
+          "term_info": {
+            "line_num": 3,
+            "original_content": "c: word: 7"
+          }
+        },
+        {
+          "index": 3,
+          "label": "start",
+          "opcode": "LD",
+          "operand": 0,
+          "operand_type": 1,
+          "term_info": {
+            "line_num": 4,
+            "original_content": "start: ld a"
+          }
+        },
+        {
+          "index": 4,
+          "opcode": "PUSH",
+          "term_info": {
+            "line_num": 5,
+            "original_content": "push"
+          }
+        },
+        {
+          "index": 5,
+          "opcode": "LD",
+          "operand": 2,
+          "operand_type": 1,
+          "term_info": {
+            "line_num": 6,
+            "original_content": "ld c"
+          }
+        },
+        {
+          "index": 6,
+          "opcode": "ADD",
+          "operand": 1,
+          "operand_type": 1,
+          "term_info": {
+            "line_num": 7,
+            "original_content": "add b"
+          }
+        },
+        {
+          "index": 7,
+          "opcode": "POP",
+          "term_info": {
+            "line_num": 8,
+            "original_content": "pop"
+          }
+        },
+        {
+          "index": 8,
+          "opcode": "HLT",
+          "term_info": {
+            "line_num": 9,
+            "original_content": "hlt"
+          }
+        }
+      ]
+    }
+stdout: '[{ "ArrivesAt": 0, "Char": "a" }]'
+log: |
+    IP -> AR                      | AC:  0, IP:  3, CR: NOP 0, PS:  0, SP: 1024, DR:  0, AR:  3 | !Z !N !C | mem[AR]: LD 0 | CR: NOP 0
+    IP + 1 -> IP; mem[AR] -> DR   | AC:  0, IP:  4, CR: NOP 0, PS:  0, SP: 1024, DR:  0, AR:  3 | !Z !N !C | mem[AR]: LD 0 | CR: NOP 0
+    DR -> CR                      | AC:  0, IP:  4, CR:  LD 0, PS:  0, SP: 1024, DR:  0, AR:  3 | !Z !N !C | mem[AR]: LD 0 | CR: LD 0
+    DR -> AR                      | AC:  0, IP:  4, CR:  LD 0, PS:  0, SP: 1024, DR:  0, AR:  0 | !Z !N !C | mem[AR]: 5 | CR: LD 0
+    mem[AR] -> DR                 | AC:  0, IP:  4, CR:  LD 0, PS:  0, SP: 1024, DR:  5, AR:  0 | !Z !N !C | mem[AR]: 5 | CR: LD 0
+    DR -> AC                      | AC:  5, IP:  4, CR:  LD 0, PS:  0, SP: 1024, DR:  5, AR:  0 | !Z !N !C | mem[AR]: 5 | CR: LD 0
+
+    IP -> AR                      | AC:  5, IP:  4, CR:  LD 0, PS:  0, SP: 1024, DR:  5, AR:  4 | !Z !N !C | mem[AR]: PUSH | CR: LD 0
+    IP + 1 -> IP; mem[AR] -> DR   | AC:  5, IP:  5, CR:  LD 0, PS:  0, SP: 1024, DR:  0, AR:  4 | !Z !N !C | mem[AR]: PUSH | CR: LD 0
+    DR -> CR                      | AC:  5, IP:  5, CR:  PUSH, PS:  0, SP: 1024, DR:  0, AR:  4 | !Z !N !C | mem[AR]: PUSH | CR: PUSH
+    SP - 1 -> SP                  | AC:  5, IP:  5, CR:  PUSH, PS:  0, SP: 1023, DR:  0, AR:  4 | !Z !N !C | mem[AR]: PUSH | CR: PUSH
+    SP -> AR                      | AC:  5, IP:  5, CR:  PUSH, PS:  0, SP: 1023, DR:  0, AR: 1023 | !Z !N !C | mem[AR]: 0 | CR: PUSH
+    AC -> DR                      | AC:  5, IP:  5, CR:  PUSH, PS:  0, SP: 1023, DR:  5, AR: 1023 | !Z !N !C | mem[AR]: 0 | CR: PUSH
+    DR -> mem[AR]                 | AC:  5, IP:  5, CR:  PUSH, PS:  0, SP: 1023, DR:  5, AR: 1023 | !Z !N !C | mem[AR]: 5 | CR: PUSH
+
+    IP -> AR                      | AC:  5, IP:  5, CR:  PUSH, PS:  0, SP: 1023, DR:  5, AR:  5 | !Z !N !C | mem[AR]: LD 2 | CR: PUSH
+    IP + 1 -> IP; mem[AR] -> DR   | AC:  5, IP:  6, CR:  PUSH, PS:  0, SP: 1023, DR:  2, AR:  5 | !Z !N !C | mem[AR]: LD 2 | CR: PUSH
+    DR -> CR                      | AC:  5, IP:  6, CR:  LD 2, PS:  0, SP: 1023, DR:  2, AR:  5 | !Z !N !C | mem[AR]: LD 2 | CR: LD 2
+    DR -> AR                      | AC:  5, IP:  6, CR:  LD 2, PS:  0, SP: 1023, DR:  2, AR:  2 | !Z !N !C | mem[AR]: 7 | CR: LD 2
+    mem[AR] -> DR                 | AC:  5, IP:  6, CR:  LD 2, PS:  0, SP: 1023, DR:  7, AR:  2 | !Z !N !C | mem[AR]: 7 | CR: LD 2
+    DR -> AC                      | AC:  7, IP:  6, CR:  LD 2, PS:  0, SP: 1023, DR:  7, AR:  2 | !Z !N !C | mem[AR]: 7 | CR: LD 2
+
+    IP -> AR                      | AC:  7, IP:  6, CR:  LD 2, PS:  0, SP: 1023, DR:  7, AR:  6 | !Z !N !C | mem[AR]: ADD 1 | CR: LD 2
+    IP + 1 -> IP; mem[AR] -> DR   | AC:  7, IP:  7, CR:  LD 2, PS:  0, SP: 1023, DR:  1, AR:  6 | !Z !N !C | mem[AR]: ADD 1 | CR: LD 2
+    DR -> CR                      | AC:  7, IP:  7, CR: ADD 1, PS:  0, SP: 1023, DR:  1, AR:  6 | !Z !N !C | mem[AR]: ADD 1 | CR: ADD 1
+    DR -> AR                      | AC:  7, IP:  7, CR: ADD 1, PS:  0, SP: 1023, DR:  1, AR:  1 | !Z !N !C | mem[AR]: 10 | CR: ADD 1
+    mem[AR] -> DR                 | AC:  7, IP:  7, CR: ADD 1, PS:  0, SP: 1023, DR: 10, AR:  1 | !Z !N !C | mem[AR]: 10 | CR: ADD 1
+    AC +- DR -> AC                | AC: 17, IP:  7, CR: ADD 1, PS:  0, SP: 1023, DR: 10, AR:  1 | !Z !N !C | mem[AR]: 10 | CR: ADD 1
+
+    IP -> AR                      | AC: 17, IP:  7, CR: ADD 1, PS:  0, SP: 1023, DR: 10, AR:  7 | !Z !N !C | mem[AR]: POP | CR: ADD 1
+    IP + 1 -> IP; mem[AR] -> DR   | AC: 17, IP:  8, CR: ADD 1, PS:  0, SP: 1023, DR:  0, AR:  7 | !Z !N !C | mem[AR]: POP | CR: ADD 1
+    DR -> CR                      | AC: 17, IP:  8, CR:   POP, PS:  0, SP: 1023, DR:  0, AR:  7 | !Z !N !C | mem[AR]: POP | CR: POP
+    SP -> AR                      | AC: 17, IP:  8, CR:   POP, PS:  0, SP: 1023, DR:  0, AR: 1023 | !Z !N !C | mem[AR]: 5 | CR: POP
+    mem[AR] -> DR; SP + 1 -> SP   | AC: 17, IP:  8, CR:   POP, PS:  0, SP: 1024, DR:  5, AR: 1023 | !Z !N !C | mem[AR]: 5 | CR: POP
+    DR -> AC                      | AC:  5, IP:  8, CR:   POP, PS:  0, SP: 1024, DR:  5, AR: 1023 | !Z !N !C | mem[AR]: 5 | CR: POP
+
+    IP -> AR                      | AC:  5, IP:  8, CR:   POP, PS:  0, SP: 1024, DR:  5, AR:  8 | !Z !N !C | mem[AR]: HLT | CR: POP
+    IP + 1 -> IP; mem[AR] -> DR   | AC:  5, IP:  9, CR:   POP, PS:  0, SP: 1024, DR:  0, AR:  8 | !Z !N !C | mem[AR]: HLT | CR: POP
+    DR -> CR                      | AC:  5, IP:  9, CR:   HLT, PS:  0, SP: 1024, DR:  0, AR:  8 | !Z !N !C | mem[AR]: HLT | CR: HLT
+    HLT                           | AC:  5, IP:  9, CR:   HLT, PS:  0, SP: 1024, DR:  0, AR:  8 | !Z !N !C | mem[AR]: HLT | CR: HLT

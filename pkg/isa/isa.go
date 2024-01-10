@@ -41,6 +41,9 @@ const (
 	OpcodeCmp
 	OpcodeHlt
 	OpcodeIret
+	OpcodeInc
+	OpcodeDec
+
 	OpcodeIn
 	OpcodeOut
 
@@ -106,6 +109,14 @@ var (
 		OpcodeIret: {
 			instructionType:      OpcodeTypeAddressless,
 			stringRepresentation: "IRET",
+		},
+		OpcodeInc: {
+			instructionType:      OpcodeTypeAddressless,
+			stringRepresentation: "INC",
+		},
+		OpcodeDec: {
+			instructionType:      OpcodeTypeAddressless,
+			stringRepresentation: "DEC",
 		},
 		OpcodeIn: {
 			instructionType:      OpcodeTypeIO,

@@ -48,6 +48,12 @@ func TestSimpleStack(t *testing.T) {
 	runTest(t, input, goldenFilename)
 }
 
+func TestCatIOInterrupts(t *testing.T) {
+	input := parseInputFile(t, "cat.yml")
+	goldenFilename := "golden/cat.yml"
+	runTest(t, input, goldenFilename)
+}
+
 func parseInputFile(t *testing.T, filename string) TestInput {
 	inputContent, err := os.ReadFile("inputs/" + filename)
 	if err != nil {

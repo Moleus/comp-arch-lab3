@@ -104,6 +104,10 @@ type ParsedInstruction struct {
 	MetaInfo     isa.TermMetaInfo
 }
 
+func NewConstant(label string, operand int, valueType isa.ValueType) ParsedInstruction {
+	return ParsedInstruction{Label: label, Operand: operand, ValueType: valueType, Opcode: isa.OpcodeNop.String()}
+}
+
 type ParseError struct {
 	message     string
 	lineContent string
@@ -174,34 +178,22 @@ func (t *AsmTranslator) parseLine(line string, lineNumber int) error {
 }
 
 func parseConstantDeclaration(parts []string) ([]ParsedInstruction, error) {
+	// 3 variants:
+	// 1. [<label>] word: <number>
+	// 2. [<label>] word: '<string>'
+	// 3. [<label>] word: address
+
 	label := strings.Split(parts[0], ":")[0]
-	operand := strings.Join(parts[2:], " ")
-	numberS, stringValue, found := strings.Cut(operand, ", ")
-	number, err := strconv.Atoi(numberS)
-	if err != nil {
-		return []ParsedInstruction{}, fmt.Errorf("failed to convert number to string: '%s'", operand)
+	argument := strings.TrimSpace(parts[2])
+
+	switch {
+	case strings.HasPrefix(argument, "'") && strings.HasSuffix(argument, "'"):
+		return parseConstString(label, argument), nil
+	case isNumber(argument):
+		return wrapInSlice(parseConstNumber(label, argument))
+	default:
+		return wrapInSlice(parseAddressConstantDeclaration(label, argument))
 	}
-
-	if !found {
-		// this is a number constant
-		return []ParsedInstruction{{Label: label, Opcode: "nop", ValueType: isa.ValueTypeNumber, Operand: number}}, nil
-	}
-
-	symbolsCount := number
-
-	isQuotedString := strings.HasPrefix(stringValue, "'") && strings.HasSuffix(stringValue, "'")
-	if !isQuotedString {
-		return []ParsedInstruction{}, fmt.Errorf("invalid string declaration: '%s'", operand)
-	}
-
-	instructions := make([]ParsedInstruction, 1)
-	instructions[0] = ParsedInstruction{Label: label, Opcode: "nop", ValueType: isa.ValueTypeNumber, Operand: symbolsCount}
-	instructions = append(instructions, parseConstString(stringValue)...)
-	if len(instructions) != symbolsCount+1 {
-		return []ParsedInstruction{}, fmt.Errorf("number of symbols (%d) doesn't match the len of string (%d): '%s'", symbolsCount, len(instructions)-1, operand)
-	}
-
-	return instructions, nil
 }
 
 func (t *AsmTranslator) parseInstructionDeclaration(parts []string) ParsedInstruction {
@@ -213,19 +205,38 @@ func (t *AsmTranslator) parseInstructionDeclaration(parts []string) ParsedInstru
 	}
 	instruction.Opcode = parts[0]
 	if len(parts) > 1 {
-		instruction.ValueType = isa.ValueTypeAddress
-		instruction.LabelOperand = parts[1]
+		instruction = addLabelOperand(instruction, parts[1])
 	}
 	return instruction
 }
 
-func parseConstString(value string) []ParsedInstruction {
+func addLabelOperand(instruction ParsedInstruction, label string) ParsedInstruction {
+	instruction.ValueType = isa.ValueTypeAddress
+	instruction.LabelOperand = label
+	return instruction
+}
+
+func parseConstString(label string, value string) []ParsedInstruction {
 	value = strings.Trim(value, "'")
 	instructions := make([]ParsedInstruction, 0)
 	for _, char := range value {
-		instructions = append(instructions, ParsedInstruction{Operand: int(char), ValueType: isa.ValueTypeChar, Opcode: "nop"})
+		instructions = append(instructions, NewConstant("", int(char), isa.ValueTypeChar))
 	}
+	instructions[0].Label = label
+	instructions = append(instructions, NewConstant("", 0, isa.ValueTypeChar))
 	return instructions
+}
+
+func parseConstNumber(label string, value string) (ParsedInstruction, error) {
+	number, err := strconv.Atoi(value)
+	if err != nil {
+		return ParsedInstruction{}, fmt.Errorf("failed to parse number: %s", value)
+	}
+	return NewConstant(label, number, isa.ValueTypeNumber), nil
+}
+
+func parseAddressConstantDeclaration(label string, argument string) (ParsedInstruction, error) {
+	return ParsedInstruction{Label: label, Opcode: isa.OpcodeNop.String(), ValueType: isa.ValueTypeAddress, LabelOperand: argument}, nil
 }
 
 func (t *AsmTranslator) addConstant(instruction ParsedInstruction) {

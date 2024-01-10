@@ -214,10 +214,12 @@ func (cu *ControlUnit) decodeAndExecuteAddresslessInstruction(instruction isa.Ma
 		cu.doInOneTick("0 -> AC", cu.SigLatchRegFunc(AC, cu.calculate(cu.toAluOp(AC, 0, instruction.Opcode))))
 	case isa.OpcodeNop:
 		cu.doInOneTick("NOP", func() {})
+	case isa.OpcodeInc:
+		cu.doInOneTick("AC + 1 -> AC", cu.SigLatchRegFunc(AC, cu.calculate(cu.aluIncrement(AC))))
+	case isa.OpcodeDec:
+		cu.doInOneTick("AC - 1 -> AC", cu.SigLatchRegFunc(AC, cu.calculate(cu.aluDecrement(AC))))
 	default:
-		// unary arithmetic operation
-		cu.doInOneTick("AC +- -> AC", // TODO: think about better way to pass left/right if unnecessary
-			cu.SigLatchRegFunc(AC, cu.calculate(cu.toAluOp(AC, 0, instruction.Opcode))))
+		panic(fmt.Sprintf("unknown addressless instruction: %s", instruction.Opcode))
 	}
 	return nil
 }
@@ -242,7 +244,6 @@ func (cu *ControlUnit) interruption() {
 }
 
 func (cu *ControlUnit) processInterrupt() {
-	// TODO: check PS bits!!! 5 - EI, 6 - IRQ
 	// disable interrupts and save PS on stack
 	cu.doInOneTick("0 -> PS[EI]",
 		cu.SigLatchRegFunc(PS, cu.calculate(*NewAluOp(AluOperationAnd).SetLeft(cu.GetReg(PS)).SetRightValue(^(StatusRegisterEnableInterruptBit)))))
@@ -263,8 +264,6 @@ func (cu *ControlUnit) processInterrupt() {
 	cu.popFromStack(PS)
 	cu.popFromStack(IP)
 
-	// TODO: maybe set PS and DR -> PS??
-	// TODO: check PS bits and offset
 	// enable interrupts
 	cu.doInOneTick("1 -> PS[EI]", cu.SigLatchRegFunc(PS, cu.calculate(*NewAluOp(AluOperationOr).SetLeft(cu.GetReg(PS)).SetRightValue(StatusRegisterEnableInterruptBit))))
 }
