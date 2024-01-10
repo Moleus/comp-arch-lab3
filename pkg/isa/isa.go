@@ -218,7 +218,7 @@ func (o *Opcode) UnmarshalJSON(data []byte) error {
 
 func GetOpcodeFromString(opcode string) (Opcode, error) {
 	for opcodeObj, opcodeInfo := range opcodeToInfo {
-		if strings.ToLower(opcodeInfo.stringRepresentation) == opcode {
+		if strings.ToLower(opcodeInfo.stringRepresentation) == strings.ToLower(opcode) {
 			return opcodeObj, nil
 		}
 	}

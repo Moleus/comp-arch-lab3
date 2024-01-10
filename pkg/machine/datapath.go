@@ -55,15 +55,15 @@ const (
 )
 
 const (
-	StatusRegisterCarryBit            = 0x0
-	StatusRegisterZeroBit             = 0x2
-	StatusRegisterNegativeBit         = 0x3
-	StatusRegisterEnableInterruptBit  = 0x5
-	StatusRegisterRequestInterruptBit = 0x6
+	StatusRegisterCarryBit            = 1 << 0
+	StatusRegisterZeroBit             = 1 << 2
+	StatusRegisterNegativeBit         = 1 << 3
+	StatusRegisterEnableInterruptBit  = 1 << 5
+	StatusRegisterRequestInterruptBit = 1 << 6
 )
 
 const (
-	AccumulatorIOReadyBit = 0x6
+	AccumulatorIOReadyBit = 1 << 6
 )
 
 type BitFlags struct {
@@ -146,15 +146,17 @@ func (dp *DataPath) SigCheckIrq() {
 	}
 }
 
+func (dp *DataPath) SigLatchACInput() {
+	dp.registers[AC] = isa.NewMemoryWordFromIO(dp.inputBuffer[0])
+	dp.inputBuffer = dp.inputBuffer[1:]
+}
+
 func (dp *DataPath) SigReadPortIn() {
 	inReady := dp.isInputReady()
 	if !inReady {
 		dp.setIoState(inReady)
 		return
 	}
-	ioData := dp.inputBuffer[0]
-	dp.registers[AC] = isa.NewMemoryWordFromIO(ioData)
-	dp.inputBuffer = dp.inputBuffer[1:]
 	// don't override AC but only set IO ready bit
 	dp.setIoState(inReady)
 }
@@ -191,4 +193,8 @@ func (dp *DataPath) WriteMemory() {
 	// we need to store u8 bytes in memory
 	// we need to store instructions and their parameters in memory
 	dp.memory[dp.GetRegister(AR).Value] = dp.GetRegister(DR)
+}
+
+func (dp *DataPath) SigExecuteAluOp(aluParams ExecutionParams) isa.MachineWord {
+	return dp.Alu.Execute(aluParams)
 }

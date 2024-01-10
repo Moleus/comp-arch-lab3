@@ -10,8 +10,7 @@ translator_input: |-
     jz spin_loop
     hlt
 
-  interrupt:
-    di
+  interrupt: di
     in in_port
     out out_port
     cmp line_feed
@@ -22,4 +21,4 @@ translator_input: |-
     returning: iret
 
 machine_input: |-
-  [{ "arrivesAt": 0, "char": "a" }]
+  [{ "arrivesAt": 1, "char": "a" }]
