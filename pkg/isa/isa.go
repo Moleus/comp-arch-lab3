@@ -222,7 +222,7 @@ func GetOpcodeFromString(opcode string) (Opcode, error) {
 			return opcodeObj, nil
 		}
 	}
-	return OpcodeNop, fmt.Errorf("unknown opcode: %s", opcode)
+	return OpcodeNop, fmt.Errorf("unknown opcode: '%s'", opcode)
 }
 
 type Program struct {
@@ -274,7 +274,8 @@ const (
 	ValueTypeNone ValueType = iota
 	ValueTypeNumber
 	ValueTypeChar
-	ValueTypeAddress
+	ValueTypeAddressDirect
+	ValueTypeAddressIndirect
 )
 
 type MachineCodeTerm struct {

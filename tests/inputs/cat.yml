@@ -3,8 +3,6 @@ translator_input: |-
   in_port: word: 0
   out_port: word: 1
   flag: word: 0
-  ; TODO: зачем нам эта штука? Как это работает? 
-  ; похоже мы ждем определенного символа 10 (line feed) с порта 0, чтобы закончить. Да, мы ждем символа переноса строки
   line_feed: word: 10
 
   start: ei

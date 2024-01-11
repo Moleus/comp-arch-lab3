@@ -7,7 +7,7 @@ translator_output: |-
           "label": "vector",
           "opcode": "NOP",
           "operand": 9,
-          "operand_type": 1,
+          "operand_type": 3,
           "term_info": {
             "line_num": 1,
             "original_content": "vector: word: interrupt"
@@ -53,7 +53,7 @@ translator_output: |-
           "operand": 10,
           "operand_type": 1,
           "term_info": {
-            "line_num": 7,
+            "line_num": 5,
             "original_content": "line_feed: word: 10"
           }
         },
@@ -62,7 +62,7 @@ translator_output: |-
           "label": "start",
           "opcode": "EI",
           "term_info": {
-            "line_num": 9,
+            "line_num": 7,
             "original_content": "start: ei"
           }
         },
@@ -71,9 +71,9 @@ translator_output: |-
           "label": "spin_loop",
           "opcode": "LD",
           "operand": 3,
-          "operand_type": 1,
+          "operand_type": 3,
           "term_info": {
-            "line_num": 10,
+            "line_num": 8,
             "original_content": "spin_loop: ld flag"
           }
         },
@@ -81,9 +81,9 @@ translator_output: |-
           "index": 7,
           "opcode": "JZ",
           "operand": 6,
-          "operand_type": 1,
+          "operand_type": 3,
           "term_info": {
-            "line_num": 11,
+            "line_num": 9,
             "original_content": "jz spin_loop"
           }
         },
@@ -91,7 +91,7 @@ translator_output: |-
           "index": 8,
           "opcode": "HLT",
           "term_info": {
-            "line_num": 12,
+            "line_num": 10,
             "original_content": "hlt"
           }
         },
@@ -100,9 +100,9 @@ translator_output: |-
           "label": "interrupt",
           "opcode": "IN",
           "operand": 1,
-          "operand_type": 1,
+          "operand_type": 3,
           "term_info": {
-            "line_num": 14,
+            "line_num": 12,
             "original_content": "interrupt: in in_port"
           }
         },
@@ -110,9 +110,9 @@ translator_output: |-
           "index": 10,
           "opcode": "OUT",
           "operand": 2,
-          "operand_type": 1,
+          "operand_type": 3,
           "term_info": {
-            "line_num": 15,
+            "line_num": 13,
             "original_content": "out out_port"
           }
         },
@@ -120,9 +120,9 @@ translator_output: |-
           "index": 11,
           "opcode": "CMP",
           "operand": 4,
-          "operand_type": 1,
+          "operand_type": 3,
           "term_info": {
-            "line_num": 16,
+            "line_num": 14,
             "original_content": "cmp line_feed"
           }
         },
@@ -130,9 +130,9 @@ translator_output: |-
           "index": 12,
           "opcode": "JNZ",
           "operand": 16,
-          "operand_type": 1,
+          "operand_type": 3,
           "term_info": {
-            "line_num": 17,
+            "line_num": 15,
             "original_content": "jnz returning"
           }
         },
@@ -140,9 +140,9 @@ translator_output: |-
           "index": 13,
           "opcode": "LD",
           "operand": 3,
-          "operand_type": 1,
+          "operand_type": 3,
           "term_info": {
-            "line_num": 18,
+            "line_num": 16,
             "original_content": "ld flag"
           }
         },
@@ -150,7 +150,7 @@ translator_output: |-
           "index": 14,
           "opcode": "INC",
           "term_info": {
-            "line_num": 19,
+            "line_num": 17,
             "original_content": "inc"
           }
         },
@@ -158,9 +158,9 @@ translator_output: |-
           "index": 15,
           "opcode": "ST",
           "operand": 3,
-          "operand_type": 1,
+          "operand_type": 3,
           "term_info": {
-            "line_num": 20,
+            "line_num": 18,
             "original_content": "st flag"
           }
         },
@@ -169,7 +169,7 @@ translator_output: |-
           "label": "returning",
           "opcode": "IRET",
           "term_info": {
-            "line_num": 21,
+            "line_num": 19,
             "original_content": "returning: iret"
           }
         }

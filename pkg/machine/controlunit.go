@@ -160,10 +160,8 @@ func (cu *ControlUnit) InstructionFetch() {
 }
 
 func (cu *ControlUnit) AddressFetch() {
-	// цикл выборки адреса
-	// TODO: у нас только абсолютная адресация, поэтому цикл выборки адреса не используется. Мб его удалить?
-	cu.doInOneTick("CR -> AR", cu.SigLatchRegFunc(AR, cu.dataPath.SigExecuteAluOp(*cu.aluRegisterPassthrough(CR))))
-	cu.doInOneTick("IP + 1 -> IP", cu.SigLatchRegFunc(IP, cu.dataPath.SigExecuteAluOp(*cu.aluIncrement(IP))))
+	cu.doInOneTick("DR -> AR", cu.SigLatchRegFunc(AR, cu.dataPath.SigExecuteAluOp(*cu.aluRegisterPassthrough(DR))))
+	cu.doInOneTick("mem[AR] -> DR", cu.SigReadMemoryFunc())
 }
 
 func (cu *ControlUnit) OperandFetch() {
@@ -175,6 +173,9 @@ func (cu *ControlUnit) OperandFetch() {
 
 // Пробуем реализовать без косвенной адресации. Только прямая абсолютная.
 func (cu *ControlUnit) decodeAndExecuteAddressInstruction(instruction isa.MachineWord) error {
+	if instruction.ValueType == isa.ValueTypeAddressIndirect {
+		cu.AddressFetch()
+	}
 	cu.OperandFetch()
 
 	opcode := instruction.Opcode
@@ -376,7 +377,7 @@ func formatFlags(flags BitFlags) string {
 func (cu *ControlUnit) formatCurrentInstruction() string {
 	currentInstruction := cu.dataPath.GetRegister(CR)
 	switch currentInstruction.ValueType {
-	case isa.ValueTypeNumber:
+	case isa.ValueTypeNumber, isa.ValueTypeAddressIndirect, isa.ValueTypeAddressDirect:
 		return fmt.Sprintf("%s %d", currentInstruction.Opcode, currentInstruction.Value)
 	case isa.ValueTypeChar:
 		return fmt.Sprintf("%s '%c'", currentInstruction.Opcode, currentInstruction.Value)
@@ -406,7 +407,11 @@ func (cu *ControlUnit) formatMemByAR(arRegister isa.MachineWord) string {
 
 	argument := fmt.Sprintf("%d", memContent.Value)
 	if isa.ValueTypeChar == memContent.ValueType {
-		argument = fmt.Sprintf("'%c'", memContent.Value)
+		if memContent.Value == 0 {
+			argument = "0"
+		} else {
+			argument = fmt.Sprintf("'%c'", memContent.Value)
+		}
 	}
 
 	if memContent.Opcode == isa.OpcodeNop {

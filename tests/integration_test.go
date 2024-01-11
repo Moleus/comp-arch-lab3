@@ -54,6 +54,12 @@ func TestCatIOInterrupts(t *testing.T) {
 	runTest(t, input, goldenFilename)
 }
 
+func TestHelloOutput(t *testing.T) {
+	input := parseInputFile(t, "hello.yml")
+	goldenFilename := "golden/hello.yml"
+	runTest(t, input, goldenFilename)
+}
+
 func parseInputFile(t *testing.T, filename string) TestInput {
 	inputContent, err := os.ReadFile("inputs/" + filename)
 	if err != nil {

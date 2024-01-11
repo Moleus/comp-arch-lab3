@@ -150,9 +150,9 @@ func (t *AsmTranslator) ParseInstructions(input string) error {
 
 func (t *AsmTranslator) parseLine(line string, lineNumber int) error {
 	metaInfo := isa.TermMetaInfo{LineNum: lineNumber, OriginalContent: line}
-	parts := strings.Fields(line)
+	parts := strings.SplitN(line, " ", 3)
 
-	if len(parts) == 0 {
+	if len(parts) == 0 || parts[0] == "" {
 		return nil
 	}
 
@@ -212,7 +212,12 @@ func (t *AsmTranslator) parseInstructionDeclaration(parts []string) ParsedInstru
 }
 
 func addLabelOperand(instruction ParsedInstruction, label string) ParsedInstruction {
-	instruction.ValueType = isa.ValueTypeAddress
+	if isIndirectAddressing(label) {
+		instruction.ValueType = isa.ValueTypeAddressIndirect
+		label = strings.Trim(label, "()")
+	} else {
+		instruction.ValueType = isa.ValueTypeAddressDirect
+	}
 	instruction.LabelOperand = label
 	return instruction
 }
@@ -237,7 +242,7 @@ func parseConstNumber(label string, value string) (ParsedInstruction, error) {
 }
 
 func parseAddressConstantDeclaration(label string, argument string) (ParsedInstruction, error) {
-	return ParsedInstruction{Label: label, Opcode: isa.OpcodeNop.String(), ValueType: isa.ValueTypeAddress, LabelOperand: argument}, nil
+	return ParsedInstruction{Label: label, Opcode: isa.OpcodeNop.String(), ValueType: isa.ValueTypeAddressDirect, LabelOperand: argument}, nil
 }
 
 func (t *AsmTranslator) addConstant(instruction ParsedInstruction) {
@@ -278,9 +283,10 @@ func (t *AsmTranslator) convertTermsToMachineCode() (machineCode []isa.MachineCo
 		}
 
 		operandType := instruction.ValueType
-		if operandType == isa.ValueTypeAddress {
-			operandType = isa.ValueTypeNumber
-		}
+		// TODO: why did we need this?
+		//if operandType == isa.ValueTypeAddressDirect {
+		//	operandType = isa.ValueTypeNumber
+		//}
 		newMachineCodeTerm := isa.MachineCodeTerm{
 			Index:       instruction.Index,
 			Label:       label,
@@ -304,7 +310,7 @@ func (t *AsmTranslator) inferOperand(instruction ParsedInstruction) (*int, error
 	case isa.ValueTypeChar, isa.ValueTypeNumber:
 		*operand = instruction.Operand
 		return operand, nil
-	case isa.ValueTypeAddress:
+	case isa.ValueTypeAddressDirect, isa.ValueTypeAddressIndirect:
 		// label
 		if instruction.LabelOperand == "" {
 			panic(fmt.Sprintf("label operand is empty: %s", instruction.Opcode))

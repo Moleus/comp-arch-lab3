@@ -32,3 +32,7 @@ func wrapInSlice(instruction ParsedInstruction, err error) ([]ParsedInstruction,
 	instructions = append(instructions, instruction)
 	return instructions, err
 }
+
+func isIndirectAddressing(label string) bool {
+	return strings.HasPrefix(label, "(") && strings.HasSuffix(label, ")")
+}
