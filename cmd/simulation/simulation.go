@@ -65,6 +65,9 @@ func main() {
 	dataPathOutput := os.Stdout
 	controlUnitStateOutput := os.Stdout
 
-	machine.RunSimulation(ioData, program, dataPathOutput, controlUnitStateOutput)
-	// process simulation results
+	err = machine.RunSimulation(ioData, program, dataPathOutput, controlUnitStateOutput)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error while running simulation: %s", err.Error())
+		os.Exit(1)
+	}
 }

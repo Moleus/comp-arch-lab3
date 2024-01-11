@@ -9,7 +9,8 @@ type BinaryOperationExec func(left int, right int) int
 type AluOperation int
 
 const (
-	AluOperationAdd AluOperation = iota
+	AluOperationNone AluOperation = iota
+	AluOperationAdd
 	AluOperationSub
 	AluOperationMul
 	AluOperationDiv
@@ -25,11 +26,12 @@ var (
 		isa.OpcodeAdd: AluOperationAdd,
 		isa.OpcodeSub: AluOperationSub,
 		isa.OpcodeCla: AluOperationRight,
+		isa.OpcodeCmp: AluOperationSub,
 	}
 )
 
 type Alu struct {
-	bitFlags       int
+	bitFlags       BitFlags
 	operation2func map[AluOperation]BinaryOperationExec
 }
 
@@ -100,21 +102,10 @@ const (
 	CARRY
 )
 
-func (a *Alu) getBit(bit FlagBit) bool {
-	return (a.bitFlags>>bit)&1 == 1
-}
-
-func (a *Alu) setBit(bit FlagBit, value bool) {
-	if value {
-		a.bitFlags |= 1 << bit
-	} else {
-		a.bitFlags &= ^(1 << bit)
-	}
-}
-
 func (a *Alu) setFlags(value int) {
-	a.setBit(ZERO, value == 0)
-	a.setBit(NEGATIVE, value < 0)
+	a.bitFlags.CARRY = value > isa.WordMaxValue || value < isa.WordMinValue
+	a.bitFlags.ZERO = value == 0
+	a.bitFlags.NEGATIVE = value < 0
 }
 
 type ExecutionParams struct {
@@ -158,7 +149,7 @@ func (p *ExecutionParams) UpdateRegisters(updateRegisters bool) *ExecutionParams
 	return p
 }
 
-func (a *Alu) Execute(executionParams ExecutionParams) isa.MachineWord {
+func (a *Alu) Execute(executionParams ExecutionParams) (isa.MachineWord, BitFlags) {
 	if a.operation2func[executionParams.operation] == nil {
 		panic("unknown operation")
 	}
@@ -169,5 +160,5 @@ func (a *Alu) Execute(executionParams ExecutionParams) isa.MachineWord {
 	if executionParams.updateRegisters {
 		a.setFlags(output)
 	}
-	return result
+	return result, a.bitFlags
 }

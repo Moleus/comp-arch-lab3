@@ -1,0 +1,354 @@
+translator_output: |-
+    {
+      "StartAddress": 5,
+      "Instructions": [
+        {
+          "index": 0,
+          "label": "vector",
+          "opcode": "NOP",
+          "operand": 9,
+          "operand_type": 1,
+          "term_info": {
+            "line_num": 1,
+            "original_content": "vector: word: interrupt"
+          }
+        },
+        {
+          "index": 1,
+          "label": "in_port",
+          "opcode": "NOP",
+          "operand": 0,
+          "operand_type": 1,
+          "term_info": {
+            "line_num": 2,
+            "original_content": "in_port: word: 0"
+          }
+        },
+        {
+          "index": 2,
+          "label": "out_port",
+          "opcode": "NOP",
+          "operand": 1,
+          "operand_type": 1,
+          "term_info": {
+            "line_num": 3,
+            "original_content": "out_port: word: 1"
+          }
+        },
+        {
+          "index": 3,
+          "label": "flag",
+          "opcode": "NOP",
+          "operand": 0,
+          "operand_type": 1,
+          "term_info": {
+            "line_num": 4,
+            "original_content": "flag: word: 0"
+          }
+        },
+        {
+          "index": 4,
+          "label": "line_feed",
+          "opcode": "NOP",
+          "operand": 10,
+          "operand_type": 1,
+          "term_info": {
+            "line_num": 7,
+            "original_content": "line_feed: word: 10"
+          }
+        },
+        {
+          "index": 5,
+          "label": "start",
+          "opcode": "EI",
+          "term_info": {
+            "line_num": 9,
+            "original_content": "start: ei"
+          }
+        },
+        {
+          "index": 6,
+          "label": "spin_loop",
+          "opcode": "LD",
+          "operand": 3,
+          "operand_type": 1,
+          "term_info": {
+            "line_num": 10,
+            "original_content": "spin_loop: ld flag"
+          }
+        },
+        {
+          "index": 7,
+          "opcode": "JZ",
+          "operand": 6,
+          "operand_type": 1,
+          "term_info": {
+            "line_num": 11,
+            "original_content": "jz spin_loop"
+          }
+        },
+        {
+          "index": 8,
+          "opcode": "HLT",
+          "term_info": {
+            "line_num": 12,
+            "original_content": "hlt"
+          }
+        },
+        {
+          "index": 9,
+          "label": "interrupt",
+          "opcode": "IN",
+          "operand": 1,
+          "operand_type": 1,
+          "term_info": {
+            "line_num": 14,
+            "original_content": "interrupt: in in_port"
+          }
+        },
+        {
+          "index": 10,
+          "opcode": "OUT",
+          "operand": 2,
+          "operand_type": 1,
+          "term_info": {
+            "line_num": 15,
+            "original_content": "out out_port"
+          }
+        },
+        {
+          "index": 11,
+          "opcode": "CMP",
+          "operand": 4,
+          "operand_type": 1,
+          "term_info": {
+            "line_num": 16,
+            "original_content": "cmp line_feed"
+          }
+        },
+        {
+          "index": 12,
+          "opcode": "JNZ",
+          "operand": 16,
+          "operand_type": 1,
+          "term_info": {
+            "line_num": 17,
+            "original_content": "jnz returning"
+          }
+        },
+        {
+          "index": 13,
+          "opcode": "LD",
+          "operand": 3,
+          "operand_type": 1,
+          "term_info": {
+            "line_num": 18,
+            "original_content": "ld flag"
+          }
+        },
+        {
+          "index": 14,
+          "opcode": "INC",
+          "term_info": {
+            "line_num": 19,
+            "original_content": "inc"
+          }
+        },
+        {
+          "index": 15,
+          "opcode": "ST",
+          "operand": 3,
+          "operand_type": 1,
+          "term_info": {
+            "line_num": 20,
+            "original_content": "st flag"
+          }
+        },
+        {
+          "index": 16,
+          "label": "returning",
+          "opcode": "IRET",
+          "term_info": {
+            "line_num": 21,
+            "original_content": "returning: iret"
+          }
+        }
+      ]
+    }
+stdout: |
+    ab
+log: |
+    t0    | IP -> AR                      | AC:  0, IP:  5, CR: NOP 0, PS:  0, SP: 1024, DR:  0, AR:  5 | !Z !N !C DI | mem[AR]: EI
+    t1    | IP + 1 -> IP; mem[AR] -> DR   | AC:  0, IP:  6, CR: NOP 0, PS:  0, SP: 1024, DR:  0, AR:  5 | !Z !N !C DI | mem[AR]: EI
+    t2    | DR -> CR                      | AC:  0, IP:  6, CR:    EI, PS:  0, SP: 1024, DR:  0, AR:  5 | !Z !N !C DI | mem[AR]: EI
+    t3    | 1 -> PS[EI]                   | AC:  0, IP:  6, CR:    EI, PS: 32, SP: 1024, DR:  0, AR:  5 | !Z !N !C EI | mem[AR]: EI
+    t4    | 0 -> PS[EI]                   | AC:  0, IP:  6, CR:    EI, PS:  0, SP: 1024, DR:  0, AR:  5 | !Z !N !C DI | mem[AR]: EI
+    t5    | SP - 1 -> SP                  | AC:  0, IP:  6, CR:    EI, PS:  0, SP: 1023, DR:  0, AR:  5 | !Z !N !C DI | mem[AR]: EI
+    t6    | SP -> AR                      | AC:  0, IP:  6, CR:    EI, PS:  0, SP: 1023, DR:  0, AR: 1023 | !Z !N !C DI | mem[AR]: 0
+    t7    | IP -> DR                      | AC:  0, IP:  6, CR:    EI, PS:  0, SP: 1023, DR:  6, AR: 1023 | !Z !N !C DI | mem[AR]: 0
+    t8    | DR -> mem[AR]                 | AC:  0, IP:  6, CR:    EI, PS:  0, SP: 1023, DR:  6, AR: 1023 | !Z !N !C DI | mem[AR]: 6
+    t9    | SP - 1 -> SP                  | AC:  0, IP:  6, CR:    EI, PS:  0, SP: 1022, DR:  6, AR: 1023 | !Z !N !C DI | mem[AR]: 6
+    t10   | SP -> AR                      | AC:  0, IP:  6, CR:    EI, PS:  0, SP: 1022, DR:  6, AR: 1022 | !Z !N !C DI | mem[AR]: 0
+    t11   | PS -> DR                      | AC:  0, IP:  6, CR:    EI, PS:  0, SP: 1022, DR:  0, AR: 1022 | !Z !N !C DI | mem[AR]: 0
+    t12   | DR -> mem[AR]                 | AC:  0, IP:  6, CR:    EI, PS:  0, SP: 1022, DR:  0, AR: 1022 | !Z !N !C DI | mem[AR]: 0
+    t13   | intVec -> AR                  | AC:  0, IP:  6, CR:    EI, PS:  0, SP: 1022, DR:  0, AR:  0 | !Z !N !C DI | mem[AR]: 9
+    t14   | mem[AR] -> DR                 | AC:  0, IP:  6, CR:    EI, PS:  0, SP: 1022, DR:  9, AR:  0 | !Z !N !C DI | mem[AR]: 9
+    t15   | DR -> IP                      | AC:  0, IP:  9, CR:    EI, PS:  0, SP: 1022, DR:  9, AR:  0 | !Z !N !C DI | mem[AR]: 9
+    t16   | IP -> AR                      | AC:  0, IP:  9, CR:    EI, PS:  0, SP: 1022, DR:  9, AR:  9 | !Z !N !C DI | mem[AR]: IN 1
+    t17   | IP + 1 -> IP; mem[AR] -> DR   | AC:  0, IP: 10, CR:    EI, PS:  0, SP: 1022, DR:  1, AR:  9 | !Z !N !C DI | mem[AR]: IN 1
+    t18   | DR -> CR                      | AC:  0, IP: 10, CR:  IN 1, PS:  0, SP: 1022, DR:  1, AR:  9 | !Z !N !C DI | mem[AR]: IN 1
+    t19   | IN -> AC                      | AC: 97, IP: 10, CR:  IN 1, PS:  0, SP: 1022, DR:  1, AR:  9 | !Z !N !C DI | mem[AR]: IN 1
+
+    t20   | IP -> AR                      | AC: 97, IP: 10, CR:  IN 1, PS:  0, SP: 1022, DR:  1, AR: 10 | !Z !N !C DI | mem[AR]: OUT 2
+    t21   | IP + 1 -> IP; mem[AR] -> DR   | AC: 97, IP: 11, CR:  IN 1, PS:  0, SP: 1022, DR:  2, AR: 10 | !Z !N !C DI | mem[AR]: OUT 2
+    t22   | DR -> CR                      | AC: 97, IP: 11, CR: OUT 2, PS:  0, SP: 1022, DR:  2, AR: 10 | !Z !N !C DI | mem[AR]: OUT 2
+    t23   | AC -> OUT                     | AC: 97, IP: 11, CR: OUT 2, PS:  0, SP: 1022, DR:  2, AR: 10 | !Z !N !C DI | mem[AR]: OUT 2
+
+    t24   | IP -> AR                      | AC: 97, IP: 11, CR: OUT 2, PS:  0, SP: 1022, DR:  2, AR: 11 | !Z !N !C DI | mem[AR]: CMP 4
+    t25   | IP + 1 -> IP; mem[AR] -> DR   | AC: 97, IP: 12, CR: OUT 2, PS:  0, SP: 1022, DR:  4, AR: 11 | !Z !N !C DI | mem[AR]: CMP 4
+    t26   | DR -> CR                      | AC: 97, IP: 12, CR: CMP 4, PS:  0, SP: 1022, DR:  4, AR: 11 | !Z !N !C DI | mem[AR]: CMP 4
+    t27   | DR -> AR                      | AC: 97, IP: 12, CR: CMP 4, PS:  0, SP: 1022, DR:  4, AR:  4 | !Z !N !C DI | mem[AR]: 10
+    t28   | mem[AR] -> DR                 | AC: 97, IP: 12, CR: CMP 4, PS:  0, SP: 1022, DR: 10, AR:  4 | !Z !N !C DI | mem[AR]: 10
+    t29   | AC - DR -> AC                 | AC: 87, IP: 12, CR: CMP 4, PS:  0, SP: 1022, DR: 10, AR:  4 | !Z !N !C DI | mem[AR]: 10
+
+    t30   | IP -> AR                      | AC: 87, IP: 12, CR: CMP 4, PS:  0, SP: 1022, DR: 10, AR: 12 | !Z !N !C DI | mem[AR]: JNZ 16
+    t31   | IP + 1 -> IP; mem[AR] -> DR   | AC: 87, IP: 13, CR: CMP 4, PS:  0, SP: 1022, DR: 16, AR: 12 | !Z !N !C DI | mem[AR]: JNZ 16
+    t32   | DR -> CR                      | AC: 87, IP: 13, CR: JNZ 16, PS:  0, SP: 1022, DR: 16, AR: 12 | !Z !N !C DI | mem[AR]: JNZ 16
+    t33   | DR -> IP                      | AC: 87, IP: 16, CR: JNZ 16, PS:  0, SP: 1022, DR: 16, AR: 12 | !Z !N !C DI | mem[AR]: JNZ 16
+
+    t34   | IP -> AR                      | AC: 87, IP: 16, CR: JNZ 16, PS:  0, SP: 1022, DR: 16, AR: 16 | !Z !N !C DI | mem[AR]: IRET
+    t35   | IP + 1 -> IP; mem[AR] -> DR   | AC: 87, IP: 17, CR: JNZ 16, PS:  0, SP: 1022, DR:  0, AR: 16 | !Z !N !C DI | mem[AR]: IRET
+    t36   | DR -> CR                      | AC: 87, IP: 17, CR:  IRET, PS:  0, SP: 1022, DR:  0, AR: 16 | !Z !N !C DI | mem[AR]: IRET
+    t37   | IRET                          | AC: 87, IP: 17, CR:  IRET, PS:  0, SP: 1022, DR:  0, AR: 16 | !Z !N !C DI | mem[AR]: IRET
+    t38   | SP -> AR                      | AC: 87, IP: 17, CR:  IRET, PS:  0, SP: 1022, DR:  0, AR: 1022 | !Z !N !C DI | mem[AR]: 0
+    t39   | mem[AR] -> DR; SP + 1 -> SP   | AC: 87, IP: 17, CR:  IRET, PS:  0, SP: 1023, DR:  0, AR: 1022 | !Z !N !C DI | mem[AR]: 0
+    t40   | DR -> PS                      | AC: 87, IP: 17, CR:  IRET, PS:  0, SP: 1023, DR:  0, AR: 1022 | !Z !N !C DI | mem[AR]: 0
+    t41   | SP -> AR                      | AC: 87, IP: 17, CR:  IRET, PS:  0, SP: 1023, DR:  0, AR: 1023 | !Z !N !C DI | mem[AR]: 6
+    t42   | mem[AR] -> DR; SP + 1 -> SP   | AC: 87, IP: 17, CR:  IRET, PS:  0, SP: 1024, DR:  6, AR: 1023 | !Z !N !C DI | mem[AR]: 6
+    t43   | DR -> IP                      | AC: 87, IP:  6, CR:  IRET, PS:  0, SP: 1024, DR:  6, AR: 1023 | !Z !N !C DI | mem[AR]: 6
+    t44   | 1 -> PS[EI]                   | AC: 87, IP:  6, CR:  IRET, PS: 32, SP: 1024, DR:  6, AR: 1023 | !Z !N !C EI | mem[AR]: 6
+    t45   | 0 -> PS[EI]                   | AC: 87, IP:  6, CR:  IRET, PS:  0, SP: 1024, DR:  6, AR: 1023 | !Z !N !C DI | mem[AR]: 6
+    t46   | SP - 1 -> SP                  | AC: 87, IP:  6, CR:  IRET, PS:  0, SP: 1023, DR:  6, AR: 1023 | !Z !N !C DI | mem[AR]: 6
+    t47   | SP -> AR                      | AC: 87, IP:  6, CR:  IRET, PS:  0, SP: 1023, DR:  6, AR: 1023 | !Z !N !C DI | mem[AR]: 6
+    t48   | IP -> DR                      | AC: 87, IP:  6, CR:  IRET, PS:  0, SP: 1023, DR:  6, AR: 1023 | !Z !N !C DI | mem[AR]: 6
+    t49   | DR -> mem[AR]                 | AC: 87, IP:  6, CR:  IRET, PS:  0, SP: 1023, DR:  6, AR: 1023 | !Z !N !C DI | mem[AR]: 6
+    t50   | SP - 1 -> SP                  | AC: 87, IP:  6, CR:  IRET, PS:  0, SP: 1022, DR:  6, AR: 1023 | !Z !N !C DI | mem[AR]: 6
+    t51   | SP -> AR                      | AC: 87, IP:  6, CR:  IRET, PS:  0, SP: 1022, DR:  6, AR: 1022 | !Z !N !C DI | mem[AR]: 0
+    t52   | PS -> DR                      | AC: 87, IP:  6, CR:  IRET, PS:  0, SP: 1022, DR:  0, AR: 1022 | !Z !N !C DI | mem[AR]: 0
+    t53   | DR -> mem[AR]                 | AC: 87, IP:  6, CR:  IRET, PS:  0, SP: 1022, DR:  0, AR: 1022 | !Z !N !C DI | mem[AR]: 0
+    t54   | intVec -> AR                  | AC: 87, IP:  6, CR:  IRET, PS:  0, SP: 1022, DR:  0, AR:  0 | !Z !N !C DI | mem[AR]: 9
+    t55   | mem[AR] -> DR                 | AC: 87, IP:  6, CR:  IRET, PS:  0, SP: 1022, DR:  9, AR:  0 | !Z !N !C DI | mem[AR]: 9
+    t56   | DR -> IP                      | AC: 87, IP:  9, CR:  IRET, PS:  0, SP: 1022, DR:  9, AR:  0 | !Z !N !C DI | mem[AR]: 9
+    t57   | IP -> AR                      | AC: 87, IP:  9, CR:  IRET, PS:  0, SP: 1022, DR:  9, AR:  9 | !Z !N !C DI | mem[AR]: IN 1
+    t58   | IP + 1 -> IP; mem[AR] -> DR   | AC: 87, IP: 10, CR:  IRET, PS:  0, SP: 1022, DR:  1, AR:  9 | !Z !N !C DI | mem[AR]: IN 1
+    t59   | DR -> CR                      | AC: 87, IP: 10, CR:  IN 1, PS:  0, SP: 1022, DR:  1, AR:  9 | !Z !N !C DI | mem[AR]: IN 1
+    t60   | IN -> AC                      | AC: 98, IP: 10, CR:  IN 1, PS:  0, SP: 1022, DR:  1, AR:  9 | !Z !N !C DI | mem[AR]: IN 1
+
+    t61   | IP -> AR                      | AC: 98, IP: 10, CR:  IN 1, PS:  0, SP: 1022, DR:  1, AR: 10 | !Z !N !C DI | mem[AR]: OUT 2
+    t62   | IP + 1 -> IP; mem[AR] -> DR   | AC: 98, IP: 11, CR:  IN 1, PS:  0, SP: 1022, DR:  2, AR: 10 | !Z !N !C DI | mem[AR]: OUT 2
+    t63   | DR -> CR                      | AC: 98, IP: 11, CR: OUT 2, PS:  0, SP: 1022, DR:  2, AR: 10 | !Z !N !C DI | mem[AR]: OUT 2
+    t64   | AC -> OUT                     | AC: 98, IP: 11, CR: OUT 2, PS:  0, SP: 1022, DR:  2, AR: 10 | !Z !N !C DI | mem[AR]: OUT 2
+
+    t65   | IP -> AR                      | AC: 98, IP: 11, CR: OUT 2, PS:  0, SP: 1022, DR:  2, AR: 11 | !Z !N !C DI | mem[AR]: CMP 4
+    t66   | IP + 1 -> IP; mem[AR] -> DR   | AC: 98, IP: 12, CR: OUT 2, PS:  0, SP: 1022, DR:  4, AR: 11 | !Z !N !C DI | mem[AR]: CMP 4
+    t67   | DR -> CR                      | AC: 98, IP: 12, CR: CMP 4, PS:  0, SP: 1022, DR:  4, AR: 11 | !Z !N !C DI | mem[AR]: CMP 4
+    t68   | DR -> AR                      | AC: 98, IP: 12, CR: CMP 4, PS:  0, SP: 1022, DR:  4, AR:  4 | !Z !N !C DI | mem[AR]: 10
+    t69   | mem[AR] -> DR                 | AC: 98, IP: 12, CR: CMP 4, PS:  0, SP: 1022, DR: 10, AR:  4 | !Z !N !C DI | mem[AR]: 10
+    t70   | AC - DR -> AC                 | AC: 88, IP: 12, CR: CMP 4, PS:  0, SP: 1022, DR: 10, AR:  4 | !Z !N !C DI | mem[AR]: 10
+
+    t71   | IP -> AR                      | AC: 88, IP: 12, CR: CMP 4, PS:  0, SP: 1022, DR: 10, AR: 12 | !Z !N !C DI | mem[AR]: JNZ 16
+    t72   | IP + 1 -> IP; mem[AR] -> DR   | AC: 88, IP: 13, CR: CMP 4, PS:  0, SP: 1022, DR: 16, AR: 12 | !Z !N !C DI | mem[AR]: JNZ 16
+    t73   | DR -> CR                      | AC: 88, IP: 13, CR: JNZ 16, PS:  0, SP: 1022, DR: 16, AR: 12 | !Z !N !C DI | mem[AR]: JNZ 16
+    t74   | DR -> IP                      | AC: 88, IP: 16, CR: JNZ 16, PS:  0, SP: 1022, DR: 16, AR: 12 | !Z !N !C DI | mem[AR]: JNZ 16
+
+    t75   | IP -> AR                      | AC: 88, IP: 16, CR: JNZ 16, PS:  0, SP: 1022, DR: 16, AR: 16 | !Z !N !C DI | mem[AR]: IRET
+    t76   | IP + 1 -> IP; mem[AR] -> DR   | AC: 88, IP: 17, CR: JNZ 16, PS:  0, SP: 1022, DR:  0, AR: 16 | !Z !N !C DI | mem[AR]: IRET
+    t77   | DR -> CR                      | AC: 88, IP: 17, CR:  IRET, PS:  0, SP: 1022, DR:  0, AR: 16 | !Z !N !C DI | mem[AR]: IRET
+    t78   | IRET                          | AC: 88, IP: 17, CR:  IRET, PS:  0, SP: 1022, DR:  0, AR: 16 | !Z !N !C DI | mem[AR]: IRET
+    t79   | SP -> AR                      | AC: 88, IP: 17, CR:  IRET, PS:  0, SP: 1022, DR:  0, AR: 1022 | !Z !N !C DI | mem[AR]: 0
+    t80   | mem[AR] -> DR; SP + 1 -> SP   | AC: 88, IP: 17, CR:  IRET, PS:  0, SP: 1023, DR:  0, AR: 1022 | !Z !N !C DI | mem[AR]: 0
+    t81   | DR -> PS                      | AC: 88, IP: 17, CR:  IRET, PS:  0, SP: 1023, DR:  0, AR: 1022 | !Z !N !C DI | mem[AR]: 0
+    t82   | SP -> AR                      | AC: 88, IP: 17, CR:  IRET, PS:  0, SP: 1023, DR:  0, AR: 1023 | !Z !N !C DI | mem[AR]: 6
+    t83   | mem[AR] -> DR; SP + 1 -> SP   | AC: 88, IP: 17, CR:  IRET, PS:  0, SP: 1024, DR:  6, AR: 1023 | !Z !N !C DI | mem[AR]: 6
+    t84   | DR -> IP                      | AC: 88, IP:  6, CR:  IRET, PS:  0, SP: 1024, DR:  6, AR: 1023 | !Z !N !C DI | mem[AR]: 6
+    t85   | 1 -> PS[EI]                   | AC: 88, IP:  6, CR:  IRET, PS: 32, SP: 1024, DR:  6, AR: 1023 | !Z !N !C EI | mem[AR]: 6
+    t86   | 0 -> PS[EI]                   | AC: 88, IP:  6, CR:  IRET, PS:  0, SP: 1024, DR:  6, AR: 1023 | !Z !N !C DI | mem[AR]: 6
+    t87   | SP - 1 -> SP                  | AC: 88, IP:  6, CR:  IRET, PS:  0, SP: 1023, DR:  6, AR: 1023 | !Z !N !C DI | mem[AR]: 6
+    t88   | SP -> AR                      | AC: 88, IP:  6, CR:  IRET, PS:  0, SP: 1023, DR:  6, AR: 1023 | !Z !N !C DI | mem[AR]: 6
+    t89   | IP -> DR                      | AC: 88, IP:  6, CR:  IRET, PS:  0, SP: 1023, DR:  6, AR: 1023 | !Z !N !C DI | mem[AR]: 6
+    t90   | DR -> mem[AR]                 | AC: 88, IP:  6, CR:  IRET, PS:  0, SP: 1023, DR:  6, AR: 1023 | !Z !N !C DI | mem[AR]: 6
+    t91   | SP - 1 -> SP                  | AC: 88, IP:  6, CR:  IRET, PS:  0, SP: 1022, DR:  6, AR: 1023 | !Z !N !C DI | mem[AR]: 6
+    t92   | SP -> AR                      | AC: 88, IP:  6, CR:  IRET, PS:  0, SP: 1022, DR:  6, AR: 1022 | !Z !N !C DI | mem[AR]: 0
+    t93   | PS -> DR                      | AC: 88, IP:  6, CR:  IRET, PS:  0, SP: 1022, DR:  0, AR: 1022 | !Z !N !C DI | mem[AR]: 0
+    t94   | DR -> mem[AR]                 | AC: 88, IP:  6, CR:  IRET, PS:  0, SP: 1022, DR:  0, AR: 1022 | !Z !N !C DI | mem[AR]: 0
+    t95   | intVec -> AR                  | AC: 88, IP:  6, CR:  IRET, PS:  0, SP: 1022, DR:  0, AR:  0 | !Z !N !C DI | mem[AR]: 9
+    t96   | mem[AR] -> DR                 | AC: 88, IP:  6, CR:  IRET, PS:  0, SP: 1022, DR:  9, AR:  0 | !Z !N !C DI | mem[AR]: 9
+    t97   | DR -> IP                      | AC: 88, IP:  9, CR:  IRET, PS:  0, SP: 1022, DR:  9, AR:  0 | !Z !N !C DI | mem[AR]: 9
+    t98   | IP -> AR                      | AC: 88, IP:  9, CR:  IRET, PS:  0, SP: 1022, DR:  9, AR:  9 | !Z !N !C DI | mem[AR]: IN 1
+    t99   | IP + 1 -> IP; mem[AR] -> DR   | AC: 88, IP: 10, CR:  IRET, PS:  0, SP: 1022, DR:  1, AR:  9 | !Z !N !C DI | mem[AR]: IN 1
+    t100  | DR -> CR                      | AC: 88, IP: 10, CR:  IN 1, PS:  0, SP: 1022, DR:  1, AR:  9 | !Z !N !C DI | mem[AR]: IN 1
+    t101  | IN -> AC                      | AC: 10, IP: 10, CR:  IN 1, PS:  0, SP: 1022, DR:  1, AR:  9 | !Z !N !C DI | mem[AR]: IN 1
+
+    t102  | IP -> AR                      | AC: 10, IP: 10, CR:  IN 1, PS:  0, SP: 1022, DR:  1, AR: 10 | !Z !N !C DI | mem[AR]: OUT 2
+    t103  | IP + 1 -> IP; mem[AR] -> DR   | AC: 10, IP: 11, CR:  IN 1, PS:  0, SP: 1022, DR:  2, AR: 10 | !Z !N !C DI | mem[AR]: OUT 2
+    t104  | DR -> CR                      | AC: 10, IP: 11, CR: OUT 2, PS:  0, SP: 1022, DR:  2, AR: 10 | !Z !N !C DI | mem[AR]: OUT 2
+    t105  | AC -> OUT                     | AC: 10, IP: 11, CR: OUT 2, PS:  0, SP: 1022, DR:  2, AR: 10 | !Z !N !C DI | mem[AR]: OUT 2
+
+    t106  | IP -> AR                      | AC: 10, IP: 11, CR: OUT 2, PS:  0, SP: 1022, DR:  2, AR: 11 | !Z !N !C DI | mem[AR]: CMP 4
+    t107  | IP + 1 -> IP; mem[AR] -> DR   | AC: 10, IP: 12, CR: OUT 2, PS:  0, SP: 1022, DR:  4, AR: 11 | !Z !N !C DI | mem[AR]: CMP 4
+    t108  | DR -> CR                      | AC: 10, IP: 12, CR: CMP 4, PS:  0, SP: 1022, DR:  4, AR: 11 | !Z !N !C DI | mem[AR]: CMP 4
+    t109  | DR -> AR                      | AC: 10, IP: 12, CR: CMP 4, PS:  0, SP: 1022, DR:  4, AR:  4 | !Z !N !C DI | mem[AR]: 10
+    t110  | mem[AR] -> DR                 | AC: 10, IP: 12, CR: CMP 4, PS:  0, SP: 1022, DR: 10, AR:  4 | !Z !N !C DI | mem[AR]: 10
+    t111  | AC - DR -> AC                 | AC:  0, IP: 12, CR: CMP 4, PS:  4, SP: 1022, DR: 10, AR:  4 | Z !N !C DI | mem[AR]: 10
+
+    t112  | IP -> AR                      | AC:  0, IP: 12, CR: CMP 4, PS:  4, SP: 1022, DR: 10, AR: 12 | Z !N !C DI | mem[AR]: JNZ 16
+    t113  | IP + 1 -> IP; mem[AR] -> DR   | AC:  0, IP: 13, CR: CMP 4, PS:  4, SP: 1022, DR: 16, AR: 12 | Z !N !C DI | mem[AR]: JNZ 16
+    t114  | DR -> CR                      | AC:  0, IP: 13, CR: JNZ 16, PS:  4, SP: 1022, DR: 16, AR: 12 | Z !N !C DI | mem[AR]: JNZ 16
+
+    t115  | IP -> AR                      | AC:  0, IP: 13, CR: JNZ 16, PS:  4, SP: 1022, DR: 16, AR: 13 | Z !N !C DI | mem[AR]: LD 3
+    t116  | IP + 1 -> IP; mem[AR] -> DR   | AC:  0, IP: 14, CR: JNZ 16, PS:  4, SP: 1022, DR:  3, AR: 13 | Z !N !C DI | mem[AR]: LD 3
+    t117  | DR -> CR                      | AC:  0, IP: 14, CR:  LD 3, PS:  4, SP: 1022, DR:  3, AR: 13 | Z !N !C DI | mem[AR]: LD 3
+    t118  | DR -> AR                      | AC:  0, IP: 14, CR:  LD 3, PS:  4, SP: 1022, DR:  3, AR:  3 | Z !N !C DI | mem[AR]: 0
+    t119  | mem[AR] -> DR                 | AC:  0, IP: 14, CR:  LD 3, PS:  4, SP: 1022, DR:  0, AR:  3 | Z !N !C DI | mem[AR]: 0
+    t120  | DR -> AC                      | AC:  0, IP: 14, CR:  LD 3, PS:  4, SP: 1022, DR:  0, AR:  3 | Z !N !C DI | mem[AR]: 0
+
+    t121  | IP -> AR                      | AC:  0, IP: 14, CR:  LD 3, PS:  4, SP: 1022, DR:  0, AR: 14 | Z !N !C DI | mem[AR]: INC
+    t122  | IP + 1 -> IP; mem[AR] -> DR   | AC:  0, IP: 15, CR:  LD 3, PS:  4, SP: 1022, DR:  0, AR: 14 | Z !N !C DI | mem[AR]: INC
+    t123  | DR -> CR                      | AC:  0, IP: 15, CR:   INC, PS:  4, SP: 1022, DR:  0, AR: 14 | Z !N !C DI | mem[AR]: INC
+    t124  | AC + 1 -> AC                  | AC:  1, IP: 15, CR:   INC, PS:  0, SP: 1022, DR:  0, AR: 14 | !Z !N !C DI | mem[AR]: INC
+
+    t125  | IP -> AR                      | AC:  1, IP: 15, CR:   INC, PS:  0, SP: 1022, DR:  0, AR: 15 | !Z !N !C DI | mem[AR]: ST 3
+    t126  | IP + 1 -> IP; mem[AR] -> DR   | AC:  1, IP: 16, CR:   INC, PS:  0, SP: 1022, DR:  3, AR: 15 | !Z !N !C DI | mem[AR]: ST 3
+    t127  | DR -> CR                      | AC:  1, IP: 16, CR:  ST 3, PS:  0, SP: 1022, DR:  3, AR: 15 | !Z !N !C DI | mem[AR]: ST 3
+    t128  | DR -> AR                      | AC:  1, IP: 16, CR:  ST 3, PS:  0, SP: 1022, DR:  3, AR:  3 | !Z !N !C DI | mem[AR]: 0
+    t129  | mem[AR] -> DR                 | AC:  1, IP: 16, CR:  ST 3, PS:  0, SP: 1022, DR:  0, AR:  3 | !Z !N !C DI | mem[AR]: 0
+    t130  | AC -> DR                      | AC:  1, IP: 16, CR:  ST 3, PS:  0, SP: 1022, DR:  1, AR:  3 | !Z !N !C DI | mem[AR]: 0
+    t131  | DR -> mem[AR]                 | AC:  1, IP: 16, CR:  ST 3, PS:  0, SP: 1022, DR:  1, AR:  3 | !Z !N !C DI | mem[AR]: 1
+
+    t132  | IP -> AR                      | AC:  1, IP: 16, CR:  ST 3, PS:  0, SP: 1022, DR:  1, AR: 16 | !Z !N !C DI | mem[AR]: IRET
+    t133  | IP + 1 -> IP; mem[AR] -> DR   | AC:  1, IP: 17, CR:  ST 3, PS:  0, SP: 1022, DR:  0, AR: 16 | !Z !N !C DI | mem[AR]: IRET
+    t134  | DR -> CR                      | AC:  1, IP: 17, CR:  IRET, PS:  0, SP: 1022, DR:  0, AR: 16 | !Z !N !C DI | mem[AR]: IRET
+    t135  | IRET                          | AC:  1, IP: 17, CR:  IRET, PS:  0, SP: 1022, DR:  0, AR: 16 | !Z !N !C DI | mem[AR]: IRET
+    t136  | SP -> AR                      | AC:  1, IP: 17, CR:  IRET, PS:  0, SP: 1022, DR:  0, AR: 1022 | !Z !N !C DI | mem[AR]: 0
+    t137  | mem[AR] -> DR; SP + 1 -> SP   | AC:  1, IP: 17, CR:  IRET, PS:  0, SP: 1023, DR:  0, AR: 1022 | !Z !N !C DI | mem[AR]: 0
+    t138  | DR -> PS                      | AC:  1, IP: 17, CR:  IRET, PS:  0, SP: 1023, DR:  0, AR: 1022 | !Z !N !C DI | mem[AR]: 0
+    t139  | SP -> AR                      | AC:  1, IP: 17, CR:  IRET, PS:  0, SP: 1023, DR:  0, AR: 1023 | !Z !N !C DI | mem[AR]: 6
+    t140  | mem[AR] -> DR; SP + 1 -> SP   | AC:  1, IP: 17, CR:  IRET, PS:  0, SP: 1024, DR:  6, AR: 1023 | !Z !N !C DI | mem[AR]: 6
+    t141  | DR -> IP                      | AC:  1, IP:  6, CR:  IRET, PS:  0, SP: 1024, DR:  6, AR: 1023 | !Z !N !C DI | mem[AR]: 6
+    t142  | 1 -> PS[EI]                   | AC:  1, IP:  6, CR:  IRET, PS: 32, SP: 1024, DR:  6, AR: 1023 | !Z !N !C EI | mem[AR]: 6
+
+    t143  | IP -> AR                      | AC:  1, IP:  6, CR:  IRET, PS: 32, SP: 1024, DR:  6, AR:  6 | !Z !N !C EI | mem[AR]: LD 3
+    t144  | IP + 1 -> IP; mem[AR] -> DR   | AC:  1, IP:  7, CR:  IRET, PS: 32, SP: 1024, DR:  3, AR:  6 | !Z !N !C EI | mem[AR]: LD 3
+    t145  | DR -> CR                      | AC:  1, IP:  7, CR:  LD 3, PS: 32, SP: 1024, DR:  3, AR:  6 | !Z !N !C EI | mem[AR]: LD 3
+    t146  | DR -> AR                      | AC:  1, IP:  7, CR:  LD 3, PS: 32, SP: 1024, DR:  3, AR:  3 | !Z !N !C EI | mem[AR]: 1
+    t147  | mem[AR] -> DR                 | AC:  1, IP:  7, CR:  LD 3, PS: 32, SP: 1024, DR:  1, AR:  3 | !Z !N !C EI | mem[AR]: 1
+    t148  | DR -> AC                      | AC:  1, IP:  7, CR:  LD 3, PS: 32, SP: 1024, DR:  1, AR:  3 | !Z !N !C EI | mem[AR]: 1
+
+    t149  | IP -> AR                      | AC:  1, IP:  7, CR:  LD 3, PS: 32, SP: 1024, DR:  1, AR:  7 | !Z !N !C EI | mem[AR]: JZ 6
+    t150  | IP + 1 -> IP; mem[AR] -> DR   | AC:  1, IP:  8, CR:  LD 3, PS: 32, SP: 1024, DR:  6, AR:  7 | !Z !N !C EI | mem[AR]: JZ 6
+    t151  | DR -> CR                      | AC:  1, IP:  8, CR:  JZ 6, PS: 32, SP: 1024, DR:  6, AR:  7 | !Z !N !C EI | mem[AR]: JZ 6
+
+    t152  | IP -> AR                      | AC:  1, IP:  8, CR:  JZ 6, PS: 32, SP: 1024, DR:  6, AR:  8 | !Z !N !C EI | mem[AR]: HLT
+    t153  | IP + 1 -> IP; mem[AR] -> DR   | AC:  1, IP:  9, CR:  JZ 6, PS: 32, SP: 1024, DR:  0, AR:  8 | !Z !N !C EI | mem[AR]: HLT
+    t154  | DR -> CR                      | AC:  1, IP:  9, CR:   HLT, PS: 32, SP: 1024, DR:  0, AR:  8 | !Z !N !C EI | mem[AR]: HLT
+    t155  | HLT                           | AC:  1, IP:  9, CR:   HLT, PS: 32, SP: 1024, DR:  0, AR:  8 | !Z !N !C EI | mem[AR]: HLT

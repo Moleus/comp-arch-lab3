@@ -55,11 +55,10 @@ const (
 )
 
 const (
-	StatusRegisterCarryBit            = 1 << 0
-	StatusRegisterZeroBit             = 1 << 2
-	StatusRegisterNegativeBit         = 1 << 3
-	StatusRegisterEnableInterruptBit  = 1 << 5
-	StatusRegisterRequestInterruptBit = 1 << 6
+	StatusRegisterCarryBit           = 1 << 0
+	StatusRegisterZeroBit            = 1 << 2
+	StatusRegisterNegativeBit        = 1 << 3
+	StatusRegisterEnableInterruptBit = 1 << 5
 )
 
 const (
@@ -67,9 +66,27 @@ const (
 )
 
 type BitFlags struct {
-	ZERO     bool
-	NEGATIVE bool
-	CARRY    bool
+	ZERO              bool
+	NEGATIVE          bool
+	CARRY             bool
+	ENABLE_INTERRUPTS bool
+}
+
+func (b *BitFlags) toByte() byte {
+	var result byte
+	if b.ZERO {
+		result |= StatusRegisterZeroBit
+	}
+	if b.NEGATIVE {
+		result |= StatusRegisterNegativeBit
+	}
+	if b.CARRY {
+		result |= StatusRegisterCarryBit
+	}
+	if b.ENABLE_INTERRUPTS {
+		result |= StatusRegisterEnableInterruptBit
+	}
+	return result
 }
 
 func (r Register) String() string {
@@ -119,14 +136,15 @@ func NewDataPath(dataInput []isa.IoData, output io.Writer, clock TickProvider) *
 
 func (dp *DataPath) GetFlags() BitFlags {
 	return BitFlags{
-		ZERO:     dp.registers[PS].Value&StatusRegisterZeroBit == 1,
-		NEGATIVE: dp.registers[PS].Value&StatusRegisterNegativeBit == 1,
-		CARRY:    dp.registers[PS].Value&StatusRegisterCarryBit == 1,
+		ZERO:              dp.registers[PS].Value&StatusRegisterZeroBit > 0,
+		NEGATIVE:          dp.registers[PS].Value&StatusRegisterNegativeBit > 0,
+		CARRY:             dp.registers[PS].Value&StatusRegisterCarryBit > 0,
+		ENABLE_INTERRUPTS: dp.registers[PS].Value&StatusRegisterEnableInterruptBit > 0,
 	}
 }
 
-func (dp *DataPath) IsInterruptRequired() bool {
-	return dp.registers[PS].Value&StatusRegisterEnableInterruptBit == 1 && dp.registers[PS].Value&StatusRegisterRequestInterruptBit == 1
+func (dp *DataPath) IsInterruptEnabled() bool {
+	return dp.registers[PS].Value&StatusRegisterEnableInterruptBit > 0
 }
 
 func (dp *DataPath) WriteOutput(character rune) {
@@ -140,39 +158,13 @@ func (dp *DataPath) SigLatchRegister(register Register, value isa.MachineWord) {
 	dp.registers[register] = value
 }
 
-func (dp *DataPath) SigCheckIrq() {
-	if dp.isInputReady() {
-		dp.setIoState(true)
-	}
-}
-
 func (dp *DataPath) SigLatchACInput() {
 	dp.registers[AC] = isa.NewMemoryWordFromIO(dp.inputBuffer[0])
 	dp.inputBuffer = dp.inputBuffer[1:]
 }
 
-func (dp *DataPath) SigReadPortIn() {
-	inReady := dp.isInputReady()
-	if !inReady {
-		dp.setIoState(inReady)
-		return
-	}
-	// don't override AC but only set IO ready bit
-	dp.setIoState(inReady)
-}
-
 func (dp *DataPath) isInputReady() bool {
 	return len(dp.inputBuffer) > 0 && dp.inputBuffer[0].ArrivesAt <= dp.clock.GetCurrentTick()
-}
-
-func (dp *DataPath) setIoState(isReady bool) {
-	reg := dp.registers[AC]
-	if isReady {
-		reg.Value |= AccumulatorIOReadyBit
-	} else {
-		reg.Value &= ^(AccumulatorIOReadyBit)
-	}
-	dp.registers[AC] = reg
 }
 
 func (dp *DataPath) SigWritePortOut() {
@@ -196,5 +188,32 @@ func (dp *DataPath) WriteMemory() {
 }
 
 func (dp *DataPath) SigExecuteAluOp(aluParams ExecutionParams) isa.MachineWord {
-	return dp.Alu.Execute(aluParams)
+	// TODO: fix nzvc flags
+	result, bitFlags := dp.Alu.Execute(aluParams)
+	oldPs := dp.registers[PS]
+	oldPs.Value = updatePsWithBitFlags(oldPs.Value, bitFlags)
+	dp.registers[PS] = oldPs
+	return result
+}
+
+func updatePsWithBitFlags(oldPs int, bitFlags BitFlags) int {
+	// update carry
+	if bitFlags.CARRY {
+		oldPs |= StatusRegisterCarryBit
+	} else {
+		oldPs &= ^StatusRegisterCarryBit
+	}
+	// update zero
+	if bitFlags.ZERO {
+		oldPs |= StatusRegisterZeroBit
+	} else {
+		oldPs &= ^StatusRegisterZeroBit
+	}
+	// update negative
+	if bitFlags.NEGATIVE {
+		oldPs |= StatusRegisterNegativeBit
+	} else {
+		oldPs &= ^StatusRegisterNegativeBit
+	}
+	return oldPs
 }

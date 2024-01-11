@@ -137,7 +137,8 @@ func (t *AsmTranslator) Translate(input string) (isa.Program, error) {
 func (t *AsmTranslator) ParseInstructions(input string) error {
 	lines := strings.Split(input, "\n")
 	for i, line := range lines {
-		line := strings.TrimSpace(line)
+		line := strings.Split(line, ";")[0]
+		line = strings.TrimSpace(line)
 		err := t.parseLine(line, i+1)
 		if err != nil {
 			return err

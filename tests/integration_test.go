@@ -88,11 +88,14 @@ func runTest(t *testing.T, input TestInput, goldenFile string) {
 	dataPathOutputBuffer := bytes.NewBuffer([]byte{})
 	controlUnitStateOutputBuffer := bytes.NewBuffer([]byte{})
 
-	machine.RunSimulation(ioData, program, dataPathOutputBuffer, controlUnitStateOutputBuffer)
+	err = machine.RunSimulation(ioData, program, dataPathOutputBuffer, controlUnitStateOutputBuffer)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	testOutput := TestOutput{
 		TranslatorOutput: string(serializedMachineCode),
-		MachineStdout:    input.MachineInput,
+		MachineStdout:    dataPathOutputBuffer.String(),
 		MachineLog:       controlUnitStateOutputBuffer.String(),
 	}
 

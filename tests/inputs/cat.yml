@@ -3,6 +3,8 @@ translator_input: |-
   in_port: word: 0
   out_port: word: 1
   flag: word: 0
+  ; TODO: зачем нам эта штука? Как это работает? 
+  ; похоже мы ждем определенного символа 10 (line feed) с порта 0, чтобы закончить. Да, мы ждем символа переноса строки
   line_feed: word: 10
 
   start: ei
@@ -10,8 +12,7 @@ translator_input: |-
     jz spin_loop
     hlt
 
-  interrupt: di
-    in in_port
+  interrupt: in in_port
     out out_port
     cmp line_feed
     jnz returning
@@ -21,4 +22,4 @@ translator_input: |-
     returning: iret
 
 machine_input: |-
-  [{ "arrivesAt": 1, "char": "a" }]
+  [{ "arrivesAt": 1, "char": "a"}, { "arrivesAt": 2, "char": "b"},  {"arrivesAt": 85, "char": "\n"}]

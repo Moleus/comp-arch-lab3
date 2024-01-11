@@ -11,7 +11,7 @@ ControlUnit и DataPath находятся в отдельных файлах
 package machine
 
 import (
-	"fmt"
+	"errors"
 	"github.com/Moleus/comp-arch-lab3/pkg/isa"
 	"io"
 	"log"
@@ -28,18 +28,22 @@ type SimulationStatistics struct {
 	currentTick        int
 }
 
-func RunSimulation(dataInput []isa.IoData, program isa.Program, dataPathOutput io.Writer, controlUnitStateOutput io.Writer) {
+func RunSimulation(dataInput []isa.IoData, program isa.Program, dataPathOutput io.Writer, controlUnitStateOutput io.Writer) error {
 	clock := &Clock{currentTick: 0}
 	datapath := NewDataPath(dataInput, dataPathOutput, clock)
 	controlUnit := NewControlUnit(program, datapath, controlUnitStateOutput, clock)
 
 	log.Println("starting simulation")
 
+	controlUnit.PresetInstructionCounter(controlUnit.program.StartAddress)
 	err := controlUnit.RunInstructionCycle()
-	if err != nil {
-		// TODO: ignore NOP errors
-		fmt.Print(err)
+	var controlUnitError *ControlUnitError
+	if err == nil {
+		return errors.New("simulation should finish with HLT")
+	} else if !errors.As(err, &controlUnitError) {
+		return err
 	}
 
 	log.Println("simulation finished")
+	return nil
 }
