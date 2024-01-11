@@ -27,6 +27,7 @@ var (
 		isa.OpcodeSub: AluOperationSub,
 		isa.OpcodeCla: AluOperationRight,
 		isa.OpcodeCmp: AluOperationSub,
+		isa.OpcodeMod: AluOperationMod,
 	}
 )
 

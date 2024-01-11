@@ -39,6 +39,7 @@ const (
 	OpcodeAdd
 	OpcodeSub
 	OpcodeCmp
+	OpcodeMod
 	OpcodeHlt
 	OpcodeIret
 	OpcodeInc
@@ -101,6 +102,10 @@ var (
 		OpcodeCmp: {
 			instructionType:      OpcodeTypeAddress,
 			stringRepresentation: "CMP",
+		},
+		OpcodeMod: {
+			instructionType:      OpcodeTypeAddress,
+			stringRepresentation: "MOD",
 		},
 		OpcodeHlt: {
 			instructionType:      OpcodeTypeAddressless,

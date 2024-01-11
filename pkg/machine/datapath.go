@@ -168,8 +168,16 @@ func (dp *DataPath) isInputReady() bool {
 }
 
 func (dp *DataPath) SigWritePortOut() {
-	if _, err := dp.outputBuffer.Write([]byte{byte(dp.registers[AC].Value)}); err != nil {
-		panic(err)
+	ac := dp.registers[AC]
+	if ac.ValueType == isa.ValueTypeChar || ac.Value == 10 {
+		if _, err := dp.outputBuffer.Write([]byte{byte(ac.Value)}); err != nil {
+			panic(err)
+		}
+	} else {
+		// print number
+		if _, err := dp.outputBuffer.Write([]byte(fmt.Sprintf("%d", ac.Value))); err != nil {
+			panic(err)
+		}
 	}
 }
 

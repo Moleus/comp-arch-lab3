@@ -57,7 +57,7 @@ type ControlUnit struct {
 	stateOutput io.Writer
 }
 
-const MaxInstructions = 1000
+const MaxInstructions = 1_000_000
 
 func NewControlUnit(program isa.Program, dataPath *DataPath, stateOutput io.Writer, clock *Clock) *ControlUnit {
 	mapMemory(dataPath, program.Instructions)
@@ -239,14 +239,11 @@ func (cu *ControlUnit) decodeAndExecuteBranchInstruction(instruction isa.Machine
 
 func (cu *ControlUnit) interruption() {
 	for cu.dataPath.isInputReady() && cu.dataPath.IsInterruptEnabled() {
-		fmt.Printf("t%-4d entering interruption\n", cu.clock.GetCurrentTick())
 		cu.processInterrupt()
-		fmt.Printf("t%-4d exiting interruption\n", cu.clock.GetCurrentTick())
 	}
 }
 
 func (cu *ControlUnit) processInterrupt() {
-	// disable interrupts and save PS on stack
 	cu.doInOneTick("0 -> PS[EI]",
 		cu.SigLatchRegFunc(PS, cu.dataPath.SigExecuteAluOp(*NewAluOp(AluOperationAnd).SetLeft(cu.GetReg(PS)).SetRightValue(^(StatusRegisterEnableInterruptBit)))))
 

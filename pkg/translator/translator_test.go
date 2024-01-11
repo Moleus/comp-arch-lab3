@@ -1,37 +1,12 @@
 package translator
 
 import (
-	"bytes"
 	"gotest.tools/v3/assert"
 	"strings"
 	"testing"
 
 	"github.com/Moleus/comp-arch-lab3/pkg/isa"
-	"gotest.tools/v3/golden"
 )
-
-func TestTranslator(t *testing.T) {
-	tr := NewTranslator()
-	f := golden.Open(t, "program.input.asm")
-	defer f.Close()
-
-	buf := new(bytes.Buffer)
-	_, err := buf.ReadFrom(f)
-	if err != nil {
-		t.Fatal(err)
-	}
-	contents := buf.String()
-	if err != nil {
-		t.Fatal(err)
-	}
-	machineCode, err := tr.Translate(contents)
-	if err != nil {
-		t.Fatal(err)
-	}
-	serialized, err := isa.SerializeCode(machineCode)
-
-	golden.Assert(t, string(serialized), "program.golden.json")
-}
 
 func TestParseConstant(t *testing.T) {
 	tests := []struct {

@@ -6,6 +6,7 @@ import (
 	"github.com/Moleus/comp-arch-lab3/pkg/machine"
 	translator2 "github.com/Moleus/comp-arch-lab3/pkg/translator"
 	"gopkg.in/yaml.v3"
+	"gotest.tools/v3/golden"
 	"os"
 	"strings"
 	"testing"
@@ -30,40 +31,10 @@ func TestTranslationAndSimulation(t *testing.T) {
 	for _, file := range dir {
 		t.Run(file.Name(), func(t *testing.T) {
 			input := parseInputFile(t, file.Name())
-			goldenFile := "golden/" + file.Name()
+			goldenFile := file.Name()
 			runTest(t, input, goldenFile)
 		})
 	}
-}
-
-func TestSimplePlusProgram(t *testing.T) {
-	input := parseInputFile(t, "plus.yml")
-	goldenFilename := "golden/plus.yml"
-	runTest(t, input, goldenFilename)
-}
-
-func TestSimpleStack(t *testing.T) {
-	input := parseInputFile(t, "stack.yml")
-	goldenFilename := "golden/stack.yml"
-	runTest(t, input, goldenFilename)
-}
-
-func TestCatIOInterrupts(t *testing.T) {
-	input := parseInputFile(t, "cat.yml")
-	goldenFilename := "golden/cat.yml"
-	runTest(t, input, goldenFilename)
-}
-
-func TestHelloOutput(t *testing.T) {
-	input := parseInputFile(t, "hello.yml")
-	goldenFilename := "golden/hello.yml"
-	runTest(t, input, goldenFilename)
-}
-
-func TestHelloUserInput(t *testing.T) {
-	input := parseInputFile(t, "hello_user.yml")
-	goldenFilename := "golden/hello_user.yml"
-	runTest(t, input, goldenFilename)
 }
 
 func parseInputFile(t *testing.T, filename string) TestInput {
@@ -115,7 +86,9 @@ func runTest(t *testing.T, input TestInput, goldenFile string) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(goldenFile, yamlOutput, 0644); err != nil {
-		t.Fatal(err)
-	}
+	//cmp := golden.Bytes(yamlOutput, goldenFile)
+	golden.Assert(t, string(yamlOutput), goldenFile)
+	//if !cmp().Success() {
+	//	t.Errorf("Golden file %s doesn't match the actual output", goldenFile)
+	//}
 }

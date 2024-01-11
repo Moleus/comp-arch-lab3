@@ -10,7 +10,6 @@ translator_input: |-
   out_port: word: 1
   flag: word: 0
   line_feed: word: 10
-  tmp: word: 0
 
   start: nop
       message_loop: ld (message_pointer)
