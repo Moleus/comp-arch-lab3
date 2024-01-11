@@ -179,669 +179,678 @@ translator_output: |-
         {
           "index": 17,
           "label": "start",
-          "opcode": "LD",
-          "operand": 14,
-          "operand_type": 3,
+          "opcode": "NOP",
           "term_info": {
             "line_num": 6,
-            "original_content": "start: ld pointer"
+            "original_content": "start: nop"
           }
         },
         {
           "index": 18,
-          "opcode": "DEC",
-          "term_info": {
-            "line_num": 7,
-            "original_content": "dec"
-          }
-        },
-        {
-          "index": 19,
-          "opcode": "ST",
-          "operand": 14,
-          "operand_type": 3,
-          "term_info": {
-            "line_num": 8,
-            "original_content": "st pointer"
-          }
-        },
-        {
-          "index": 20,
           "label": "loop",
-          "opcode": "LD",
-          "operand": 14,
-          "operand_type": 3,
-          "term_info": {
-            "line_num": 9,
-            "original_content": "loop: ld pointer"
-          }
-        },
-        {
-          "index": 21,
-          "opcode": "INC",
-          "term_info": {
-            "line_num": 10,
-            "original_content": "inc"
-          }
-        },
-        {
-          "index": 22,
-          "opcode": "ST",
-          "operand": 14,
-          "operand_type": 3,
-          "term_info": {
-            "line_num": 11,
-            "original_content": "st pointer"
-          }
-        },
-        {
-          "index": 23,
           "opcode": "LD",
           "operand": 14,
           "operand_type": 4,
           "term_info": {
-            "line_num": 12,
-            "original_content": "ld (pointer)"
+            "line_num": 7,
+            "original_content": "loop: ld (pointer)"
           }
         },
         {
-          "index": 24,
+          "index": 19,
           "opcode": "OUT",
           "operand": 16,
           "operand_type": 3,
           "term_info": {
-            "line_num": 13,
+            "line_num": 8,
             "original_content": "out out_port"
           }
         },
         {
-          "index": 25,
-          "opcode": "JNZ",
-          "operand": 20,
+          "index": 20,
+          "opcode": "JZ",
+          "operand": 25,
           "operand_type": 3,
           "term_info": {
-            "line_num": 14,
-            "original_content": "jnz loop"
+            "line_num": 9,
+            "original_content": "jz end"
           }
         },
         {
-          "index": 26,
+          "index": 21,
+          "opcode": "LD",
+          "operand": 14,
+          "operand_type": 3,
+          "term_info": {
+            "line_num": 10,
+            "original_content": "ld pointer"
+          }
+        },
+        {
+          "index": 22,
+          "opcode": "INC",
+          "term_info": {
+            "line_num": 11,
+            "original_content": "inc"
+          }
+        },
+        {
+          "index": 23,
+          "opcode": "ST",
+          "operand": 14,
+          "operand_type": 3,
+          "term_info": {
+            "line_num": 12,
+            "original_content": "st pointer"
+          }
+        },
+        {
+          "index": 24,
+          "opcode": "JMP",
+          "operand": 18,
+          "operand_type": 3,
+          "term_info": {
+            "line_num": 13,
+            "original_content": "jmp loop"
+          }
+        },
+        {
+          "index": 25,
+          "label": "end",
           "opcode": "HLT",
           "term_info": {
-            "line_num": 15,
-            "original_content": "hlt"
+            "line_num": 14,
+            "original_content": "end: hlt"
           }
         }
       ]
     }
 stdout: "Hello, World!\0"
 log: |
-    t0    | IP -> AR                      | AC:  0, IP: 17, CR: NOP 0, PS:  0, SP: 1024, DR:  0, AR: 17 | !Z !N !C DI | mem[AR]: LD 14
-    t1    | IP + 1 -> IP; mem[AR] -> DR   | AC:  0, IP: 18, CR: NOP 0, PS:  0, SP: 1024, DR: 14, AR: 17 | !Z !N !C DI | mem[AR]: LD 14
-    t2    | DR -> CR                      | AC:  0, IP: 18, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 17 | !Z !N !C DI | mem[AR]: LD 14
-    t3    | DR -> AR                      | AC:  0, IP: 18, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 0
-    t4    | mem[AR] -> DR                 | AC:  0, IP: 18, CR:  LD 14, PS:  0, SP: 1024, DR:  0, AR: 14 | !Z !N !C DI | mem[AR]: 0
-    t5    | DR -> AC                      | AC:  0, IP: 18, CR:  LD 14, PS:  4, SP: 1024, DR:  0, AR: 14 | Z !N !C DI | mem[AR]: 0
-
-    t6    | IP -> AR                      | AC:  0, IP: 18, CR:  LD 14, PS:  4, SP: 1024, DR:  0, AR: 18 | Z !N !C DI | mem[AR]: DEC
-    t7    | IP + 1 -> IP; mem[AR] -> DR   | AC:  0, IP: 19, CR:  LD 14, PS:  4, SP: 1024, DR:  0, AR: 18 | Z !N !C DI | mem[AR]: DEC
-    t8    | DR -> CR                      | AC:  0, IP: 19, CR:   DEC, PS:  4, SP: 1024, DR:  0, AR: 18 | Z !N !C DI | mem[AR]: DEC
-    t9    | AC - 1 -> AC                  | AC: -1, IP: 19, CR:   DEC, PS:  8, SP: 1024, DR:  0, AR: 18 | !Z N !C DI | mem[AR]: DEC
-
-    t10   | IP -> AR                      | AC: -1, IP: 19, CR:   DEC, PS:  8, SP: 1024, DR:  0, AR: 19 | !Z N !C DI | mem[AR]: ST 14
-    t11   | IP + 1 -> IP; mem[AR] -> DR   | AC: -1, IP: 20, CR:   DEC, PS:  8, SP: 1024, DR: 14, AR: 19 | !Z N !C DI | mem[AR]: ST 14
-    t12   | DR -> CR                      | AC: -1, IP: 20, CR:  ST 14, PS:  8, SP: 1024, DR: 14, AR: 19 | !Z N !C DI | mem[AR]: ST 14
-    t13   | DR -> AR                      | AC: -1, IP: 20, CR:  ST 14, PS:  8, SP: 1024, DR: 14, AR: 14 | !Z N !C DI | mem[AR]: 0
-    t14   | mem[AR] -> DR                 | AC: -1, IP: 20, CR:  ST 14, PS:  8, SP: 1024, DR:  0, AR: 14 | !Z N !C DI | mem[AR]: 0
-    t15   | AC -> DR                      | AC: -1, IP: 20, CR:  ST 14, PS:  8, SP: 1024, DR: -1, AR: 14 | !Z N !C DI | mem[AR]: 0
-    t16   | DR -> mem[AR]                 | AC: -1, IP: 20, CR:  ST 14, PS:  8, SP: 1024, DR: -1, AR: 14 | !Z N !C DI | mem[AR]: -1
-
-    t17   | IP -> AR                      | AC: -1, IP: 20, CR:  ST 14, PS:  8, SP: 1024, DR: -1, AR: 20 | !Z N !C DI | mem[AR]: LD 14
-    t18   | IP + 1 -> IP; mem[AR] -> DR   | AC: -1, IP: 21, CR:  ST 14, PS:  8, SP: 1024, DR: 14, AR: 20 | !Z N !C DI | mem[AR]: LD 14
-    t19   | DR -> CR                      | AC: -1, IP: 21, CR:  LD 14, PS:  8, SP: 1024, DR: 14, AR: 20 | !Z N !C DI | mem[AR]: LD 14
-    t20   | DR -> AR                      | AC: -1, IP: 21, CR:  LD 14, PS:  8, SP: 1024, DR: 14, AR: 14 | !Z N !C DI | mem[AR]: -1
-    t21   | mem[AR] -> DR                 | AC: -1, IP: 21, CR:  LD 14, PS:  8, SP: 1024, DR: -1, AR: 14 | !Z N !C DI | mem[AR]: -1
-    t22   | DR -> AC                      | AC: -1, IP: 21, CR:  LD 14, PS:  8, SP: 1024, DR: -1, AR: 14 | !Z N !C DI | mem[AR]: -1
-
-    t23   | IP -> AR                      | AC: -1, IP: 21, CR:  LD 14, PS:  8, SP: 1024, DR: -1, AR: 21 | !Z N !C DI | mem[AR]: INC
-    t24   | IP + 1 -> IP; mem[AR] -> DR   | AC: -1, IP: 22, CR:  LD 14, PS:  8, SP: 1024, DR:  0, AR: 21 | !Z N !C DI | mem[AR]: INC
-    t25   | DR -> CR                      | AC: -1, IP: 22, CR:   INC, PS:  8, SP: 1024, DR:  0, AR: 21 | !Z N !C DI | mem[AR]: INC
-    t26   | AC + 1 -> AC                  | AC:  0, IP: 22, CR:   INC, PS:  4, SP: 1024, DR:  0, AR: 21 | Z !N !C DI | mem[AR]: INC
-
-    t27   | IP -> AR                      | AC:  0, IP: 22, CR:   INC, PS:  4, SP: 1024, DR:  0, AR: 22 | Z !N !C DI | mem[AR]: ST 14
-    t28   | IP + 1 -> IP; mem[AR] -> DR   | AC:  0, IP: 23, CR:   INC, PS:  4, SP: 1024, DR: 14, AR: 22 | Z !N !C DI | mem[AR]: ST 14
-    t29   | DR -> CR                      | AC:  0, IP: 23, CR:  ST 14, PS:  4, SP: 1024, DR: 14, AR: 22 | Z !N !C DI | mem[AR]: ST 14
-    t30   | DR -> AR                      | AC:  0, IP: 23, CR:  ST 14, PS:  4, SP: 1024, DR: 14, AR: 14 | Z !N !C DI | mem[AR]: -1
-    t31   | mem[AR] -> DR                 | AC:  0, IP: 23, CR:  ST 14, PS:  4, SP: 1024, DR: -1, AR: 14 | Z !N !C DI | mem[AR]: -1
-    t32   | AC -> DR                      | AC:  0, IP: 23, CR:  ST 14, PS:  4, SP: 1024, DR:  0, AR: 14 | Z !N !C DI | mem[AR]: -1
-    t33   | DR -> mem[AR]                 | AC:  0, IP: 23, CR:  ST 14, PS:  4, SP: 1024, DR:  0, AR: 14 | Z !N !C DI | mem[AR]: 0
-
-    t34   | IP -> AR                      | AC:  0, IP: 23, CR:  ST 14, PS:  4, SP: 1024, DR:  0, AR: 23 | Z !N !C DI | mem[AR]: LD 14
-    t35   | IP + 1 -> IP; mem[AR] -> DR   | AC:  0, IP: 24, CR:  ST 14, PS:  4, SP: 1024, DR: 14, AR: 23 | Z !N !C DI | mem[AR]: LD 14
-    t36   | DR -> CR                      | AC:  0, IP: 24, CR:  LD 14, PS:  4, SP: 1024, DR: 14, AR: 23 | Z !N !C DI | mem[AR]: LD 14
-    t37   | DR -> AR                      | AC:  0, IP: 24, CR:  LD 14, PS:  4, SP: 1024, DR: 14, AR: 14 | Z !N !C DI | mem[AR]: 0
-    t38   | mem[AR] -> DR                 | AC:  0, IP: 24, CR:  LD 14, PS:  4, SP: 1024, DR:  0, AR: 14 | Z !N !C DI | mem[AR]: 0
-    t39   | DR -> AR                      | AC:  0, IP: 24, CR:  LD 14, PS:  4, SP: 1024, DR:  0, AR:  0 | Z !N !C DI | mem[AR]: 'H'
-    t40   | mem[AR] -> DR                 | AC:  0, IP: 24, CR:  LD 14, PS:  4, SP: 1024, DR: 72, AR:  0 | Z !N !C DI | mem[AR]: 'H'
-    t41   | DR -> AC                      | AC: 72, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 72, AR:  0 | !Z !N !C DI | mem[AR]: 'H'
-
-    t42   | IP -> AR                      | AC: 72, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 72, AR: 24 | !Z !N !C DI | mem[AR]: OUT 16
-    t43   | IP + 1 -> IP; mem[AR] -> DR   | AC: 72, IP: 25, CR:  LD 14, PS:  0, SP: 1024, DR: 16, AR: 24 | !Z !N !C DI | mem[AR]: OUT 16
-    t44   | DR -> CR                      | AC: 72, IP: 25, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 24 | !Z !N !C DI | mem[AR]: OUT 16
-    t45   | AC -> OUT                     | AC: 72, IP: 25, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 24 | !Z !N !C DI | mem[AR]: OUT 16
-
-    t46   | IP -> AR                      | AC: 72, IP: 25, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 25 | !Z !N !C DI | mem[AR]: JNZ 20
-    t47   | IP + 1 -> IP; mem[AR] -> DR   | AC: 72, IP: 26, CR: OUT 16, PS:  0, SP: 1024, DR: 20, AR: 25 | !Z !N !C DI | mem[AR]: JNZ 20
-    t48   | DR -> CR                      | AC: 72, IP: 26, CR: JNZ 20, PS:  0, SP: 1024, DR: 20, AR: 25 | !Z !N !C DI | mem[AR]: JNZ 20
-    t49   | DR -> IP                      | AC: 72, IP: 20, CR: JNZ 20, PS:  0, SP: 1024, DR: 20, AR: 25 | !Z !N !C DI | mem[AR]: JNZ 20
-
-    t50   | IP -> AR                      | AC: 72, IP: 20, CR: JNZ 20, PS:  0, SP: 1024, DR: 20, AR: 20 | !Z !N !C DI | mem[AR]: LD 14
-    t51   | IP + 1 -> IP; mem[AR] -> DR   | AC: 72, IP: 21, CR: JNZ 20, PS:  0, SP: 1024, DR: 14, AR: 20 | !Z !N !C DI | mem[AR]: LD 14
-    t52   | DR -> CR                      | AC: 72, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 20 | !Z !N !C DI | mem[AR]: LD 14
-    t53   | DR -> AR                      | AC: 72, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 0
-    t54   | mem[AR] -> DR                 | AC: 72, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR:  0, AR: 14 | !Z !N !C DI | mem[AR]: 0
-    t55   | DR -> AC                      | AC:  0, IP: 21, CR:  LD 14, PS:  4, SP: 1024, DR:  0, AR: 14 | Z !N !C DI | mem[AR]: 0
-
-    t56   | IP -> AR                      | AC:  0, IP: 21, CR:  LD 14, PS:  4, SP: 1024, DR:  0, AR: 21 | Z !N !C DI | mem[AR]: INC
-    t57   | IP + 1 -> IP; mem[AR] -> DR   | AC:  0, IP: 22, CR:  LD 14, PS:  4, SP: 1024, DR:  0, AR: 21 | Z !N !C DI | mem[AR]: INC
-    t58   | DR -> CR                      | AC:  0, IP: 22, CR:   INC, PS:  4, SP: 1024, DR:  0, AR: 21 | Z !N !C DI | mem[AR]: INC
-    t59   | AC + 1 -> AC                  | AC:  1, IP: 22, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 21 | !Z !N !C DI | mem[AR]: INC
-
-    t60   | IP -> AR                      | AC:  1, IP: 22, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 22 | !Z !N !C DI | mem[AR]: ST 14
-    t61   | IP + 1 -> IP; mem[AR] -> DR   | AC:  1, IP: 23, CR:   INC, PS:  0, SP: 1024, DR: 14, AR: 22 | !Z !N !C DI | mem[AR]: ST 14
-    t62   | DR -> CR                      | AC:  1, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 22 | !Z !N !C DI | mem[AR]: ST 14
-    t63   | DR -> AR                      | AC:  1, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 0
-    t64   | mem[AR] -> DR                 | AC:  1, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR:  0, AR: 14 | !Z !N !C DI | mem[AR]: 0
-    t65   | AC -> DR                      | AC:  1, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR:  1, AR: 14 | !Z !N !C DI | mem[AR]: 0
-    t66   | DR -> mem[AR]                 | AC:  1, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR:  1, AR: 14 | !Z !N !C DI | mem[AR]: 1
-
-    t67   | IP -> AR                      | AC:  1, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR:  1, AR: 23 | !Z !N !C DI | mem[AR]: LD 14
-    t68   | IP + 1 -> IP; mem[AR] -> DR   | AC:  1, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 23 | !Z !N !C DI | mem[AR]: LD 14
-    t69   | DR -> CR                      | AC:  1, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 23 | !Z !N !C DI | mem[AR]: LD 14
-    t70   | DR -> AR                      | AC:  1, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 1
-    t71   | mem[AR] -> DR                 | AC:  1, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR:  1, AR: 14 | !Z !N !C DI | mem[AR]: 1
-    t72   | DR -> AR                      | AC:  1, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR:  1, AR:  1 | !Z !N !C DI | mem[AR]: 'e'
-    t73   | mem[AR] -> DR                 | AC:  1, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 101, AR:  1 | !Z !N !C DI | mem[AR]: 'e'
-    t74   | DR -> AC                      | AC: 101, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 101, AR:  1 | !Z !N !C DI | mem[AR]: 'e'
-
-    t75   | IP -> AR                      | AC: 101, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 101, AR: 24 | !Z !N !C DI | mem[AR]: OUT 16
-    t76   | IP + 1 -> IP; mem[AR] -> DR   | AC: 101, IP: 25, CR:  LD 14, PS:  0, SP: 1024, DR: 16, AR: 24 | !Z !N !C DI | mem[AR]: OUT 16
-    t77   | DR -> CR                      | AC: 101, IP: 25, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 24 | !Z !N !C DI | mem[AR]: OUT 16
-    t78   | AC -> OUT                     | AC: 101, IP: 25, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 24 | !Z !N !C DI | mem[AR]: OUT 16
-
-    t79   | IP -> AR                      | AC: 101, IP: 25, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 25 | !Z !N !C DI | mem[AR]: JNZ 20
-    t80   | IP + 1 -> IP; mem[AR] -> DR   | AC: 101, IP: 26, CR: OUT 16, PS:  0, SP: 1024, DR: 20, AR: 25 | !Z !N !C DI | mem[AR]: JNZ 20
-    t81   | DR -> CR                      | AC: 101, IP: 26, CR: JNZ 20, PS:  0, SP: 1024, DR: 20, AR: 25 | !Z !N !C DI | mem[AR]: JNZ 20
-    t82   | DR -> IP                      | AC: 101, IP: 20, CR: JNZ 20, PS:  0, SP: 1024, DR: 20, AR: 25 | !Z !N !C DI | mem[AR]: JNZ 20
-
-    t83   | IP -> AR                      | AC: 101, IP: 20, CR: JNZ 20, PS:  0, SP: 1024, DR: 20, AR: 20 | !Z !N !C DI | mem[AR]: LD 14
-    t84   | IP + 1 -> IP; mem[AR] -> DR   | AC: 101, IP: 21, CR: JNZ 20, PS:  0, SP: 1024, DR: 14, AR: 20 | !Z !N !C DI | mem[AR]: LD 14
-    t85   | DR -> CR                      | AC: 101, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 20 | !Z !N !C DI | mem[AR]: LD 14
-    t86   | DR -> AR                      | AC: 101, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 1
-    t87   | mem[AR] -> DR                 | AC: 101, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR:  1, AR: 14 | !Z !N !C DI | mem[AR]: 1
-    t88   | DR -> AC                      | AC:  1, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR:  1, AR: 14 | !Z !N !C DI | mem[AR]: 1
-
-    t89   | IP -> AR                      | AC:  1, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR:  1, AR: 21 | !Z !N !C DI | mem[AR]: INC
-    t90   | IP + 1 -> IP; mem[AR] -> DR   | AC:  1, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR:  0, AR: 21 | !Z !N !C DI | mem[AR]: INC
-    t91   | DR -> CR                      | AC:  1, IP: 22, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 21 | !Z !N !C DI | mem[AR]: INC
-    t92   | AC + 1 -> AC                  | AC:  2, IP: 22, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 21 | !Z !N !C DI | mem[AR]: INC
-
-    t93   | IP -> AR                      | AC:  2, IP: 22, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 22 | !Z !N !C DI | mem[AR]: ST 14
-    t94   | IP + 1 -> IP; mem[AR] -> DR   | AC:  2, IP: 23, CR:   INC, PS:  0, SP: 1024, DR: 14, AR: 22 | !Z !N !C DI | mem[AR]: ST 14
-    t95   | DR -> CR                      | AC:  2, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 22 | !Z !N !C DI | mem[AR]: ST 14
-    t96   | DR -> AR                      | AC:  2, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 1
-    t97   | mem[AR] -> DR                 | AC:  2, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR:  1, AR: 14 | !Z !N !C DI | mem[AR]: 1
-    t98   | AC -> DR                      | AC:  2, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR:  2, AR: 14 | !Z !N !C DI | mem[AR]: 1
-    t99   | DR -> mem[AR]                 | AC:  2, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR:  2, AR: 14 | !Z !N !C DI | mem[AR]: 2
-
-    t100  | IP -> AR                      | AC:  2, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR:  2, AR: 23 | !Z !N !C DI | mem[AR]: LD 14
-    t101  | IP + 1 -> IP; mem[AR] -> DR   | AC:  2, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 23 | !Z !N !C DI | mem[AR]: LD 14
-    t102  | DR -> CR                      | AC:  2, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 23 | !Z !N !C DI | mem[AR]: LD 14
-    t103  | DR -> AR                      | AC:  2, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 2
-    t104  | mem[AR] -> DR                 | AC:  2, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR:  2, AR: 14 | !Z !N !C DI | mem[AR]: 2
-    t105  | DR -> AR                      | AC:  2, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR:  2, AR:  2 | !Z !N !C DI | mem[AR]: 'l'
-    t106  | mem[AR] -> DR                 | AC:  2, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 108, AR:  2 | !Z !N !C DI | mem[AR]: 'l'
-    t107  | DR -> AC                      | AC: 108, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 108, AR:  2 | !Z !N !C DI | mem[AR]: 'l'
-
-    t108  | IP -> AR                      | AC: 108, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 108, AR: 24 | !Z !N !C DI | mem[AR]: OUT 16
-    t109  | IP + 1 -> IP; mem[AR] -> DR   | AC: 108, IP: 25, CR:  LD 14, PS:  0, SP: 1024, DR: 16, AR: 24 | !Z !N !C DI | mem[AR]: OUT 16
-    t110  | DR -> CR                      | AC: 108, IP: 25, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 24 | !Z !N !C DI | mem[AR]: OUT 16
-    t111  | AC -> OUT                     | AC: 108, IP: 25, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 24 | !Z !N !C DI | mem[AR]: OUT 16
-
-    t112  | IP -> AR                      | AC: 108, IP: 25, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 25 | !Z !N !C DI | mem[AR]: JNZ 20
-    t113  | IP + 1 -> IP; mem[AR] -> DR   | AC: 108, IP: 26, CR: OUT 16, PS:  0, SP: 1024, DR: 20, AR: 25 | !Z !N !C DI | mem[AR]: JNZ 20
-    t114  | DR -> CR                      | AC: 108, IP: 26, CR: JNZ 20, PS:  0, SP: 1024, DR: 20, AR: 25 | !Z !N !C DI | mem[AR]: JNZ 20
-    t115  | DR -> IP                      | AC: 108, IP: 20, CR: JNZ 20, PS:  0, SP: 1024, DR: 20, AR: 25 | !Z !N !C DI | mem[AR]: JNZ 20
-
-    t116  | IP -> AR                      | AC: 108, IP: 20, CR: JNZ 20, PS:  0, SP: 1024, DR: 20, AR: 20 | !Z !N !C DI | mem[AR]: LD 14
-    t117  | IP + 1 -> IP; mem[AR] -> DR   | AC: 108, IP: 21, CR: JNZ 20, PS:  0, SP: 1024, DR: 14, AR: 20 | !Z !N !C DI | mem[AR]: LD 14
-    t118  | DR -> CR                      | AC: 108, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 20 | !Z !N !C DI | mem[AR]: LD 14
-    t119  | DR -> AR                      | AC: 108, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 2
-    t120  | mem[AR] -> DR                 | AC: 108, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR:  2, AR: 14 | !Z !N !C DI | mem[AR]: 2
-    t121  | DR -> AC                      | AC:  2, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR:  2, AR: 14 | !Z !N !C DI | mem[AR]: 2
-
-    t122  | IP -> AR                      | AC:  2, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR:  2, AR: 21 | !Z !N !C DI | mem[AR]: INC
-    t123  | IP + 1 -> IP; mem[AR] -> DR   | AC:  2, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR:  0, AR: 21 | !Z !N !C DI | mem[AR]: INC
-    t124  | DR -> CR                      | AC:  2, IP: 22, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 21 | !Z !N !C DI | mem[AR]: INC
-    t125  | AC + 1 -> AC                  | AC:  3, IP: 22, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 21 | !Z !N !C DI | mem[AR]: INC
-
-    t126  | IP -> AR                      | AC:  3, IP: 22, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 22 | !Z !N !C DI | mem[AR]: ST 14
-    t127  | IP + 1 -> IP; mem[AR] -> DR   | AC:  3, IP: 23, CR:   INC, PS:  0, SP: 1024, DR: 14, AR: 22 | !Z !N !C DI | mem[AR]: ST 14
-    t128  | DR -> CR                      | AC:  3, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 22 | !Z !N !C DI | mem[AR]: ST 14
-    t129  | DR -> AR                      | AC:  3, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 2
-    t130  | mem[AR] -> DR                 | AC:  3, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR:  2, AR: 14 | !Z !N !C DI | mem[AR]: 2
-    t131  | AC -> DR                      | AC:  3, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR:  3, AR: 14 | !Z !N !C DI | mem[AR]: 2
-    t132  | DR -> mem[AR]                 | AC:  3, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR:  3, AR: 14 | !Z !N !C DI | mem[AR]: 3
-
-    t133  | IP -> AR                      | AC:  3, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR:  3, AR: 23 | !Z !N !C DI | mem[AR]: LD 14
-    t134  | IP + 1 -> IP; mem[AR] -> DR   | AC:  3, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 23 | !Z !N !C DI | mem[AR]: LD 14
-    t135  | DR -> CR                      | AC:  3, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 23 | !Z !N !C DI | mem[AR]: LD 14
-    t136  | DR -> AR                      | AC:  3, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 3
-    t137  | mem[AR] -> DR                 | AC:  3, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR:  3, AR: 14 | !Z !N !C DI | mem[AR]: 3
-    t138  | DR -> AR                      | AC:  3, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR:  3, AR:  3 | !Z !N !C DI | mem[AR]: 'l'
-    t139  | mem[AR] -> DR                 | AC:  3, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 108, AR:  3 | !Z !N !C DI | mem[AR]: 'l'
-    t140  | DR -> AC                      | AC: 108, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 108, AR:  3 | !Z !N !C DI | mem[AR]: 'l'
-
-    t141  | IP -> AR                      | AC: 108, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 108, AR: 24 | !Z !N !C DI | mem[AR]: OUT 16
-    t142  | IP + 1 -> IP; mem[AR] -> DR   | AC: 108, IP: 25, CR:  LD 14, PS:  0, SP: 1024, DR: 16, AR: 24 | !Z !N !C DI | mem[AR]: OUT 16
-    t143  | DR -> CR                      | AC: 108, IP: 25, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 24 | !Z !N !C DI | mem[AR]: OUT 16
-    t144  | AC -> OUT                     | AC: 108, IP: 25, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 24 | !Z !N !C DI | mem[AR]: OUT 16
-
-    t145  | IP -> AR                      | AC: 108, IP: 25, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 25 | !Z !N !C DI | mem[AR]: JNZ 20
-    t146  | IP + 1 -> IP; mem[AR] -> DR   | AC: 108, IP: 26, CR: OUT 16, PS:  0, SP: 1024, DR: 20, AR: 25 | !Z !N !C DI | mem[AR]: JNZ 20
-    t147  | DR -> CR                      | AC: 108, IP: 26, CR: JNZ 20, PS:  0, SP: 1024, DR: 20, AR: 25 | !Z !N !C DI | mem[AR]: JNZ 20
-    t148  | DR -> IP                      | AC: 108, IP: 20, CR: JNZ 20, PS:  0, SP: 1024, DR: 20, AR: 25 | !Z !N !C DI | mem[AR]: JNZ 20
-
-    t149  | IP -> AR                      | AC: 108, IP: 20, CR: JNZ 20, PS:  0, SP: 1024, DR: 20, AR: 20 | !Z !N !C DI | mem[AR]: LD 14
-    t150  | IP + 1 -> IP; mem[AR] -> DR   | AC: 108, IP: 21, CR: JNZ 20, PS:  0, SP: 1024, DR: 14, AR: 20 | !Z !N !C DI | mem[AR]: LD 14
-    t151  | DR -> CR                      | AC: 108, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 20 | !Z !N !C DI | mem[AR]: LD 14
-    t152  | DR -> AR                      | AC: 108, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 3
-    t153  | mem[AR] -> DR                 | AC: 108, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR:  3, AR: 14 | !Z !N !C DI | mem[AR]: 3
-    t154  | DR -> AC                      | AC:  3, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR:  3, AR: 14 | !Z !N !C DI | mem[AR]: 3
-
-    t155  | IP -> AR                      | AC:  3, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR:  3, AR: 21 | !Z !N !C DI | mem[AR]: INC
-    t156  | IP + 1 -> IP; mem[AR] -> DR   | AC:  3, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR:  0, AR: 21 | !Z !N !C DI | mem[AR]: INC
-    t157  | DR -> CR                      | AC:  3, IP: 22, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 21 | !Z !N !C DI | mem[AR]: INC
-    t158  | AC + 1 -> AC                  | AC:  4, IP: 22, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 21 | !Z !N !C DI | mem[AR]: INC
-
-    t159  | IP -> AR                      | AC:  4, IP: 22, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 22 | !Z !N !C DI | mem[AR]: ST 14
-    t160  | IP + 1 -> IP; mem[AR] -> DR   | AC:  4, IP: 23, CR:   INC, PS:  0, SP: 1024, DR: 14, AR: 22 | !Z !N !C DI | mem[AR]: ST 14
-    t161  | DR -> CR                      | AC:  4, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 22 | !Z !N !C DI | mem[AR]: ST 14
-    t162  | DR -> AR                      | AC:  4, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 3
-    t163  | mem[AR] -> DR                 | AC:  4, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR:  3, AR: 14 | !Z !N !C DI | mem[AR]: 3
-    t164  | AC -> DR                      | AC:  4, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR:  4, AR: 14 | !Z !N !C DI | mem[AR]: 3
-    t165  | DR -> mem[AR]                 | AC:  4, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR:  4, AR: 14 | !Z !N !C DI | mem[AR]: 4
-
-    t166  | IP -> AR                      | AC:  4, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR:  4, AR: 23 | !Z !N !C DI | mem[AR]: LD 14
-    t167  | IP + 1 -> IP; mem[AR] -> DR   | AC:  4, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 23 | !Z !N !C DI | mem[AR]: LD 14
-    t168  | DR -> CR                      | AC:  4, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 23 | !Z !N !C DI | mem[AR]: LD 14
-    t169  | DR -> AR                      | AC:  4, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 4
-    t170  | mem[AR] -> DR                 | AC:  4, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR:  4, AR: 14 | !Z !N !C DI | mem[AR]: 4
-    t171  | DR -> AR                      | AC:  4, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR:  4, AR:  4 | !Z !N !C DI | mem[AR]: 'o'
-    t172  | mem[AR] -> DR                 | AC:  4, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 111, AR:  4 | !Z !N !C DI | mem[AR]: 'o'
-    t173  | DR -> AC                      | AC: 111, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 111, AR:  4 | !Z !N !C DI | mem[AR]: 'o'
-
-    t174  | IP -> AR                      | AC: 111, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 111, AR: 24 | !Z !N !C DI | mem[AR]: OUT 16
-    t175  | IP + 1 -> IP; mem[AR] -> DR   | AC: 111, IP: 25, CR:  LD 14, PS:  0, SP: 1024, DR: 16, AR: 24 | !Z !N !C DI | mem[AR]: OUT 16
-    t176  | DR -> CR                      | AC: 111, IP: 25, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 24 | !Z !N !C DI | mem[AR]: OUT 16
-    t177  | AC -> OUT                     | AC: 111, IP: 25, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 24 | !Z !N !C DI | mem[AR]: OUT 16
-
-    t178  | IP -> AR                      | AC: 111, IP: 25, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 25 | !Z !N !C DI | mem[AR]: JNZ 20
-    t179  | IP + 1 -> IP; mem[AR] -> DR   | AC: 111, IP: 26, CR: OUT 16, PS:  0, SP: 1024, DR: 20, AR: 25 | !Z !N !C DI | mem[AR]: JNZ 20
-    t180  | DR -> CR                      | AC: 111, IP: 26, CR: JNZ 20, PS:  0, SP: 1024, DR: 20, AR: 25 | !Z !N !C DI | mem[AR]: JNZ 20
-    t181  | DR -> IP                      | AC: 111, IP: 20, CR: JNZ 20, PS:  0, SP: 1024, DR: 20, AR: 25 | !Z !N !C DI | mem[AR]: JNZ 20
-
-    t182  | IP -> AR                      | AC: 111, IP: 20, CR: JNZ 20, PS:  0, SP: 1024, DR: 20, AR: 20 | !Z !N !C DI | mem[AR]: LD 14
-    t183  | IP + 1 -> IP; mem[AR] -> DR   | AC: 111, IP: 21, CR: JNZ 20, PS:  0, SP: 1024, DR: 14, AR: 20 | !Z !N !C DI | mem[AR]: LD 14
-    t184  | DR -> CR                      | AC: 111, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 20 | !Z !N !C DI | mem[AR]: LD 14
-    t185  | DR -> AR                      | AC: 111, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 4
-    t186  | mem[AR] -> DR                 | AC: 111, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR:  4, AR: 14 | !Z !N !C DI | mem[AR]: 4
-    t187  | DR -> AC                      | AC:  4, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR:  4, AR: 14 | !Z !N !C DI | mem[AR]: 4
-
-    t188  | IP -> AR                      | AC:  4, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR:  4, AR: 21 | !Z !N !C DI | mem[AR]: INC
-    t189  | IP + 1 -> IP; mem[AR] -> DR   | AC:  4, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR:  0, AR: 21 | !Z !N !C DI | mem[AR]: INC
-    t190  | DR -> CR                      | AC:  4, IP: 22, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 21 | !Z !N !C DI | mem[AR]: INC
-    t191  | AC + 1 -> AC                  | AC:  5, IP: 22, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 21 | !Z !N !C DI | mem[AR]: INC
-
-    t192  | IP -> AR                      | AC:  5, IP: 22, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 22 | !Z !N !C DI | mem[AR]: ST 14
-    t193  | IP + 1 -> IP; mem[AR] -> DR   | AC:  5, IP: 23, CR:   INC, PS:  0, SP: 1024, DR: 14, AR: 22 | !Z !N !C DI | mem[AR]: ST 14
-    t194  | DR -> CR                      | AC:  5, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 22 | !Z !N !C DI | mem[AR]: ST 14
-    t195  | DR -> AR                      | AC:  5, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 4
-    t196  | mem[AR] -> DR                 | AC:  5, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR:  4, AR: 14 | !Z !N !C DI | mem[AR]: 4
-    t197  | AC -> DR                      | AC:  5, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR:  5, AR: 14 | !Z !N !C DI | mem[AR]: 4
-    t198  | DR -> mem[AR]                 | AC:  5, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR:  5, AR: 14 | !Z !N !C DI | mem[AR]: 5
-
-    t199  | IP -> AR                      | AC:  5, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR:  5, AR: 23 | !Z !N !C DI | mem[AR]: LD 14
-    t200  | IP + 1 -> IP; mem[AR] -> DR   | AC:  5, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 23 | !Z !N !C DI | mem[AR]: LD 14
-    t201  | DR -> CR                      | AC:  5, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 23 | !Z !N !C DI | mem[AR]: LD 14
-    t202  | DR -> AR                      | AC:  5, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 5
-    t203  | mem[AR] -> DR                 | AC:  5, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR:  5, AR: 14 | !Z !N !C DI | mem[AR]: 5
-    t204  | DR -> AR                      | AC:  5, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR:  5, AR:  5 | !Z !N !C DI | mem[AR]: ','
-    t205  | mem[AR] -> DR                 | AC:  5, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 44, AR:  5 | !Z !N !C DI | mem[AR]: ','
-    t206  | DR -> AC                      | AC: 44, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 44, AR:  5 | !Z !N !C DI | mem[AR]: ','
-
-    t207  | IP -> AR                      | AC: 44, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 44, AR: 24 | !Z !N !C DI | mem[AR]: OUT 16
-    t208  | IP + 1 -> IP; mem[AR] -> DR   | AC: 44, IP: 25, CR:  LD 14, PS:  0, SP: 1024, DR: 16, AR: 24 | !Z !N !C DI | mem[AR]: OUT 16
-    t209  | DR -> CR                      | AC: 44, IP: 25, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 24 | !Z !N !C DI | mem[AR]: OUT 16
-    t210  | AC -> OUT                     | AC: 44, IP: 25, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 24 | !Z !N !C DI | mem[AR]: OUT 16
-
-    t211  | IP -> AR                      | AC: 44, IP: 25, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 25 | !Z !N !C DI | mem[AR]: JNZ 20
-    t212  | IP + 1 -> IP; mem[AR] -> DR   | AC: 44, IP: 26, CR: OUT 16, PS:  0, SP: 1024, DR: 20, AR: 25 | !Z !N !C DI | mem[AR]: JNZ 20
-    t213  | DR -> CR                      | AC: 44, IP: 26, CR: JNZ 20, PS:  0, SP: 1024, DR: 20, AR: 25 | !Z !N !C DI | mem[AR]: JNZ 20
-    t214  | DR -> IP                      | AC: 44, IP: 20, CR: JNZ 20, PS:  0, SP: 1024, DR: 20, AR: 25 | !Z !N !C DI | mem[AR]: JNZ 20
-
-    t215  | IP -> AR                      | AC: 44, IP: 20, CR: JNZ 20, PS:  0, SP: 1024, DR: 20, AR: 20 | !Z !N !C DI | mem[AR]: LD 14
-    t216  | IP + 1 -> IP; mem[AR] -> DR   | AC: 44, IP: 21, CR: JNZ 20, PS:  0, SP: 1024, DR: 14, AR: 20 | !Z !N !C DI | mem[AR]: LD 14
-    t217  | DR -> CR                      | AC: 44, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 20 | !Z !N !C DI | mem[AR]: LD 14
-    t218  | DR -> AR                      | AC: 44, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 5
-    t219  | mem[AR] -> DR                 | AC: 44, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR:  5, AR: 14 | !Z !N !C DI | mem[AR]: 5
-    t220  | DR -> AC                      | AC:  5, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR:  5, AR: 14 | !Z !N !C DI | mem[AR]: 5
-
-    t221  | IP -> AR                      | AC:  5, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR:  5, AR: 21 | !Z !N !C DI | mem[AR]: INC
-    t222  | IP + 1 -> IP; mem[AR] -> DR   | AC:  5, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR:  0, AR: 21 | !Z !N !C DI | mem[AR]: INC
-    t223  | DR -> CR                      | AC:  5, IP: 22, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 21 | !Z !N !C DI | mem[AR]: INC
-    t224  | AC + 1 -> AC                  | AC:  6, IP: 22, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 21 | !Z !N !C DI | mem[AR]: INC
-
-    t225  | IP -> AR                      | AC:  6, IP: 22, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 22 | !Z !N !C DI | mem[AR]: ST 14
-    t226  | IP + 1 -> IP; mem[AR] -> DR   | AC:  6, IP: 23, CR:   INC, PS:  0, SP: 1024, DR: 14, AR: 22 | !Z !N !C DI | mem[AR]: ST 14
-    t227  | DR -> CR                      | AC:  6, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 22 | !Z !N !C DI | mem[AR]: ST 14
-    t228  | DR -> AR                      | AC:  6, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 5
-    t229  | mem[AR] -> DR                 | AC:  6, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR:  5, AR: 14 | !Z !N !C DI | mem[AR]: 5
-    t230  | AC -> DR                      | AC:  6, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR:  6, AR: 14 | !Z !N !C DI | mem[AR]: 5
-    t231  | DR -> mem[AR]                 | AC:  6, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR:  6, AR: 14 | !Z !N !C DI | mem[AR]: 6
-
-    t232  | IP -> AR                      | AC:  6, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR:  6, AR: 23 | !Z !N !C DI | mem[AR]: LD 14
-    t233  | IP + 1 -> IP; mem[AR] -> DR   | AC:  6, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 23 | !Z !N !C DI | mem[AR]: LD 14
-    t234  | DR -> CR                      | AC:  6, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 23 | !Z !N !C DI | mem[AR]: LD 14
-    t235  | DR -> AR                      | AC:  6, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 6
-    t236  | mem[AR] -> DR                 | AC:  6, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR:  6, AR: 14 | !Z !N !C DI | mem[AR]: 6
-    t237  | DR -> AR                      | AC:  6, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR:  6, AR:  6 | !Z !N !C DI | mem[AR]: ' '
-    t238  | mem[AR] -> DR                 | AC:  6, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 32, AR:  6 | !Z !N !C DI | mem[AR]: ' '
-    t239  | DR -> AC                      | AC: 32, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 32, AR:  6 | !Z !N !C DI | mem[AR]: ' '
-
-    t240  | IP -> AR                      | AC: 32, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 32, AR: 24 | !Z !N !C DI | mem[AR]: OUT 16
-    t241  | IP + 1 -> IP; mem[AR] -> DR   | AC: 32, IP: 25, CR:  LD 14, PS:  0, SP: 1024, DR: 16, AR: 24 | !Z !N !C DI | mem[AR]: OUT 16
-    t242  | DR -> CR                      | AC: 32, IP: 25, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 24 | !Z !N !C DI | mem[AR]: OUT 16
-    t243  | AC -> OUT                     | AC: 32, IP: 25, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 24 | !Z !N !C DI | mem[AR]: OUT 16
-
-    t244  | IP -> AR                      | AC: 32, IP: 25, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 25 | !Z !N !C DI | mem[AR]: JNZ 20
-    t245  | IP + 1 -> IP; mem[AR] -> DR   | AC: 32, IP: 26, CR: OUT 16, PS:  0, SP: 1024, DR: 20, AR: 25 | !Z !N !C DI | mem[AR]: JNZ 20
-    t246  | DR -> CR                      | AC: 32, IP: 26, CR: JNZ 20, PS:  0, SP: 1024, DR: 20, AR: 25 | !Z !N !C DI | mem[AR]: JNZ 20
-    t247  | DR -> IP                      | AC: 32, IP: 20, CR: JNZ 20, PS:  0, SP: 1024, DR: 20, AR: 25 | !Z !N !C DI | mem[AR]: JNZ 20
-
-    t248  | IP -> AR                      | AC: 32, IP: 20, CR: JNZ 20, PS:  0, SP: 1024, DR: 20, AR: 20 | !Z !N !C DI | mem[AR]: LD 14
-    t249  | IP + 1 -> IP; mem[AR] -> DR   | AC: 32, IP: 21, CR: JNZ 20, PS:  0, SP: 1024, DR: 14, AR: 20 | !Z !N !C DI | mem[AR]: LD 14
-    t250  | DR -> CR                      | AC: 32, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 20 | !Z !N !C DI | mem[AR]: LD 14
-    t251  | DR -> AR                      | AC: 32, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 6
-    t252  | mem[AR] -> DR                 | AC: 32, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR:  6, AR: 14 | !Z !N !C DI | mem[AR]: 6
-    t253  | DR -> AC                      | AC:  6, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR:  6, AR: 14 | !Z !N !C DI | mem[AR]: 6
-
-    t254  | IP -> AR                      | AC:  6, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR:  6, AR: 21 | !Z !N !C DI | mem[AR]: INC
-    t255  | IP + 1 -> IP; mem[AR] -> DR   | AC:  6, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR:  0, AR: 21 | !Z !N !C DI | mem[AR]: INC
-    t256  | DR -> CR                      | AC:  6, IP: 22, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 21 | !Z !N !C DI | mem[AR]: INC
-    t257  | AC + 1 -> AC                  | AC:  7, IP: 22, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 21 | !Z !N !C DI | mem[AR]: INC
-
-    t258  | IP -> AR                      | AC:  7, IP: 22, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 22 | !Z !N !C DI | mem[AR]: ST 14
-    t259  | IP + 1 -> IP; mem[AR] -> DR   | AC:  7, IP: 23, CR:   INC, PS:  0, SP: 1024, DR: 14, AR: 22 | !Z !N !C DI | mem[AR]: ST 14
-    t260  | DR -> CR                      | AC:  7, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 22 | !Z !N !C DI | mem[AR]: ST 14
-    t261  | DR -> AR                      | AC:  7, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 6
-    t262  | mem[AR] -> DR                 | AC:  7, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR:  6, AR: 14 | !Z !N !C DI | mem[AR]: 6
-    t263  | AC -> DR                      | AC:  7, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR:  7, AR: 14 | !Z !N !C DI | mem[AR]: 6
-    t264  | DR -> mem[AR]                 | AC:  7, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR:  7, AR: 14 | !Z !N !C DI | mem[AR]: 7
-
-    t265  | IP -> AR                      | AC:  7, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR:  7, AR: 23 | !Z !N !C DI | mem[AR]: LD 14
-    t266  | IP + 1 -> IP; mem[AR] -> DR   | AC:  7, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 23 | !Z !N !C DI | mem[AR]: LD 14
-    t267  | DR -> CR                      | AC:  7, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 23 | !Z !N !C DI | mem[AR]: LD 14
-    t268  | DR -> AR                      | AC:  7, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 7
-    t269  | mem[AR] -> DR                 | AC:  7, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR:  7, AR: 14 | !Z !N !C DI | mem[AR]: 7
-    t270  | DR -> AR                      | AC:  7, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR:  7, AR:  7 | !Z !N !C DI | mem[AR]: 'W'
-    t271  | mem[AR] -> DR                 | AC:  7, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 87, AR:  7 | !Z !N !C DI | mem[AR]: 'W'
-    t272  | DR -> AC                      | AC: 87, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 87, AR:  7 | !Z !N !C DI | mem[AR]: 'W'
-
-    t273  | IP -> AR                      | AC: 87, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 87, AR: 24 | !Z !N !C DI | mem[AR]: OUT 16
-    t274  | IP + 1 -> IP; mem[AR] -> DR   | AC: 87, IP: 25, CR:  LD 14, PS:  0, SP: 1024, DR: 16, AR: 24 | !Z !N !C DI | mem[AR]: OUT 16
-    t275  | DR -> CR                      | AC: 87, IP: 25, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 24 | !Z !N !C DI | mem[AR]: OUT 16
-    t276  | AC -> OUT                     | AC: 87, IP: 25, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 24 | !Z !N !C DI | mem[AR]: OUT 16
-
-    t277  | IP -> AR                      | AC: 87, IP: 25, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 25 | !Z !N !C DI | mem[AR]: JNZ 20
-    t278  | IP + 1 -> IP; mem[AR] -> DR   | AC: 87, IP: 26, CR: OUT 16, PS:  0, SP: 1024, DR: 20, AR: 25 | !Z !N !C DI | mem[AR]: JNZ 20
-    t279  | DR -> CR                      | AC: 87, IP: 26, CR: JNZ 20, PS:  0, SP: 1024, DR: 20, AR: 25 | !Z !N !C DI | mem[AR]: JNZ 20
-    t280  | DR -> IP                      | AC: 87, IP: 20, CR: JNZ 20, PS:  0, SP: 1024, DR: 20, AR: 25 | !Z !N !C DI | mem[AR]: JNZ 20
-
-    t281  | IP -> AR                      | AC: 87, IP: 20, CR: JNZ 20, PS:  0, SP: 1024, DR: 20, AR: 20 | !Z !N !C DI | mem[AR]: LD 14
-    t282  | IP + 1 -> IP; mem[AR] -> DR   | AC: 87, IP: 21, CR: JNZ 20, PS:  0, SP: 1024, DR: 14, AR: 20 | !Z !N !C DI | mem[AR]: LD 14
-    t283  | DR -> CR                      | AC: 87, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 20 | !Z !N !C DI | mem[AR]: LD 14
-    t284  | DR -> AR                      | AC: 87, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 7
-    t285  | mem[AR] -> DR                 | AC: 87, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR:  7, AR: 14 | !Z !N !C DI | mem[AR]: 7
-    t286  | DR -> AC                      | AC:  7, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR:  7, AR: 14 | !Z !N !C DI | mem[AR]: 7
-
-    t287  | IP -> AR                      | AC:  7, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR:  7, AR: 21 | !Z !N !C DI | mem[AR]: INC
-    t288  | IP + 1 -> IP; mem[AR] -> DR   | AC:  7, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR:  0, AR: 21 | !Z !N !C DI | mem[AR]: INC
-    t289  | DR -> CR                      | AC:  7, IP: 22, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 21 | !Z !N !C DI | mem[AR]: INC
-    t290  | AC + 1 -> AC                  | AC:  8, IP: 22, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 21 | !Z !N !C DI | mem[AR]: INC
-
-    t291  | IP -> AR                      | AC:  8, IP: 22, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 22 | !Z !N !C DI | mem[AR]: ST 14
-    t292  | IP + 1 -> IP; mem[AR] -> DR   | AC:  8, IP: 23, CR:   INC, PS:  0, SP: 1024, DR: 14, AR: 22 | !Z !N !C DI | mem[AR]: ST 14
-    t293  | DR -> CR                      | AC:  8, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 22 | !Z !N !C DI | mem[AR]: ST 14
-    t294  | DR -> AR                      | AC:  8, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 7
-    t295  | mem[AR] -> DR                 | AC:  8, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR:  7, AR: 14 | !Z !N !C DI | mem[AR]: 7
-    t296  | AC -> DR                      | AC:  8, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR:  8, AR: 14 | !Z !N !C DI | mem[AR]: 7
-    t297  | DR -> mem[AR]                 | AC:  8, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR:  8, AR: 14 | !Z !N !C DI | mem[AR]: 8
-
-    t298  | IP -> AR                      | AC:  8, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR:  8, AR: 23 | !Z !N !C DI | mem[AR]: LD 14
-    t299  | IP + 1 -> IP; mem[AR] -> DR   | AC:  8, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 23 | !Z !N !C DI | mem[AR]: LD 14
-    t300  | DR -> CR                      | AC:  8, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 23 | !Z !N !C DI | mem[AR]: LD 14
-    t301  | DR -> AR                      | AC:  8, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 8
-    t302  | mem[AR] -> DR                 | AC:  8, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR:  8, AR: 14 | !Z !N !C DI | mem[AR]: 8
-    t303  | DR -> AR                      | AC:  8, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR:  8, AR:  8 | !Z !N !C DI | mem[AR]: 'o'
-    t304  | mem[AR] -> DR                 | AC:  8, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 111, AR:  8 | !Z !N !C DI | mem[AR]: 'o'
-    t305  | DR -> AC                      | AC: 111, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 111, AR:  8 | !Z !N !C DI | mem[AR]: 'o'
-
-    t306  | IP -> AR                      | AC: 111, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 111, AR: 24 | !Z !N !C DI | mem[AR]: OUT 16
-    t307  | IP + 1 -> IP; mem[AR] -> DR   | AC: 111, IP: 25, CR:  LD 14, PS:  0, SP: 1024, DR: 16, AR: 24 | !Z !N !C DI | mem[AR]: OUT 16
-    t308  | DR -> CR                      | AC: 111, IP: 25, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 24 | !Z !N !C DI | mem[AR]: OUT 16
-    t309  | AC -> OUT                     | AC: 111, IP: 25, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 24 | !Z !N !C DI | mem[AR]: OUT 16
-
-    t310  | IP -> AR                      | AC: 111, IP: 25, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 25 | !Z !N !C DI | mem[AR]: JNZ 20
-    t311  | IP + 1 -> IP; mem[AR] -> DR   | AC: 111, IP: 26, CR: OUT 16, PS:  0, SP: 1024, DR: 20, AR: 25 | !Z !N !C DI | mem[AR]: JNZ 20
-    t312  | DR -> CR                      | AC: 111, IP: 26, CR: JNZ 20, PS:  0, SP: 1024, DR: 20, AR: 25 | !Z !N !C DI | mem[AR]: JNZ 20
-    t313  | DR -> IP                      | AC: 111, IP: 20, CR: JNZ 20, PS:  0, SP: 1024, DR: 20, AR: 25 | !Z !N !C DI | mem[AR]: JNZ 20
-
-    t314  | IP -> AR                      | AC: 111, IP: 20, CR: JNZ 20, PS:  0, SP: 1024, DR: 20, AR: 20 | !Z !N !C DI | mem[AR]: LD 14
-    t315  | IP + 1 -> IP; mem[AR] -> DR   | AC: 111, IP: 21, CR: JNZ 20, PS:  0, SP: 1024, DR: 14, AR: 20 | !Z !N !C DI | mem[AR]: LD 14
-    t316  | DR -> CR                      | AC: 111, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 20 | !Z !N !C DI | mem[AR]: LD 14
-    t317  | DR -> AR                      | AC: 111, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 8
-    t318  | mem[AR] -> DR                 | AC: 111, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR:  8, AR: 14 | !Z !N !C DI | mem[AR]: 8
-    t319  | DR -> AC                      | AC:  8, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR:  8, AR: 14 | !Z !N !C DI | mem[AR]: 8
-
-    t320  | IP -> AR                      | AC:  8, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR:  8, AR: 21 | !Z !N !C DI | mem[AR]: INC
-    t321  | IP + 1 -> IP; mem[AR] -> DR   | AC:  8, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR:  0, AR: 21 | !Z !N !C DI | mem[AR]: INC
-    t322  | DR -> CR                      | AC:  8, IP: 22, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 21 | !Z !N !C DI | mem[AR]: INC
-    t323  | AC + 1 -> AC                  | AC:  9, IP: 22, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 21 | !Z !N !C DI | mem[AR]: INC
-
-    t324  | IP -> AR                      | AC:  9, IP: 22, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 22 | !Z !N !C DI | mem[AR]: ST 14
-    t325  | IP + 1 -> IP; mem[AR] -> DR   | AC:  9, IP: 23, CR:   INC, PS:  0, SP: 1024, DR: 14, AR: 22 | !Z !N !C DI | mem[AR]: ST 14
-    t326  | DR -> CR                      | AC:  9, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 22 | !Z !N !C DI | mem[AR]: ST 14
-    t327  | DR -> AR                      | AC:  9, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 8
-    t328  | mem[AR] -> DR                 | AC:  9, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR:  8, AR: 14 | !Z !N !C DI | mem[AR]: 8
-    t329  | AC -> DR                      | AC:  9, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR:  9, AR: 14 | !Z !N !C DI | mem[AR]: 8
-    t330  | DR -> mem[AR]                 | AC:  9, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR:  9, AR: 14 | !Z !N !C DI | mem[AR]: 9
-
-    t331  | IP -> AR                      | AC:  9, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR:  9, AR: 23 | !Z !N !C DI | mem[AR]: LD 14
-    t332  | IP + 1 -> IP; mem[AR] -> DR   | AC:  9, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 23 | !Z !N !C DI | mem[AR]: LD 14
-    t333  | DR -> CR                      | AC:  9, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 23 | !Z !N !C DI | mem[AR]: LD 14
-    t334  | DR -> AR                      | AC:  9, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 9
-    t335  | mem[AR] -> DR                 | AC:  9, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR:  9, AR: 14 | !Z !N !C DI | mem[AR]: 9
-    t336  | DR -> AR                      | AC:  9, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR:  9, AR:  9 | !Z !N !C DI | mem[AR]: 'r'
-    t337  | mem[AR] -> DR                 | AC:  9, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 114, AR:  9 | !Z !N !C DI | mem[AR]: 'r'
-    t338  | DR -> AC                      | AC: 114, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 114, AR:  9 | !Z !N !C DI | mem[AR]: 'r'
-
-    t339  | IP -> AR                      | AC: 114, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 114, AR: 24 | !Z !N !C DI | mem[AR]: OUT 16
-    t340  | IP + 1 -> IP; mem[AR] -> DR   | AC: 114, IP: 25, CR:  LD 14, PS:  0, SP: 1024, DR: 16, AR: 24 | !Z !N !C DI | mem[AR]: OUT 16
-    t341  | DR -> CR                      | AC: 114, IP: 25, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 24 | !Z !N !C DI | mem[AR]: OUT 16
-    t342  | AC -> OUT                     | AC: 114, IP: 25, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 24 | !Z !N !C DI | mem[AR]: OUT 16
-
-    t343  | IP -> AR                      | AC: 114, IP: 25, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 25 | !Z !N !C DI | mem[AR]: JNZ 20
-    t344  | IP + 1 -> IP; mem[AR] -> DR   | AC: 114, IP: 26, CR: OUT 16, PS:  0, SP: 1024, DR: 20, AR: 25 | !Z !N !C DI | mem[AR]: JNZ 20
-    t345  | DR -> CR                      | AC: 114, IP: 26, CR: JNZ 20, PS:  0, SP: 1024, DR: 20, AR: 25 | !Z !N !C DI | mem[AR]: JNZ 20
-    t346  | DR -> IP                      | AC: 114, IP: 20, CR: JNZ 20, PS:  0, SP: 1024, DR: 20, AR: 25 | !Z !N !C DI | mem[AR]: JNZ 20
-
-    t347  | IP -> AR                      | AC: 114, IP: 20, CR: JNZ 20, PS:  0, SP: 1024, DR: 20, AR: 20 | !Z !N !C DI | mem[AR]: LD 14
-    t348  | IP + 1 -> IP; mem[AR] -> DR   | AC: 114, IP: 21, CR: JNZ 20, PS:  0, SP: 1024, DR: 14, AR: 20 | !Z !N !C DI | mem[AR]: LD 14
-    t349  | DR -> CR                      | AC: 114, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 20 | !Z !N !C DI | mem[AR]: LD 14
-    t350  | DR -> AR                      | AC: 114, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 9
-    t351  | mem[AR] -> DR                 | AC: 114, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR:  9, AR: 14 | !Z !N !C DI | mem[AR]: 9
-    t352  | DR -> AC                      | AC:  9, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR:  9, AR: 14 | !Z !N !C DI | mem[AR]: 9
-
-    t353  | IP -> AR                      | AC:  9, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR:  9, AR: 21 | !Z !N !C DI | mem[AR]: INC
-    t354  | IP + 1 -> IP; mem[AR] -> DR   | AC:  9, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR:  0, AR: 21 | !Z !N !C DI | mem[AR]: INC
-    t355  | DR -> CR                      | AC:  9, IP: 22, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 21 | !Z !N !C DI | mem[AR]: INC
-    t356  | AC + 1 -> AC                  | AC: 10, IP: 22, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 21 | !Z !N !C DI | mem[AR]: INC
-
-    t357  | IP -> AR                      | AC: 10, IP: 22, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 22 | !Z !N !C DI | mem[AR]: ST 14
-    t358  | IP + 1 -> IP; mem[AR] -> DR   | AC: 10, IP: 23, CR:   INC, PS:  0, SP: 1024, DR: 14, AR: 22 | !Z !N !C DI | mem[AR]: ST 14
-    t359  | DR -> CR                      | AC: 10, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 22 | !Z !N !C DI | mem[AR]: ST 14
-    t360  | DR -> AR                      | AC: 10, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 9
-    t361  | mem[AR] -> DR                 | AC: 10, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR:  9, AR: 14 | !Z !N !C DI | mem[AR]: 9
-    t362  | AC -> DR                      | AC: 10, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR: 10, AR: 14 | !Z !N !C DI | mem[AR]: 9
-    t363  | DR -> mem[AR]                 | AC: 10, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR: 10, AR: 14 | !Z !N !C DI | mem[AR]: 10
-
-    t364  | IP -> AR                      | AC: 10, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR: 10, AR: 23 | !Z !N !C DI | mem[AR]: LD 14
-    t365  | IP + 1 -> IP; mem[AR] -> DR   | AC: 10, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 23 | !Z !N !C DI | mem[AR]: LD 14
-    t366  | DR -> CR                      | AC: 10, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 23 | !Z !N !C DI | mem[AR]: LD 14
-    t367  | DR -> AR                      | AC: 10, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 10
-    t368  | mem[AR] -> DR                 | AC: 10, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 10, AR: 14 | !Z !N !C DI | mem[AR]: 10
-    t369  | DR -> AR                      | AC: 10, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 10, AR: 10 | !Z !N !C DI | mem[AR]: 'l'
-    t370  | mem[AR] -> DR                 | AC: 10, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 108, AR: 10 | !Z !N !C DI | mem[AR]: 'l'
-    t371  | DR -> AC                      | AC: 108, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 108, AR: 10 | !Z !N !C DI | mem[AR]: 'l'
-
-    t372  | IP -> AR                      | AC: 108, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 108, AR: 24 | !Z !N !C DI | mem[AR]: OUT 16
-    t373  | IP + 1 -> IP; mem[AR] -> DR   | AC: 108, IP: 25, CR:  LD 14, PS:  0, SP: 1024, DR: 16, AR: 24 | !Z !N !C DI | mem[AR]: OUT 16
-    t374  | DR -> CR                      | AC: 108, IP: 25, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 24 | !Z !N !C DI | mem[AR]: OUT 16
-    t375  | AC -> OUT                     | AC: 108, IP: 25, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 24 | !Z !N !C DI | mem[AR]: OUT 16
-
-    t376  | IP -> AR                      | AC: 108, IP: 25, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 25 | !Z !N !C DI | mem[AR]: JNZ 20
-    t377  | IP + 1 -> IP; mem[AR] -> DR   | AC: 108, IP: 26, CR: OUT 16, PS:  0, SP: 1024, DR: 20, AR: 25 | !Z !N !C DI | mem[AR]: JNZ 20
-    t378  | DR -> CR                      | AC: 108, IP: 26, CR: JNZ 20, PS:  0, SP: 1024, DR: 20, AR: 25 | !Z !N !C DI | mem[AR]: JNZ 20
-    t379  | DR -> IP                      | AC: 108, IP: 20, CR: JNZ 20, PS:  0, SP: 1024, DR: 20, AR: 25 | !Z !N !C DI | mem[AR]: JNZ 20
-
-    t380  | IP -> AR                      | AC: 108, IP: 20, CR: JNZ 20, PS:  0, SP: 1024, DR: 20, AR: 20 | !Z !N !C DI | mem[AR]: LD 14
-    t381  | IP + 1 -> IP; mem[AR] -> DR   | AC: 108, IP: 21, CR: JNZ 20, PS:  0, SP: 1024, DR: 14, AR: 20 | !Z !N !C DI | mem[AR]: LD 14
-    t382  | DR -> CR                      | AC: 108, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 20 | !Z !N !C DI | mem[AR]: LD 14
-    t383  | DR -> AR                      | AC: 108, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 10
-    t384  | mem[AR] -> DR                 | AC: 108, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR: 10, AR: 14 | !Z !N !C DI | mem[AR]: 10
-    t385  | DR -> AC                      | AC: 10, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR: 10, AR: 14 | !Z !N !C DI | mem[AR]: 10
-
-    t386  | IP -> AR                      | AC: 10, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR: 10, AR: 21 | !Z !N !C DI | mem[AR]: INC
-    t387  | IP + 1 -> IP; mem[AR] -> DR   | AC: 10, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR:  0, AR: 21 | !Z !N !C DI | mem[AR]: INC
-    t388  | DR -> CR                      | AC: 10, IP: 22, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 21 | !Z !N !C DI | mem[AR]: INC
-    t389  | AC + 1 -> AC                  | AC: 11, IP: 22, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 21 | !Z !N !C DI | mem[AR]: INC
-
-    t390  | IP -> AR                      | AC: 11, IP: 22, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 22 | !Z !N !C DI | mem[AR]: ST 14
-    t391  | IP + 1 -> IP; mem[AR] -> DR   | AC: 11, IP: 23, CR:   INC, PS:  0, SP: 1024, DR: 14, AR: 22 | !Z !N !C DI | mem[AR]: ST 14
-    t392  | DR -> CR                      | AC: 11, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 22 | !Z !N !C DI | mem[AR]: ST 14
-    t393  | DR -> AR                      | AC: 11, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 10
-    t394  | mem[AR] -> DR                 | AC: 11, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR: 10, AR: 14 | !Z !N !C DI | mem[AR]: 10
-    t395  | AC -> DR                      | AC: 11, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR: 11, AR: 14 | !Z !N !C DI | mem[AR]: 10
-    t396  | DR -> mem[AR]                 | AC: 11, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR: 11, AR: 14 | !Z !N !C DI | mem[AR]: 11
-
-    t397  | IP -> AR                      | AC: 11, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR: 11, AR: 23 | !Z !N !C DI | mem[AR]: LD 14
-    t398  | IP + 1 -> IP; mem[AR] -> DR   | AC: 11, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 23 | !Z !N !C DI | mem[AR]: LD 14
-    t399  | DR -> CR                      | AC: 11, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 23 | !Z !N !C DI | mem[AR]: LD 14
-    t400  | DR -> AR                      | AC: 11, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 11
-    t401  | mem[AR] -> DR                 | AC: 11, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 11, AR: 14 | !Z !N !C DI | mem[AR]: 11
-    t402  | DR -> AR                      | AC: 11, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 11, AR: 11 | !Z !N !C DI | mem[AR]: 'd'
-    t403  | mem[AR] -> DR                 | AC: 11, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 100, AR: 11 | !Z !N !C DI | mem[AR]: 'd'
-    t404  | DR -> AC                      | AC: 100, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 100, AR: 11 | !Z !N !C DI | mem[AR]: 'd'
-
-    t405  | IP -> AR                      | AC: 100, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 100, AR: 24 | !Z !N !C DI | mem[AR]: OUT 16
-    t406  | IP + 1 -> IP; mem[AR] -> DR   | AC: 100, IP: 25, CR:  LD 14, PS:  0, SP: 1024, DR: 16, AR: 24 | !Z !N !C DI | mem[AR]: OUT 16
-    t407  | DR -> CR                      | AC: 100, IP: 25, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 24 | !Z !N !C DI | mem[AR]: OUT 16
-    t408  | AC -> OUT                     | AC: 100, IP: 25, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 24 | !Z !N !C DI | mem[AR]: OUT 16
-
-    t409  | IP -> AR                      | AC: 100, IP: 25, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 25 | !Z !N !C DI | mem[AR]: JNZ 20
-    t410  | IP + 1 -> IP; mem[AR] -> DR   | AC: 100, IP: 26, CR: OUT 16, PS:  0, SP: 1024, DR: 20, AR: 25 | !Z !N !C DI | mem[AR]: JNZ 20
-    t411  | DR -> CR                      | AC: 100, IP: 26, CR: JNZ 20, PS:  0, SP: 1024, DR: 20, AR: 25 | !Z !N !C DI | mem[AR]: JNZ 20
-    t412  | DR -> IP                      | AC: 100, IP: 20, CR: JNZ 20, PS:  0, SP: 1024, DR: 20, AR: 25 | !Z !N !C DI | mem[AR]: JNZ 20
-
-    t413  | IP -> AR                      | AC: 100, IP: 20, CR: JNZ 20, PS:  0, SP: 1024, DR: 20, AR: 20 | !Z !N !C DI | mem[AR]: LD 14
-    t414  | IP + 1 -> IP; mem[AR] -> DR   | AC: 100, IP: 21, CR: JNZ 20, PS:  0, SP: 1024, DR: 14, AR: 20 | !Z !N !C DI | mem[AR]: LD 14
-    t415  | DR -> CR                      | AC: 100, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 20 | !Z !N !C DI | mem[AR]: LD 14
-    t416  | DR -> AR                      | AC: 100, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 11
-    t417  | mem[AR] -> DR                 | AC: 100, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR: 11, AR: 14 | !Z !N !C DI | mem[AR]: 11
-    t418  | DR -> AC                      | AC: 11, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR: 11, AR: 14 | !Z !N !C DI | mem[AR]: 11
-
-    t419  | IP -> AR                      | AC: 11, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR: 11, AR: 21 | !Z !N !C DI | mem[AR]: INC
-    t420  | IP + 1 -> IP; mem[AR] -> DR   | AC: 11, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR:  0, AR: 21 | !Z !N !C DI | mem[AR]: INC
-    t421  | DR -> CR                      | AC: 11, IP: 22, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 21 | !Z !N !C DI | mem[AR]: INC
-    t422  | AC + 1 -> AC                  | AC: 12, IP: 22, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 21 | !Z !N !C DI | mem[AR]: INC
-
-    t423  | IP -> AR                      | AC: 12, IP: 22, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 22 | !Z !N !C DI | mem[AR]: ST 14
-    t424  | IP + 1 -> IP; mem[AR] -> DR   | AC: 12, IP: 23, CR:   INC, PS:  0, SP: 1024, DR: 14, AR: 22 | !Z !N !C DI | mem[AR]: ST 14
-    t425  | DR -> CR                      | AC: 12, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 22 | !Z !N !C DI | mem[AR]: ST 14
-    t426  | DR -> AR                      | AC: 12, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 11
-    t427  | mem[AR] -> DR                 | AC: 12, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR: 11, AR: 14 | !Z !N !C DI | mem[AR]: 11
-    t428  | AC -> DR                      | AC: 12, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR: 12, AR: 14 | !Z !N !C DI | mem[AR]: 11
-    t429  | DR -> mem[AR]                 | AC: 12, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR: 12, AR: 14 | !Z !N !C DI | mem[AR]: 12
-
-    t430  | IP -> AR                      | AC: 12, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR: 12, AR: 23 | !Z !N !C DI | mem[AR]: LD 14
-    t431  | IP + 1 -> IP; mem[AR] -> DR   | AC: 12, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 23 | !Z !N !C DI | mem[AR]: LD 14
-    t432  | DR -> CR                      | AC: 12, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 23 | !Z !N !C DI | mem[AR]: LD 14
-    t433  | DR -> AR                      | AC: 12, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 12
-    t434  | mem[AR] -> DR                 | AC: 12, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 12, AR: 14 | !Z !N !C DI | mem[AR]: 12
-    t435  | DR -> AR                      | AC: 12, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 12, AR: 12 | !Z !N !C DI | mem[AR]: '!'
-    t436  | mem[AR] -> DR                 | AC: 12, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 33, AR: 12 | !Z !N !C DI | mem[AR]: '!'
-    t437  | DR -> AC                      | AC: 33, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 33, AR: 12 | !Z !N !C DI | mem[AR]: '!'
-
-    t438  | IP -> AR                      | AC: 33, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 33, AR: 24 | !Z !N !C DI | mem[AR]: OUT 16
-    t439  | IP + 1 -> IP; mem[AR] -> DR   | AC: 33, IP: 25, CR:  LD 14, PS:  0, SP: 1024, DR: 16, AR: 24 | !Z !N !C DI | mem[AR]: OUT 16
-    t440  | DR -> CR                      | AC: 33, IP: 25, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 24 | !Z !N !C DI | mem[AR]: OUT 16
-    t441  | AC -> OUT                     | AC: 33, IP: 25, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 24 | !Z !N !C DI | mem[AR]: OUT 16
-
-    t442  | IP -> AR                      | AC: 33, IP: 25, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 25 | !Z !N !C DI | mem[AR]: JNZ 20
-    t443  | IP + 1 -> IP; mem[AR] -> DR   | AC: 33, IP: 26, CR: OUT 16, PS:  0, SP: 1024, DR: 20, AR: 25 | !Z !N !C DI | mem[AR]: JNZ 20
-    t444  | DR -> CR                      | AC: 33, IP: 26, CR: JNZ 20, PS:  0, SP: 1024, DR: 20, AR: 25 | !Z !N !C DI | mem[AR]: JNZ 20
-    t445  | DR -> IP                      | AC: 33, IP: 20, CR: JNZ 20, PS:  0, SP: 1024, DR: 20, AR: 25 | !Z !N !C DI | mem[AR]: JNZ 20
-
-    t446  | IP -> AR                      | AC: 33, IP: 20, CR: JNZ 20, PS:  0, SP: 1024, DR: 20, AR: 20 | !Z !N !C DI | mem[AR]: LD 14
-    t447  | IP + 1 -> IP; mem[AR] -> DR   | AC: 33, IP: 21, CR: JNZ 20, PS:  0, SP: 1024, DR: 14, AR: 20 | !Z !N !C DI | mem[AR]: LD 14
-    t448  | DR -> CR                      | AC: 33, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 20 | !Z !N !C DI | mem[AR]: LD 14
-    t449  | DR -> AR                      | AC: 33, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 12
-    t450  | mem[AR] -> DR                 | AC: 33, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR: 12, AR: 14 | !Z !N !C DI | mem[AR]: 12
-    t451  | DR -> AC                      | AC: 12, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR: 12, AR: 14 | !Z !N !C DI | mem[AR]: 12
-
-    t452  | IP -> AR                      | AC: 12, IP: 21, CR:  LD 14, PS:  0, SP: 1024, DR: 12, AR: 21 | !Z !N !C DI | mem[AR]: INC
-    t453  | IP + 1 -> IP; mem[AR] -> DR   | AC: 12, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR:  0, AR: 21 | !Z !N !C DI | mem[AR]: INC
-    t454  | DR -> CR                      | AC: 12, IP: 22, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 21 | !Z !N !C DI | mem[AR]: INC
-    t455  | AC + 1 -> AC                  | AC: 13, IP: 22, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 21 | !Z !N !C DI | mem[AR]: INC
-
-    t456  | IP -> AR                      | AC: 13, IP: 22, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 22 | !Z !N !C DI | mem[AR]: ST 14
-    t457  | IP + 1 -> IP; mem[AR] -> DR   | AC: 13, IP: 23, CR:   INC, PS:  0, SP: 1024, DR: 14, AR: 22 | !Z !N !C DI | mem[AR]: ST 14
-    t458  | DR -> CR                      | AC: 13, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 22 | !Z !N !C DI | mem[AR]: ST 14
-    t459  | DR -> AR                      | AC: 13, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 12
-    t460  | mem[AR] -> DR                 | AC: 13, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR: 12, AR: 14 | !Z !N !C DI | mem[AR]: 12
-    t461  | AC -> DR                      | AC: 13, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR: 13, AR: 14 | !Z !N !C DI | mem[AR]: 12
-    t462  | DR -> mem[AR]                 | AC: 13, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR: 13, AR: 14 | !Z !N !C DI | mem[AR]: 13
-
-    t463  | IP -> AR                      | AC: 13, IP: 23, CR:  ST 14, PS:  0, SP: 1024, DR: 13, AR: 23 | !Z !N !C DI | mem[AR]: LD 14
-    t464  | IP + 1 -> IP; mem[AR] -> DR   | AC: 13, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 23 | !Z !N !C DI | mem[AR]: LD 14
-    t465  | DR -> CR                      | AC: 13, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 23 | !Z !N !C DI | mem[AR]: LD 14
-    t466  | DR -> AR                      | AC: 13, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 13
-    t467  | mem[AR] -> DR                 | AC: 13, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 13, AR: 14 | !Z !N !C DI | mem[AR]: 13
-    t468  | DR -> AR                      | AC: 13, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR: 13, AR: 13 | !Z !N !C DI | mem[AR]: 0
-    t469  | mem[AR] -> DR                 | AC: 13, IP: 24, CR:  LD 14, PS:  0, SP: 1024, DR:  0, AR: 13 | !Z !N !C DI | mem[AR]: 0
-    t470  | DR -> AC                      | AC:  0, IP: 24, CR:  LD 14, PS:  4, SP: 1024, DR:  0, AR: 13 | Z !N !C DI | mem[AR]: 0
-
-    t471  | IP -> AR                      | AC:  0, IP: 24, CR:  LD 14, PS:  4, SP: 1024, DR:  0, AR: 24 | Z !N !C DI | mem[AR]: OUT 16
-    t472  | IP + 1 -> IP; mem[AR] -> DR   | AC:  0, IP: 25, CR:  LD 14, PS:  4, SP: 1024, DR: 16, AR: 24 | Z !N !C DI | mem[AR]: OUT 16
-    t473  | DR -> CR                      | AC:  0, IP: 25, CR: OUT 16, PS:  4, SP: 1024, DR: 16, AR: 24 | Z !N !C DI | mem[AR]: OUT 16
-    t474  | AC -> OUT                     | AC:  0, IP: 25, CR: OUT 16, PS:  4, SP: 1024, DR: 16, AR: 24 | Z !N !C DI | mem[AR]: OUT 16
-
-    t475  | IP -> AR                      | AC:  0, IP: 25, CR: OUT 16, PS:  4, SP: 1024, DR: 16, AR: 25 | Z !N !C DI | mem[AR]: JNZ 20
-    t476  | IP + 1 -> IP; mem[AR] -> DR   | AC:  0, IP: 26, CR: OUT 16, PS:  4, SP: 1024, DR: 20, AR: 25 | Z !N !C DI | mem[AR]: JNZ 20
-    t477  | DR -> CR                      | AC:  0, IP: 26, CR: JNZ 20, PS:  4, SP: 1024, DR: 20, AR: 25 | Z !N !C DI | mem[AR]: JNZ 20
-
-    t478  | IP -> AR                      | AC:  0, IP: 26, CR: JNZ 20, PS:  4, SP: 1024, DR: 20, AR: 26 | Z !N !C DI | mem[AR]: HLT
-    t479  | IP + 1 -> IP; mem[AR] -> DR   | AC:  0, IP: 27, CR: JNZ 20, PS:  4, SP: 1024, DR:  0, AR: 26 | Z !N !C DI | mem[AR]: HLT
-    t480  | DR -> CR                      | AC:  0, IP: 27, CR:   HLT, PS:  4, SP: 1024, DR:  0, AR: 26 | Z !N !C DI | mem[AR]: HLT
-    t481  | HLT                           | AC:  0, IP: 27, CR:   HLT, PS:  4, SP: 1024, DR:  0, AR: 26 | Z !N !C DI | mem[AR]: HLT
+    t0    | IP -> AR                      | AC:  0, IP: 17, CR: NOP 0, PS:  0, SP: 1024, DR:  0, AR: 17 | !Z !N !C DI | mem[AR]: 0
+    t1    | IP + 1 -> IP; mem[AR] -> DR   | AC:  0, IP: 18, CR: NOP 0, PS:  0, SP: 1024, DR:  0, AR: 17 | !Z !N !C DI | mem[AR]: 0
+    t2    | DR -> CR                      | AC:  0, IP: 18, CR:   NOP, PS:  0, SP: 1024, DR:  0, AR: 17 | !Z !N !C DI | mem[AR]: 0
+    t3    | NOP                           | AC:  0, IP: 18, CR:   NOP, PS:  0, SP: 1024, DR:  0, AR: 17 | !Z !N !C DI | mem[AR]: 0
+
+    t4    | IP -> AR                      | AC:  0, IP: 18, CR:   NOP, PS:  0, SP: 1024, DR:  0, AR: 18 | !Z !N !C DI | mem[AR]: LD 14
+    t5    | IP + 1 -> IP; mem[AR] -> DR   | AC:  0, IP: 19, CR:   NOP, PS:  0, SP: 1024, DR: 14, AR: 18 | !Z !N !C DI | mem[AR]: LD 14
+    t6    | DR -> CR                      | AC:  0, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 18 | !Z !N !C DI | mem[AR]: LD 14
+    t7    | DR -> AR                      | AC:  0, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 0
+    t8    | mem[AR] -> DR                 | AC:  0, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR:  0, AR: 14 | !Z !N !C DI | mem[AR]: 0
+    t9    | DR -> AR                      | AC:  0, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR:  0, AR:  0 | !Z !N !C DI | mem[AR]: 'H'
+    t10   | mem[AR] -> DR                 | AC:  0, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 72, AR:  0 | !Z !N !C DI | mem[AR]: 'H'
+    t11   | DR -> AC                      | AC: 72, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 72, AR:  0 | !Z !N !C DI | mem[AR]: 'H'
+
+    t12   | IP -> AR                      | AC: 72, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 72, AR: 19 | !Z !N !C DI | mem[AR]: OUT 16
+    t13   | IP + 1 -> IP; mem[AR] -> DR   | AC: 72, IP: 20, CR:  LD 14, PS:  0, SP: 1024, DR: 16, AR: 19 | !Z !N !C DI | mem[AR]: OUT 16
+    t14   | DR -> CR                      | AC: 72, IP: 20, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 19 | !Z !N !C DI | mem[AR]: OUT 16
+    t15   | AC -> OUT                     | AC: 72, IP: 20, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 19 | !Z !N !C DI | mem[AR]: OUT 16
+
+    t16   | IP -> AR                      | AC: 72, IP: 20, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 20 | !Z !N !C DI | mem[AR]: JZ 25
+    t17   | IP + 1 -> IP; mem[AR] -> DR   | AC: 72, IP: 21, CR: OUT 16, PS:  0, SP: 1024, DR: 25, AR: 20 | !Z !N !C DI | mem[AR]: JZ 25
+    t18   | DR -> CR                      | AC: 72, IP: 21, CR:  JZ 25, PS:  0, SP: 1024, DR: 25, AR: 20 | !Z !N !C DI | mem[AR]: JZ 25
+
+    t19   | IP -> AR                      | AC: 72, IP: 21, CR:  JZ 25, PS:  0, SP: 1024, DR: 25, AR: 21 | !Z !N !C DI | mem[AR]: LD 14
+    t20   | IP + 1 -> IP; mem[AR] -> DR   | AC: 72, IP: 22, CR:  JZ 25, PS:  0, SP: 1024, DR: 14, AR: 21 | !Z !N !C DI | mem[AR]: LD 14
+    t21   | DR -> CR                      | AC: 72, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 21 | !Z !N !C DI | mem[AR]: LD 14
+    t22   | DR -> AR                      | AC: 72, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 0
+    t23   | mem[AR] -> DR                 | AC: 72, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR:  0, AR: 14 | !Z !N !C DI | mem[AR]: 0
+    t24   | DR -> AC                      | AC:  0, IP: 22, CR:  LD 14, PS:  4, SP: 1024, DR:  0, AR: 14 | Z !N !C DI | mem[AR]: 0
+
+    t25   | IP -> AR                      | AC:  0, IP: 22, CR:  LD 14, PS:  4, SP: 1024, DR:  0, AR: 22 | Z !N !C DI | mem[AR]: INC
+    t26   | IP + 1 -> IP; mem[AR] -> DR   | AC:  0, IP: 23, CR:  LD 14, PS:  4, SP: 1024, DR:  0, AR: 22 | Z !N !C DI | mem[AR]: INC
+    t27   | DR -> CR                      | AC:  0, IP: 23, CR:   INC, PS:  4, SP: 1024, DR:  0, AR: 22 | Z !N !C DI | mem[AR]: INC
+    t28   | AC + 1 -> AC                  | AC:  1, IP: 23, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 22 | !Z !N !C DI | mem[AR]: INC
+
+    t29   | IP -> AR                      | AC:  1, IP: 23, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 23 | !Z !N !C DI | mem[AR]: ST 14
+    t30   | IP + 1 -> IP; mem[AR] -> DR   | AC:  1, IP: 24, CR:   INC, PS:  0, SP: 1024, DR: 14, AR: 23 | !Z !N !C DI | mem[AR]: ST 14
+    t31   | DR -> CR                      | AC:  1, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 23 | !Z !N !C DI | mem[AR]: ST 14
+    t32   | DR -> AR                      | AC:  1, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 0
+    t33   | mem[AR] -> DR                 | AC:  1, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR:  0, AR: 14 | !Z !N !C DI | mem[AR]: 0
+    t34   | AC -> DR                      | AC:  1, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR:  1, AR: 14 | !Z !N !C DI | mem[AR]: 0
+    t35   | DR -> mem[AR]                 | AC:  1, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR:  1, AR: 14 | !Z !N !C DI | mem[AR]: 1
+
+    t36   | IP -> AR                      | AC:  1, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR:  1, AR: 24 | !Z !N !C DI | mem[AR]: JMP 18
+    t37   | IP + 1 -> IP; mem[AR] -> DR   | AC:  1, IP: 25, CR:  ST 14, PS:  0, SP: 1024, DR: 18, AR: 24 | !Z !N !C DI | mem[AR]: JMP 18
+    t38   | DR -> CR                      | AC:  1, IP: 25, CR: JMP 18, PS:  0, SP: 1024, DR: 18, AR: 24 | !Z !N !C DI | mem[AR]: JMP 18
+    t39   | DR -> IP                      | AC:  1, IP: 18, CR: JMP 18, PS:  0, SP: 1024, DR: 18, AR: 24 | !Z !N !C DI | mem[AR]: JMP 18
+
+    t40   | IP -> AR                      | AC:  1, IP: 18, CR: JMP 18, PS:  0, SP: 1024, DR: 18, AR: 18 | !Z !N !C DI | mem[AR]: LD 14
+    t41   | IP + 1 -> IP; mem[AR] -> DR   | AC:  1, IP: 19, CR: JMP 18, PS:  0, SP: 1024, DR: 14, AR: 18 | !Z !N !C DI | mem[AR]: LD 14
+    t42   | DR -> CR                      | AC:  1, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 18 | !Z !N !C DI | mem[AR]: LD 14
+    t43   | DR -> AR                      | AC:  1, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 1
+    t44   | mem[AR] -> DR                 | AC:  1, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR:  1, AR: 14 | !Z !N !C DI | mem[AR]: 1
+    t45   | DR -> AR                      | AC:  1, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR:  1, AR:  1 | !Z !N !C DI | mem[AR]: 'e'
+    t46   | mem[AR] -> DR                 | AC:  1, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 101, AR:  1 | !Z !N !C DI | mem[AR]: 'e'
+    t47   | DR -> AC                      | AC: 101, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 101, AR:  1 | !Z !N !C DI | mem[AR]: 'e'
+
+    t48   | IP -> AR                      | AC: 101, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 101, AR: 19 | !Z !N !C DI | mem[AR]: OUT 16
+    t49   | IP + 1 -> IP; mem[AR] -> DR   | AC: 101, IP: 20, CR:  LD 14, PS:  0, SP: 1024, DR: 16, AR: 19 | !Z !N !C DI | mem[AR]: OUT 16
+    t50   | DR -> CR                      | AC: 101, IP: 20, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 19 | !Z !N !C DI | mem[AR]: OUT 16
+    t51   | AC -> OUT                     | AC: 101, IP: 20, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 19 | !Z !N !C DI | mem[AR]: OUT 16
+
+    t52   | IP -> AR                      | AC: 101, IP: 20, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 20 | !Z !N !C DI | mem[AR]: JZ 25
+    t53   | IP + 1 -> IP; mem[AR] -> DR   | AC: 101, IP: 21, CR: OUT 16, PS:  0, SP: 1024, DR: 25, AR: 20 | !Z !N !C DI | mem[AR]: JZ 25
+    t54   | DR -> CR                      | AC: 101, IP: 21, CR:  JZ 25, PS:  0, SP: 1024, DR: 25, AR: 20 | !Z !N !C DI | mem[AR]: JZ 25
+
+    t55   | IP -> AR                      | AC: 101, IP: 21, CR:  JZ 25, PS:  0, SP: 1024, DR: 25, AR: 21 | !Z !N !C DI | mem[AR]: LD 14
+    t56   | IP + 1 -> IP; mem[AR] -> DR   | AC: 101, IP: 22, CR:  JZ 25, PS:  0, SP: 1024, DR: 14, AR: 21 | !Z !N !C DI | mem[AR]: LD 14
+    t57   | DR -> CR                      | AC: 101, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 21 | !Z !N !C DI | mem[AR]: LD 14
+    t58   | DR -> AR                      | AC: 101, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 1
+    t59   | mem[AR] -> DR                 | AC: 101, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR:  1, AR: 14 | !Z !N !C DI | mem[AR]: 1
+    t60   | DR -> AC                      | AC:  1, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR:  1, AR: 14 | !Z !N !C DI | mem[AR]: 1
+
+    t61   | IP -> AR                      | AC:  1, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR:  1, AR: 22 | !Z !N !C DI | mem[AR]: INC
+    t62   | IP + 1 -> IP; mem[AR] -> DR   | AC:  1, IP: 23, CR:  LD 14, PS:  0, SP: 1024, DR:  0, AR: 22 | !Z !N !C DI | mem[AR]: INC
+    t63   | DR -> CR                      | AC:  1, IP: 23, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 22 | !Z !N !C DI | mem[AR]: INC
+    t64   | AC + 1 -> AC                  | AC:  2, IP: 23, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 22 | !Z !N !C DI | mem[AR]: INC
+
+    t65   | IP -> AR                      | AC:  2, IP: 23, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 23 | !Z !N !C DI | mem[AR]: ST 14
+    t66   | IP + 1 -> IP; mem[AR] -> DR   | AC:  2, IP: 24, CR:   INC, PS:  0, SP: 1024, DR: 14, AR: 23 | !Z !N !C DI | mem[AR]: ST 14
+    t67   | DR -> CR                      | AC:  2, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 23 | !Z !N !C DI | mem[AR]: ST 14
+    t68   | DR -> AR                      | AC:  2, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 1
+    t69   | mem[AR] -> DR                 | AC:  2, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR:  1, AR: 14 | !Z !N !C DI | mem[AR]: 1
+    t70   | AC -> DR                      | AC:  2, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR:  2, AR: 14 | !Z !N !C DI | mem[AR]: 1
+    t71   | DR -> mem[AR]                 | AC:  2, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR:  2, AR: 14 | !Z !N !C DI | mem[AR]: 2
+
+    t72   | IP -> AR                      | AC:  2, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR:  2, AR: 24 | !Z !N !C DI | mem[AR]: JMP 18
+    t73   | IP + 1 -> IP; mem[AR] -> DR   | AC:  2, IP: 25, CR:  ST 14, PS:  0, SP: 1024, DR: 18, AR: 24 | !Z !N !C DI | mem[AR]: JMP 18
+    t74   | DR -> CR                      | AC:  2, IP: 25, CR: JMP 18, PS:  0, SP: 1024, DR: 18, AR: 24 | !Z !N !C DI | mem[AR]: JMP 18
+    t75   | DR -> IP                      | AC:  2, IP: 18, CR: JMP 18, PS:  0, SP: 1024, DR: 18, AR: 24 | !Z !N !C DI | mem[AR]: JMP 18
+
+    t76   | IP -> AR                      | AC:  2, IP: 18, CR: JMP 18, PS:  0, SP: 1024, DR: 18, AR: 18 | !Z !N !C DI | mem[AR]: LD 14
+    t77   | IP + 1 -> IP; mem[AR] -> DR   | AC:  2, IP: 19, CR: JMP 18, PS:  0, SP: 1024, DR: 14, AR: 18 | !Z !N !C DI | mem[AR]: LD 14
+    t78   | DR -> CR                      | AC:  2, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 18 | !Z !N !C DI | mem[AR]: LD 14
+    t79   | DR -> AR                      | AC:  2, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 2
+    t80   | mem[AR] -> DR                 | AC:  2, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR:  2, AR: 14 | !Z !N !C DI | mem[AR]: 2
+    t81   | DR -> AR                      | AC:  2, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR:  2, AR:  2 | !Z !N !C DI | mem[AR]: 'l'
+    t82   | mem[AR] -> DR                 | AC:  2, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 108, AR:  2 | !Z !N !C DI | mem[AR]: 'l'
+    t83   | DR -> AC                      | AC: 108, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 108, AR:  2 | !Z !N !C DI | mem[AR]: 'l'
+
+    t84   | IP -> AR                      | AC: 108, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 108, AR: 19 | !Z !N !C DI | mem[AR]: OUT 16
+    t85   | IP + 1 -> IP; mem[AR] -> DR   | AC: 108, IP: 20, CR:  LD 14, PS:  0, SP: 1024, DR: 16, AR: 19 | !Z !N !C DI | mem[AR]: OUT 16
+    t86   | DR -> CR                      | AC: 108, IP: 20, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 19 | !Z !N !C DI | mem[AR]: OUT 16
+    t87   | AC -> OUT                     | AC: 108, IP: 20, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 19 | !Z !N !C DI | mem[AR]: OUT 16
+
+    t88   | IP -> AR                      | AC: 108, IP: 20, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 20 | !Z !N !C DI | mem[AR]: JZ 25
+    t89   | IP + 1 -> IP; mem[AR] -> DR   | AC: 108, IP: 21, CR: OUT 16, PS:  0, SP: 1024, DR: 25, AR: 20 | !Z !N !C DI | mem[AR]: JZ 25
+    t90   | DR -> CR                      | AC: 108, IP: 21, CR:  JZ 25, PS:  0, SP: 1024, DR: 25, AR: 20 | !Z !N !C DI | mem[AR]: JZ 25
+
+    t91   | IP -> AR                      | AC: 108, IP: 21, CR:  JZ 25, PS:  0, SP: 1024, DR: 25, AR: 21 | !Z !N !C DI | mem[AR]: LD 14
+    t92   | IP + 1 -> IP; mem[AR] -> DR   | AC: 108, IP: 22, CR:  JZ 25, PS:  0, SP: 1024, DR: 14, AR: 21 | !Z !N !C DI | mem[AR]: LD 14
+    t93   | DR -> CR                      | AC: 108, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 21 | !Z !N !C DI | mem[AR]: LD 14
+    t94   | DR -> AR                      | AC: 108, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 2
+    t95   | mem[AR] -> DR                 | AC: 108, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR:  2, AR: 14 | !Z !N !C DI | mem[AR]: 2
+    t96   | DR -> AC                      | AC:  2, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR:  2, AR: 14 | !Z !N !C DI | mem[AR]: 2
+
+    t97   | IP -> AR                      | AC:  2, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR:  2, AR: 22 | !Z !N !C DI | mem[AR]: INC
+    t98   | IP + 1 -> IP; mem[AR] -> DR   | AC:  2, IP: 23, CR:  LD 14, PS:  0, SP: 1024, DR:  0, AR: 22 | !Z !N !C DI | mem[AR]: INC
+    t99   | DR -> CR                      | AC:  2, IP: 23, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 22 | !Z !N !C DI | mem[AR]: INC
+    t100  | AC + 1 -> AC                  | AC:  3, IP: 23, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 22 | !Z !N !C DI | mem[AR]: INC
+
+    t101  | IP -> AR                      | AC:  3, IP: 23, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 23 | !Z !N !C DI | mem[AR]: ST 14
+    t102  | IP + 1 -> IP; mem[AR] -> DR   | AC:  3, IP: 24, CR:   INC, PS:  0, SP: 1024, DR: 14, AR: 23 | !Z !N !C DI | mem[AR]: ST 14
+    t103  | DR -> CR                      | AC:  3, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 23 | !Z !N !C DI | mem[AR]: ST 14
+    t104  | DR -> AR                      | AC:  3, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 2
+    t105  | mem[AR] -> DR                 | AC:  3, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR:  2, AR: 14 | !Z !N !C DI | mem[AR]: 2
+    t106  | AC -> DR                      | AC:  3, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR:  3, AR: 14 | !Z !N !C DI | mem[AR]: 2
+    t107  | DR -> mem[AR]                 | AC:  3, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR:  3, AR: 14 | !Z !N !C DI | mem[AR]: 3
+
+    t108  | IP -> AR                      | AC:  3, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR:  3, AR: 24 | !Z !N !C DI | mem[AR]: JMP 18
+    t109  | IP + 1 -> IP; mem[AR] -> DR   | AC:  3, IP: 25, CR:  ST 14, PS:  0, SP: 1024, DR: 18, AR: 24 | !Z !N !C DI | mem[AR]: JMP 18
+    t110  | DR -> CR                      | AC:  3, IP: 25, CR: JMP 18, PS:  0, SP: 1024, DR: 18, AR: 24 | !Z !N !C DI | mem[AR]: JMP 18
+    t111  | DR -> IP                      | AC:  3, IP: 18, CR: JMP 18, PS:  0, SP: 1024, DR: 18, AR: 24 | !Z !N !C DI | mem[AR]: JMP 18
+
+    t112  | IP -> AR                      | AC:  3, IP: 18, CR: JMP 18, PS:  0, SP: 1024, DR: 18, AR: 18 | !Z !N !C DI | mem[AR]: LD 14
+    t113  | IP + 1 -> IP; mem[AR] -> DR   | AC:  3, IP: 19, CR: JMP 18, PS:  0, SP: 1024, DR: 14, AR: 18 | !Z !N !C DI | mem[AR]: LD 14
+    t114  | DR -> CR                      | AC:  3, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 18 | !Z !N !C DI | mem[AR]: LD 14
+    t115  | DR -> AR                      | AC:  3, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 3
+    t116  | mem[AR] -> DR                 | AC:  3, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR:  3, AR: 14 | !Z !N !C DI | mem[AR]: 3
+    t117  | DR -> AR                      | AC:  3, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR:  3, AR:  3 | !Z !N !C DI | mem[AR]: 'l'
+    t118  | mem[AR] -> DR                 | AC:  3, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 108, AR:  3 | !Z !N !C DI | mem[AR]: 'l'
+    t119  | DR -> AC                      | AC: 108, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 108, AR:  3 | !Z !N !C DI | mem[AR]: 'l'
+
+    t120  | IP -> AR                      | AC: 108, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 108, AR: 19 | !Z !N !C DI | mem[AR]: OUT 16
+    t121  | IP + 1 -> IP; mem[AR] -> DR   | AC: 108, IP: 20, CR:  LD 14, PS:  0, SP: 1024, DR: 16, AR: 19 | !Z !N !C DI | mem[AR]: OUT 16
+    t122  | DR -> CR                      | AC: 108, IP: 20, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 19 | !Z !N !C DI | mem[AR]: OUT 16
+    t123  | AC -> OUT                     | AC: 108, IP: 20, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 19 | !Z !N !C DI | mem[AR]: OUT 16
+
+    t124  | IP -> AR                      | AC: 108, IP: 20, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 20 | !Z !N !C DI | mem[AR]: JZ 25
+    t125  | IP + 1 -> IP; mem[AR] -> DR   | AC: 108, IP: 21, CR: OUT 16, PS:  0, SP: 1024, DR: 25, AR: 20 | !Z !N !C DI | mem[AR]: JZ 25
+    t126  | DR -> CR                      | AC: 108, IP: 21, CR:  JZ 25, PS:  0, SP: 1024, DR: 25, AR: 20 | !Z !N !C DI | mem[AR]: JZ 25
+
+    t127  | IP -> AR                      | AC: 108, IP: 21, CR:  JZ 25, PS:  0, SP: 1024, DR: 25, AR: 21 | !Z !N !C DI | mem[AR]: LD 14
+    t128  | IP + 1 -> IP; mem[AR] -> DR   | AC: 108, IP: 22, CR:  JZ 25, PS:  0, SP: 1024, DR: 14, AR: 21 | !Z !N !C DI | mem[AR]: LD 14
+    t129  | DR -> CR                      | AC: 108, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 21 | !Z !N !C DI | mem[AR]: LD 14
+    t130  | DR -> AR                      | AC: 108, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 3
+    t131  | mem[AR] -> DR                 | AC: 108, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR:  3, AR: 14 | !Z !N !C DI | mem[AR]: 3
+    t132  | DR -> AC                      | AC:  3, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR:  3, AR: 14 | !Z !N !C DI | mem[AR]: 3
+
+    t133  | IP -> AR                      | AC:  3, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR:  3, AR: 22 | !Z !N !C DI | mem[AR]: INC
+    t134  | IP + 1 -> IP; mem[AR] -> DR   | AC:  3, IP: 23, CR:  LD 14, PS:  0, SP: 1024, DR:  0, AR: 22 | !Z !N !C DI | mem[AR]: INC
+    t135  | DR -> CR                      | AC:  3, IP: 23, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 22 | !Z !N !C DI | mem[AR]: INC
+    t136  | AC + 1 -> AC                  | AC:  4, IP: 23, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 22 | !Z !N !C DI | mem[AR]: INC
+
+    t137  | IP -> AR                      | AC:  4, IP: 23, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 23 | !Z !N !C DI | mem[AR]: ST 14
+    t138  | IP + 1 -> IP; mem[AR] -> DR   | AC:  4, IP: 24, CR:   INC, PS:  0, SP: 1024, DR: 14, AR: 23 | !Z !N !C DI | mem[AR]: ST 14
+    t139  | DR -> CR                      | AC:  4, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 23 | !Z !N !C DI | mem[AR]: ST 14
+    t140  | DR -> AR                      | AC:  4, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 3
+    t141  | mem[AR] -> DR                 | AC:  4, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR:  3, AR: 14 | !Z !N !C DI | mem[AR]: 3
+    t142  | AC -> DR                      | AC:  4, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR:  4, AR: 14 | !Z !N !C DI | mem[AR]: 3
+    t143  | DR -> mem[AR]                 | AC:  4, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR:  4, AR: 14 | !Z !N !C DI | mem[AR]: 4
+
+    t144  | IP -> AR                      | AC:  4, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR:  4, AR: 24 | !Z !N !C DI | mem[AR]: JMP 18
+    t145  | IP + 1 -> IP; mem[AR] -> DR   | AC:  4, IP: 25, CR:  ST 14, PS:  0, SP: 1024, DR: 18, AR: 24 | !Z !N !C DI | mem[AR]: JMP 18
+    t146  | DR -> CR                      | AC:  4, IP: 25, CR: JMP 18, PS:  0, SP: 1024, DR: 18, AR: 24 | !Z !N !C DI | mem[AR]: JMP 18
+    t147  | DR -> IP                      | AC:  4, IP: 18, CR: JMP 18, PS:  0, SP: 1024, DR: 18, AR: 24 | !Z !N !C DI | mem[AR]: JMP 18
+
+    t148  | IP -> AR                      | AC:  4, IP: 18, CR: JMP 18, PS:  0, SP: 1024, DR: 18, AR: 18 | !Z !N !C DI | mem[AR]: LD 14
+    t149  | IP + 1 -> IP; mem[AR] -> DR   | AC:  4, IP: 19, CR: JMP 18, PS:  0, SP: 1024, DR: 14, AR: 18 | !Z !N !C DI | mem[AR]: LD 14
+    t150  | DR -> CR                      | AC:  4, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 18 | !Z !N !C DI | mem[AR]: LD 14
+    t151  | DR -> AR                      | AC:  4, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 4
+    t152  | mem[AR] -> DR                 | AC:  4, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR:  4, AR: 14 | !Z !N !C DI | mem[AR]: 4
+    t153  | DR -> AR                      | AC:  4, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR:  4, AR:  4 | !Z !N !C DI | mem[AR]: 'o'
+    t154  | mem[AR] -> DR                 | AC:  4, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 111, AR:  4 | !Z !N !C DI | mem[AR]: 'o'
+    t155  | DR -> AC                      | AC: 111, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 111, AR:  4 | !Z !N !C DI | mem[AR]: 'o'
+
+    t156  | IP -> AR                      | AC: 111, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 111, AR: 19 | !Z !N !C DI | mem[AR]: OUT 16
+    t157  | IP + 1 -> IP; mem[AR] -> DR   | AC: 111, IP: 20, CR:  LD 14, PS:  0, SP: 1024, DR: 16, AR: 19 | !Z !N !C DI | mem[AR]: OUT 16
+    t158  | DR -> CR                      | AC: 111, IP: 20, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 19 | !Z !N !C DI | mem[AR]: OUT 16
+    t159  | AC -> OUT                     | AC: 111, IP: 20, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 19 | !Z !N !C DI | mem[AR]: OUT 16
+
+    t160  | IP -> AR                      | AC: 111, IP: 20, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 20 | !Z !N !C DI | mem[AR]: JZ 25
+    t161  | IP + 1 -> IP; mem[AR] -> DR   | AC: 111, IP: 21, CR: OUT 16, PS:  0, SP: 1024, DR: 25, AR: 20 | !Z !N !C DI | mem[AR]: JZ 25
+    t162  | DR -> CR                      | AC: 111, IP: 21, CR:  JZ 25, PS:  0, SP: 1024, DR: 25, AR: 20 | !Z !N !C DI | mem[AR]: JZ 25
+
+    t163  | IP -> AR                      | AC: 111, IP: 21, CR:  JZ 25, PS:  0, SP: 1024, DR: 25, AR: 21 | !Z !N !C DI | mem[AR]: LD 14
+    t164  | IP + 1 -> IP; mem[AR] -> DR   | AC: 111, IP: 22, CR:  JZ 25, PS:  0, SP: 1024, DR: 14, AR: 21 | !Z !N !C DI | mem[AR]: LD 14
+    t165  | DR -> CR                      | AC: 111, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 21 | !Z !N !C DI | mem[AR]: LD 14
+    t166  | DR -> AR                      | AC: 111, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 4
+    t167  | mem[AR] -> DR                 | AC: 111, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR:  4, AR: 14 | !Z !N !C DI | mem[AR]: 4
+    t168  | DR -> AC                      | AC:  4, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR:  4, AR: 14 | !Z !N !C DI | mem[AR]: 4
+
+    t169  | IP -> AR                      | AC:  4, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR:  4, AR: 22 | !Z !N !C DI | mem[AR]: INC
+    t170  | IP + 1 -> IP; mem[AR] -> DR   | AC:  4, IP: 23, CR:  LD 14, PS:  0, SP: 1024, DR:  0, AR: 22 | !Z !N !C DI | mem[AR]: INC
+    t171  | DR -> CR                      | AC:  4, IP: 23, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 22 | !Z !N !C DI | mem[AR]: INC
+    t172  | AC + 1 -> AC                  | AC:  5, IP: 23, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 22 | !Z !N !C DI | mem[AR]: INC
+
+    t173  | IP -> AR                      | AC:  5, IP: 23, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 23 | !Z !N !C DI | mem[AR]: ST 14
+    t174  | IP + 1 -> IP; mem[AR] -> DR   | AC:  5, IP: 24, CR:   INC, PS:  0, SP: 1024, DR: 14, AR: 23 | !Z !N !C DI | mem[AR]: ST 14
+    t175  | DR -> CR                      | AC:  5, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 23 | !Z !N !C DI | mem[AR]: ST 14
+    t176  | DR -> AR                      | AC:  5, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 4
+    t177  | mem[AR] -> DR                 | AC:  5, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR:  4, AR: 14 | !Z !N !C DI | mem[AR]: 4
+    t178  | AC -> DR                      | AC:  5, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR:  5, AR: 14 | !Z !N !C DI | mem[AR]: 4
+    t179  | DR -> mem[AR]                 | AC:  5, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR:  5, AR: 14 | !Z !N !C DI | mem[AR]: 5
+
+    t180  | IP -> AR                      | AC:  5, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR:  5, AR: 24 | !Z !N !C DI | mem[AR]: JMP 18
+    t181  | IP + 1 -> IP; mem[AR] -> DR   | AC:  5, IP: 25, CR:  ST 14, PS:  0, SP: 1024, DR: 18, AR: 24 | !Z !N !C DI | mem[AR]: JMP 18
+    t182  | DR -> CR                      | AC:  5, IP: 25, CR: JMP 18, PS:  0, SP: 1024, DR: 18, AR: 24 | !Z !N !C DI | mem[AR]: JMP 18
+    t183  | DR -> IP                      | AC:  5, IP: 18, CR: JMP 18, PS:  0, SP: 1024, DR: 18, AR: 24 | !Z !N !C DI | mem[AR]: JMP 18
+
+    t184  | IP -> AR                      | AC:  5, IP: 18, CR: JMP 18, PS:  0, SP: 1024, DR: 18, AR: 18 | !Z !N !C DI | mem[AR]: LD 14
+    t185  | IP + 1 -> IP; mem[AR] -> DR   | AC:  5, IP: 19, CR: JMP 18, PS:  0, SP: 1024, DR: 14, AR: 18 | !Z !N !C DI | mem[AR]: LD 14
+    t186  | DR -> CR                      | AC:  5, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 18 | !Z !N !C DI | mem[AR]: LD 14
+    t187  | DR -> AR                      | AC:  5, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 5
+    t188  | mem[AR] -> DR                 | AC:  5, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR:  5, AR: 14 | !Z !N !C DI | mem[AR]: 5
+    t189  | DR -> AR                      | AC:  5, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR:  5, AR:  5 | !Z !N !C DI | mem[AR]: ','
+    t190  | mem[AR] -> DR                 | AC:  5, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 44, AR:  5 | !Z !N !C DI | mem[AR]: ','
+    t191  | DR -> AC                      | AC: 44, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 44, AR:  5 | !Z !N !C DI | mem[AR]: ','
+
+    t192  | IP -> AR                      | AC: 44, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 44, AR: 19 | !Z !N !C DI | mem[AR]: OUT 16
+    t193  | IP + 1 -> IP; mem[AR] -> DR   | AC: 44, IP: 20, CR:  LD 14, PS:  0, SP: 1024, DR: 16, AR: 19 | !Z !N !C DI | mem[AR]: OUT 16
+    t194  | DR -> CR                      | AC: 44, IP: 20, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 19 | !Z !N !C DI | mem[AR]: OUT 16
+    t195  | AC -> OUT                     | AC: 44, IP: 20, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 19 | !Z !N !C DI | mem[AR]: OUT 16
+
+    t196  | IP -> AR                      | AC: 44, IP: 20, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 20 | !Z !N !C DI | mem[AR]: JZ 25
+    t197  | IP + 1 -> IP; mem[AR] -> DR   | AC: 44, IP: 21, CR: OUT 16, PS:  0, SP: 1024, DR: 25, AR: 20 | !Z !N !C DI | mem[AR]: JZ 25
+    t198  | DR -> CR                      | AC: 44, IP: 21, CR:  JZ 25, PS:  0, SP: 1024, DR: 25, AR: 20 | !Z !N !C DI | mem[AR]: JZ 25
+
+    t199  | IP -> AR                      | AC: 44, IP: 21, CR:  JZ 25, PS:  0, SP: 1024, DR: 25, AR: 21 | !Z !N !C DI | mem[AR]: LD 14
+    t200  | IP + 1 -> IP; mem[AR] -> DR   | AC: 44, IP: 22, CR:  JZ 25, PS:  0, SP: 1024, DR: 14, AR: 21 | !Z !N !C DI | mem[AR]: LD 14
+    t201  | DR -> CR                      | AC: 44, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 21 | !Z !N !C DI | mem[AR]: LD 14
+    t202  | DR -> AR                      | AC: 44, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 5
+    t203  | mem[AR] -> DR                 | AC: 44, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR:  5, AR: 14 | !Z !N !C DI | mem[AR]: 5
+    t204  | DR -> AC                      | AC:  5, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR:  5, AR: 14 | !Z !N !C DI | mem[AR]: 5
+
+    t205  | IP -> AR                      | AC:  5, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR:  5, AR: 22 | !Z !N !C DI | mem[AR]: INC
+    t206  | IP + 1 -> IP; mem[AR] -> DR   | AC:  5, IP: 23, CR:  LD 14, PS:  0, SP: 1024, DR:  0, AR: 22 | !Z !N !C DI | mem[AR]: INC
+    t207  | DR -> CR                      | AC:  5, IP: 23, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 22 | !Z !N !C DI | mem[AR]: INC
+    t208  | AC + 1 -> AC                  | AC:  6, IP: 23, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 22 | !Z !N !C DI | mem[AR]: INC
+
+    t209  | IP -> AR                      | AC:  6, IP: 23, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 23 | !Z !N !C DI | mem[AR]: ST 14
+    t210  | IP + 1 -> IP; mem[AR] -> DR   | AC:  6, IP: 24, CR:   INC, PS:  0, SP: 1024, DR: 14, AR: 23 | !Z !N !C DI | mem[AR]: ST 14
+    t211  | DR -> CR                      | AC:  6, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 23 | !Z !N !C DI | mem[AR]: ST 14
+    t212  | DR -> AR                      | AC:  6, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 5
+    t213  | mem[AR] -> DR                 | AC:  6, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR:  5, AR: 14 | !Z !N !C DI | mem[AR]: 5
+    t214  | AC -> DR                      | AC:  6, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR:  6, AR: 14 | !Z !N !C DI | mem[AR]: 5
+    t215  | DR -> mem[AR]                 | AC:  6, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR:  6, AR: 14 | !Z !N !C DI | mem[AR]: 6
+
+    t216  | IP -> AR                      | AC:  6, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR:  6, AR: 24 | !Z !N !C DI | mem[AR]: JMP 18
+    t217  | IP + 1 -> IP; mem[AR] -> DR   | AC:  6, IP: 25, CR:  ST 14, PS:  0, SP: 1024, DR: 18, AR: 24 | !Z !N !C DI | mem[AR]: JMP 18
+    t218  | DR -> CR                      | AC:  6, IP: 25, CR: JMP 18, PS:  0, SP: 1024, DR: 18, AR: 24 | !Z !N !C DI | mem[AR]: JMP 18
+    t219  | DR -> IP                      | AC:  6, IP: 18, CR: JMP 18, PS:  0, SP: 1024, DR: 18, AR: 24 | !Z !N !C DI | mem[AR]: JMP 18
+
+    t220  | IP -> AR                      | AC:  6, IP: 18, CR: JMP 18, PS:  0, SP: 1024, DR: 18, AR: 18 | !Z !N !C DI | mem[AR]: LD 14
+    t221  | IP + 1 -> IP; mem[AR] -> DR   | AC:  6, IP: 19, CR: JMP 18, PS:  0, SP: 1024, DR: 14, AR: 18 | !Z !N !C DI | mem[AR]: LD 14
+    t222  | DR -> CR                      | AC:  6, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 18 | !Z !N !C DI | mem[AR]: LD 14
+    t223  | DR -> AR                      | AC:  6, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 6
+    t224  | mem[AR] -> DR                 | AC:  6, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR:  6, AR: 14 | !Z !N !C DI | mem[AR]: 6
+    t225  | DR -> AR                      | AC:  6, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR:  6, AR:  6 | !Z !N !C DI | mem[AR]: ' '
+    t226  | mem[AR] -> DR                 | AC:  6, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 32, AR:  6 | !Z !N !C DI | mem[AR]: ' '
+    t227  | DR -> AC                      | AC: 32, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 32, AR:  6 | !Z !N !C DI | mem[AR]: ' '
+
+    t228  | IP -> AR                      | AC: 32, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 32, AR: 19 | !Z !N !C DI | mem[AR]: OUT 16
+    t229  | IP + 1 -> IP; mem[AR] -> DR   | AC: 32, IP: 20, CR:  LD 14, PS:  0, SP: 1024, DR: 16, AR: 19 | !Z !N !C DI | mem[AR]: OUT 16
+    t230  | DR -> CR                      | AC: 32, IP: 20, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 19 | !Z !N !C DI | mem[AR]: OUT 16
+    t231  | AC -> OUT                     | AC: 32, IP: 20, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 19 | !Z !N !C DI | mem[AR]: OUT 16
+
+    t232  | IP -> AR                      | AC: 32, IP: 20, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 20 | !Z !N !C DI | mem[AR]: JZ 25
+    t233  | IP + 1 -> IP; mem[AR] -> DR   | AC: 32, IP: 21, CR: OUT 16, PS:  0, SP: 1024, DR: 25, AR: 20 | !Z !N !C DI | mem[AR]: JZ 25
+    t234  | DR -> CR                      | AC: 32, IP: 21, CR:  JZ 25, PS:  0, SP: 1024, DR: 25, AR: 20 | !Z !N !C DI | mem[AR]: JZ 25
+
+    t235  | IP -> AR                      | AC: 32, IP: 21, CR:  JZ 25, PS:  0, SP: 1024, DR: 25, AR: 21 | !Z !N !C DI | mem[AR]: LD 14
+    t236  | IP + 1 -> IP; mem[AR] -> DR   | AC: 32, IP: 22, CR:  JZ 25, PS:  0, SP: 1024, DR: 14, AR: 21 | !Z !N !C DI | mem[AR]: LD 14
+    t237  | DR -> CR                      | AC: 32, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 21 | !Z !N !C DI | mem[AR]: LD 14
+    t238  | DR -> AR                      | AC: 32, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 6
+    t239  | mem[AR] -> DR                 | AC: 32, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR:  6, AR: 14 | !Z !N !C DI | mem[AR]: 6
+    t240  | DR -> AC                      | AC:  6, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR:  6, AR: 14 | !Z !N !C DI | mem[AR]: 6
+
+    t241  | IP -> AR                      | AC:  6, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR:  6, AR: 22 | !Z !N !C DI | mem[AR]: INC
+    t242  | IP + 1 -> IP; mem[AR] -> DR   | AC:  6, IP: 23, CR:  LD 14, PS:  0, SP: 1024, DR:  0, AR: 22 | !Z !N !C DI | mem[AR]: INC
+    t243  | DR -> CR                      | AC:  6, IP: 23, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 22 | !Z !N !C DI | mem[AR]: INC
+    t244  | AC + 1 -> AC                  | AC:  7, IP: 23, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 22 | !Z !N !C DI | mem[AR]: INC
+
+    t245  | IP -> AR                      | AC:  7, IP: 23, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 23 | !Z !N !C DI | mem[AR]: ST 14
+    t246  | IP + 1 -> IP; mem[AR] -> DR   | AC:  7, IP: 24, CR:   INC, PS:  0, SP: 1024, DR: 14, AR: 23 | !Z !N !C DI | mem[AR]: ST 14
+    t247  | DR -> CR                      | AC:  7, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 23 | !Z !N !C DI | mem[AR]: ST 14
+    t248  | DR -> AR                      | AC:  7, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 6
+    t249  | mem[AR] -> DR                 | AC:  7, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR:  6, AR: 14 | !Z !N !C DI | mem[AR]: 6
+    t250  | AC -> DR                      | AC:  7, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR:  7, AR: 14 | !Z !N !C DI | mem[AR]: 6
+    t251  | DR -> mem[AR]                 | AC:  7, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR:  7, AR: 14 | !Z !N !C DI | mem[AR]: 7
+
+    t252  | IP -> AR                      | AC:  7, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR:  7, AR: 24 | !Z !N !C DI | mem[AR]: JMP 18
+    t253  | IP + 1 -> IP; mem[AR] -> DR   | AC:  7, IP: 25, CR:  ST 14, PS:  0, SP: 1024, DR: 18, AR: 24 | !Z !N !C DI | mem[AR]: JMP 18
+    t254  | DR -> CR                      | AC:  7, IP: 25, CR: JMP 18, PS:  0, SP: 1024, DR: 18, AR: 24 | !Z !N !C DI | mem[AR]: JMP 18
+    t255  | DR -> IP                      | AC:  7, IP: 18, CR: JMP 18, PS:  0, SP: 1024, DR: 18, AR: 24 | !Z !N !C DI | mem[AR]: JMP 18
+
+    t256  | IP -> AR                      | AC:  7, IP: 18, CR: JMP 18, PS:  0, SP: 1024, DR: 18, AR: 18 | !Z !N !C DI | mem[AR]: LD 14
+    t257  | IP + 1 -> IP; mem[AR] -> DR   | AC:  7, IP: 19, CR: JMP 18, PS:  0, SP: 1024, DR: 14, AR: 18 | !Z !N !C DI | mem[AR]: LD 14
+    t258  | DR -> CR                      | AC:  7, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 18 | !Z !N !C DI | mem[AR]: LD 14
+    t259  | DR -> AR                      | AC:  7, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 7
+    t260  | mem[AR] -> DR                 | AC:  7, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR:  7, AR: 14 | !Z !N !C DI | mem[AR]: 7
+    t261  | DR -> AR                      | AC:  7, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR:  7, AR:  7 | !Z !N !C DI | mem[AR]: 'W'
+    t262  | mem[AR] -> DR                 | AC:  7, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 87, AR:  7 | !Z !N !C DI | mem[AR]: 'W'
+    t263  | DR -> AC                      | AC: 87, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 87, AR:  7 | !Z !N !C DI | mem[AR]: 'W'
+
+    t264  | IP -> AR                      | AC: 87, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 87, AR: 19 | !Z !N !C DI | mem[AR]: OUT 16
+    t265  | IP + 1 -> IP; mem[AR] -> DR   | AC: 87, IP: 20, CR:  LD 14, PS:  0, SP: 1024, DR: 16, AR: 19 | !Z !N !C DI | mem[AR]: OUT 16
+    t266  | DR -> CR                      | AC: 87, IP: 20, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 19 | !Z !N !C DI | mem[AR]: OUT 16
+    t267  | AC -> OUT                     | AC: 87, IP: 20, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 19 | !Z !N !C DI | mem[AR]: OUT 16
+
+    t268  | IP -> AR                      | AC: 87, IP: 20, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 20 | !Z !N !C DI | mem[AR]: JZ 25
+    t269  | IP + 1 -> IP; mem[AR] -> DR   | AC: 87, IP: 21, CR: OUT 16, PS:  0, SP: 1024, DR: 25, AR: 20 | !Z !N !C DI | mem[AR]: JZ 25
+    t270  | DR -> CR                      | AC: 87, IP: 21, CR:  JZ 25, PS:  0, SP: 1024, DR: 25, AR: 20 | !Z !N !C DI | mem[AR]: JZ 25
+
+    t271  | IP -> AR                      | AC: 87, IP: 21, CR:  JZ 25, PS:  0, SP: 1024, DR: 25, AR: 21 | !Z !N !C DI | mem[AR]: LD 14
+    t272  | IP + 1 -> IP; mem[AR] -> DR   | AC: 87, IP: 22, CR:  JZ 25, PS:  0, SP: 1024, DR: 14, AR: 21 | !Z !N !C DI | mem[AR]: LD 14
+    t273  | DR -> CR                      | AC: 87, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 21 | !Z !N !C DI | mem[AR]: LD 14
+    t274  | DR -> AR                      | AC: 87, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 7
+    t275  | mem[AR] -> DR                 | AC: 87, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR:  7, AR: 14 | !Z !N !C DI | mem[AR]: 7
+    t276  | DR -> AC                      | AC:  7, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR:  7, AR: 14 | !Z !N !C DI | mem[AR]: 7
+
+    t277  | IP -> AR                      | AC:  7, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR:  7, AR: 22 | !Z !N !C DI | mem[AR]: INC
+    t278  | IP + 1 -> IP; mem[AR] -> DR   | AC:  7, IP: 23, CR:  LD 14, PS:  0, SP: 1024, DR:  0, AR: 22 | !Z !N !C DI | mem[AR]: INC
+    t279  | DR -> CR                      | AC:  7, IP: 23, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 22 | !Z !N !C DI | mem[AR]: INC
+    t280  | AC + 1 -> AC                  | AC:  8, IP: 23, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 22 | !Z !N !C DI | mem[AR]: INC
+
+    t281  | IP -> AR                      | AC:  8, IP: 23, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 23 | !Z !N !C DI | mem[AR]: ST 14
+    t282  | IP + 1 -> IP; mem[AR] -> DR   | AC:  8, IP: 24, CR:   INC, PS:  0, SP: 1024, DR: 14, AR: 23 | !Z !N !C DI | mem[AR]: ST 14
+    t283  | DR -> CR                      | AC:  8, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 23 | !Z !N !C DI | mem[AR]: ST 14
+    t284  | DR -> AR                      | AC:  8, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 7
+    t285  | mem[AR] -> DR                 | AC:  8, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR:  7, AR: 14 | !Z !N !C DI | mem[AR]: 7
+    t286  | AC -> DR                      | AC:  8, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR:  8, AR: 14 | !Z !N !C DI | mem[AR]: 7
+    t287  | DR -> mem[AR]                 | AC:  8, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR:  8, AR: 14 | !Z !N !C DI | mem[AR]: 8
+
+    t288  | IP -> AR                      | AC:  8, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR:  8, AR: 24 | !Z !N !C DI | mem[AR]: JMP 18
+    t289  | IP + 1 -> IP; mem[AR] -> DR   | AC:  8, IP: 25, CR:  ST 14, PS:  0, SP: 1024, DR: 18, AR: 24 | !Z !N !C DI | mem[AR]: JMP 18
+    t290  | DR -> CR                      | AC:  8, IP: 25, CR: JMP 18, PS:  0, SP: 1024, DR: 18, AR: 24 | !Z !N !C DI | mem[AR]: JMP 18
+    t291  | DR -> IP                      | AC:  8, IP: 18, CR: JMP 18, PS:  0, SP: 1024, DR: 18, AR: 24 | !Z !N !C DI | mem[AR]: JMP 18
+
+    t292  | IP -> AR                      | AC:  8, IP: 18, CR: JMP 18, PS:  0, SP: 1024, DR: 18, AR: 18 | !Z !N !C DI | mem[AR]: LD 14
+    t293  | IP + 1 -> IP; mem[AR] -> DR   | AC:  8, IP: 19, CR: JMP 18, PS:  0, SP: 1024, DR: 14, AR: 18 | !Z !N !C DI | mem[AR]: LD 14
+    t294  | DR -> CR                      | AC:  8, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 18 | !Z !N !C DI | mem[AR]: LD 14
+    t295  | DR -> AR                      | AC:  8, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 8
+    t296  | mem[AR] -> DR                 | AC:  8, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR:  8, AR: 14 | !Z !N !C DI | mem[AR]: 8
+    t297  | DR -> AR                      | AC:  8, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR:  8, AR:  8 | !Z !N !C DI | mem[AR]: 'o'
+    t298  | mem[AR] -> DR                 | AC:  8, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 111, AR:  8 | !Z !N !C DI | mem[AR]: 'o'
+    t299  | DR -> AC                      | AC: 111, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 111, AR:  8 | !Z !N !C DI | mem[AR]: 'o'
+
+    t300  | IP -> AR                      | AC: 111, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 111, AR: 19 | !Z !N !C DI | mem[AR]: OUT 16
+    t301  | IP + 1 -> IP; mem[AR] -> DR   | AC: 111, IP: 20, CR:  LD 14, PS:  0, SP: 1024, DR: 16, AR: 19 | !Z !N !C DI | mem[AR]: OUT 16
+    t302  | DR -> CR                      | AC: 111, IP: 20, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 19 | !Z !N !C DI | mem[AR]: OUT 16
+    t303  | AC -> OUT                     | AC: 111, IP: 20, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 19 | !Z !N !C DI | mem[AR]: OUT 16
+
+    t304  | IP -> AR                      | AC: 111, IP: 20, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 20 | !Z !N !C DI | mem[AR]: JZ 25
+    t305  | IP + 1 -> IP; mem[AR] -> DR   | AC: 111, IP: 21, CR: OUT 16, PS:  0, SP: 1024, DR: 25, AR: 20 | !Z !N !C DI | mem[AR]: JZ 25
+    t306  | DR -> CR                      | AC: 111, IP: 21, CR:  JZ 25, PS:  0, SP: 1024, DR: 25, AR: 20 | !Z !N !C DI | mem[AR]: JZ 25
+
+    t307  | IP -> AR                      | AC: 111, IP: 21, CR:  JZ 25, PS:  0, SP: 1024, DR: 25, AR: 21 | !Z !N !C DI | mem[AR]: LD 14
+    t308  | IP + 1 -> IP; mem[AR] -> DR   | AC: 111, IP: 22, CR:  JZ 25, PS:  0, SP: 1024, DR: 14, AR: 21 | !Z !N !C DI | mem[AR]: LD 14
+    t309  | DR -> CR                      | AC: 111, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 21 | !Z !N !C DI | mem[AR]: LD 14
+    t310  | DR -> AR                      | AC: 111, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 8
+    t311  | mem[AR] -> DR                 | AC: 111, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR:  8, AR: 14 | !Z !N !C DI | mem[AR]: 8
+    t312  | DR -> AC                      | AC:  8, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR:  8, AR: 14 | !Z !N !C DI | mem[AR]: 8
+
+    t313  | IP -> AR                      | AC:  8, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR:  8, AR: 22 | !Z !N !C DI | mem[AR]: INC
+    t314  | IP + 1 -> IP; mem[AR] -> DR   | AC:  8, IP: 23, CR:  LD 14, PS:  0, SP: 1024, DR:  0, AR: 22 | !Z !N !C DI | mem[AR]: INC
+    t315  | DR -> CR                      | AC:  8, IP: 23, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 22 | !Z !N !C DI | mem[AR]: INC
+    t316  | AC + 1 -> AC                  | AC:  9, IP: 23, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 22 | !Z !N !C DI | mem[AR]: INC
+
+    t317  | IP -> AR                      | AC:  9, IP: 23, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 23 | !Z !N !C DI | mem[AR]: ST 14
+    t318  | IP + 1 -> IP; mem[AR] -> DR   | AC:  9, IP: 24, CR:   INC, PS:  0, SP: 1024, DR: 14, AR: 23 | !Z !N !C DI | mem[AR]: ST 14
+    t319  | DR -> CR                      | AC:  9, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 23 | !Z !N !C DI | mem[AR]: ST 14
+    t320  | DR -> AR                      | AC:  9, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 8
+    t321  | mem[AR] -> DR                 | AC:  9, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR:  8, AR: 14 | !Z !N !C DI | mem[AR]: 8
+    t322  | AC -> DR                      | AC:  9, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR:  9, AR: 14 | !Z !N !C DI | mem[AR]: 8
+    t323  | DR -> mem[AR]                 | AC:  9, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR:  9, AR: 14 | !Z !N !C DI | mem[AR]: 9
+
+    t324  | IP -> AR                      | AC:  9, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR:  9, AR: 24 | !Z !N !C DI | mem[AR]: JMP 18
+    t325  | IP + 1 -> IP; mem[AR] -> DR   | AC:  9, IP: 25, CR:  ST 14, PS:  0, SP: 1024, DR: 18, AR: 24 | !Z !N !C DI | mem[AR]: JMP 18
+    t326  | DR -> CR                      | AC:  9, IP: 25, CR: JMP 18, PS:  0, SP: 1024, DR: 18, AR: 24 | !Z !N !C DI | mem[AR]: JMP 18
+    t327  | DR -> IP                      | AC:  9, IP: 18, CR: JMP 18, PS:  0, SP: 1024, DR: 18, AR: 24 | !Z !N !C DI | mem[AR]: JMP 18
+
+    t328  | IP -> AR                      | AC:  9, IP: 18, CR: JMP 18, PS:  0, SP: 1024, DR: 18, AR: 18 | !Z !N !C DI | mem[AR]: LD 14
+    t329  | IP + 1 -> IP; mem[AR] -> DR   | AC:  9, IP: 19, CR: JMP 18, PS:  0, SP: 1024, DR: 14, AR: 18 | !Z !N !C DI | mem[AR]: LD 14
+    t330  | DR -> CR                      | AC:  9, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 18 | !Z !N !C DI | mem[AR]: LD 14
+    t331  | DR -> AR                      | AC:  9, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 9
+    t332  | mem[AR] -> DR                 | AC:  9, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR:  9, AR: 14 | !Z !N !C DI | mem[AR]: 9
+    t333  | DR -> AR                      | AC:  9, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR:  9, AR:  9 | !Z !N !C DI | mem[AR]: 'r'
+    t334  | mem[AR] -> DR                 | AC:  9, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 114, AR:  9 | !Z !N !C DI | mem[AR]: 'r'
+    t335  | DR -> AC                      | AC: 114, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 114, AR:  9 | !Z !N !C DI | mem[AR]: 'r'
+
+    t336  | IP -> AR                      | AC: 114, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 114, AR: 19 | !Z !N !C DI | mem[AR]: OUT 16
+    t337  | IP + 1 -> IP; mem[AR] -> DR   | AC: 114, IP: 20, CR:  LD 14, PS:  0, SP: 1024, DR: 16, AR: 19 | !Z !N !C DI | mem[AR]: OUT 16
+    t338  | DR -> CR                      | AC: 114, IP: 20, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 19 | !Z !N !C DI | mem[AR]: OUT 16
+    t339  | AC -> OUT                     | AC: 114, IP: 20, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 19 | !Z !N !C DI | mem[AR]: OUT 16
+
+    t340  | IP -> AR                      | AC: 114, IP: 20, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 20 | !Z !N !C DI | mem[AR]: JZ 25
+    t341  | IP + 1 -> IP; mem[AR] -> DR   | AC: 114, IP: 21, CR: OUT 16, PS:  0, SP: 1024, DR: 25, AR: 20 | !Z !N !C DI | mem[AR]: JZ 25
+    t342  | DR -> CR                      | AC: 114, IP: 21, CR:  JZ 25, PS:  0, SP: 1024, DR: 25, AR: 20 | !Z !N !C DI | mem[AR]: JZ 25
+
+    t343  | IP -> AR                      | AC: 114, IP: 21, CR:  JZ 25, PS:  0, SP: 1024, DR: 25, AR: 21 | !Z !N !C DI | mem[AR]: LD 14
+    t344  | IP + 1 -> IP; mem[AR] -> DR   | AC: 114, IP: 22, CR:  JZ 25, PS:  0, SP: 1024, DR: 14, AR: 21 | !Z !N !C DI | mem[AR]: LD 14
+    t345  | DR -> CR                      | AC: 114, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 21 | !Z !N !C DI | mem[AR]: LD 14
+    t346  | DR -> AR                      | AC: 114, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 9
+    t347  | mem[AR] -> DR                 | AC: 114, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR:  9, AR: 14 | !Z !N !C DI | mem[AR]: 9
+    t348  | DR -> AC                      | AC:  9, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR:  9, AR: 14 | !Z !N !C DI | mem[AR]: 9
+
+    t349  | IP -> AR                      | AC:  9, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR:  9, AR: 22 | !Z !N !C DI | mem[AR]: INC
+    t350  | IP + 1 -> IP; mem[AR] -> DR   | AC:  9, IP: 23, CR:  LD 14, PS:  0, SP: 1024, DR:  0, AR: 22 | !Z !N !C DI | mem[AR]: INC
+    t351  | DR -> CR                      | AC:  9, IP: 23, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 22 | !Z !N !C DI | mem[AR]: INC
+    t352  | AC + 1 -> AC                  | AC: 10, IP: 23, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 22 | !Z !N !C DI | mem[AR]: INC
+
+    t353  | IP -> AR                      | AC: 10, IP: 23, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 23 | !Z !N !C DI | mem[AR]: ST 14
+    t354  | IP + 1 -> IP; mem[AR] -> DR   | AC: 10, IP: 24, CR:   INC, PS:  0, SP: 1024, DR: 14, AR: 23 | !Z !N !C DI | mem[AR]: ST 14
+    t355  | DR -> CR                      | AC: 10, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 23 | !Z !N !C DI | mem[AR]: ST 14
+    t356  | DR -> AR                      | AC: 10, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 9
+    t357  | mem[AR] -> DR                 | AC: 10, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR:  9, AR: 14 | !Z !N !C DI | mem[AR]: 9
+    t358  | AC -> DR                      | AC: 10, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR: 10, AR: 14 | !Z !N !C DI | mem[AR]: 9
+    t359  | DR -> mem[AR]                 | AC: 10, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR: 10, AR: 14 | !Z !N !C DI | mem[AR]: 10
+
+    t360  | IP -> AR                      | AC: 10, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR: 10, AR: 24 | !Z !N !C DI | mem[AR]: JMP 18
+    t361  | IP + 1 -> IP; mem[AR] -> DR   | AC: 10, IP: 25, CR:  ST 14, PS:  0, SP: 1024, DR: 18, AR: 24 | !Z !N !C DI | mem[AR]: JMP 18
+    t362  | DR -> CR                      | AC: 10, IP: 25, CR: JMP 18, PS:  0, SP: 1024, DR: 18, AR: 24 | !Z !N !C DI | mem[AR]: JMP 18
+    t363  | DR -> IP                      | AC: 10, IP: 18, CR: JMP 18, PS:  0, SP: 1024, DR: 18, AR: 24 | !Z !N !C DI | mem[AR]: JMP 18
+
+    t364  | IP -> AR                      | AC: 10, IP: 18, CR: JMP 18, PS:  0, SP: 1024, DR: 18, AR: 18 | !Z !N !C DI | mem[AR]: LD 14
+    t365  | IP + 1 -> IP; mem[AR] -> DR   | AC: 10, IP: 19, CR: JMP 18, PS:  0, SP: 1024, DR: 14, AR: 18 | !Z !N !C DI | mem[AR]: LD 14
+    t366  | DR -> CR                      | AC: 10, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 18 | !Z !N !C DI | mem[AR]: LD 14
+    t367  | DR -> AR                      | AC: 10, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 10
+    t368  | mem[AR] -> DR                 | AC: 10, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 10, AR: 14 | !Z !N !C DI | mem[AR]: 10
+    t369  | DR -> AR                      | AC: 10, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 10, AR: 10 | !Z !N !C DI | mem[AR]: 'l'
+    t370  | mem[AR] -> DR                 | AC: 10, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 108, AR: 10 | !Z !N !C DI | mem[AR]: 'l'
+    t371  | DR -> AC                      | AC: 108, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 108, AR: 10 | !Z !N !C DI | mem[AR]: 'l'
+
+    t372  | IP -> AR                      | AC: 108, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 108, AR: 19 | !Z !N !C DI | mem[AR]: OUT 16
+    t373  | IP + 1 -> IP; mem[AR] -> DR   | AC: 108, IP: 20, CR:  LD 14, PS:  0, SP: 1024, DR: 16, AR: 19 | !Z !N !C DI | mem[AR]: OUT 16
+    t374  | DR -> CR                      | AC: 108, IP: 20, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 19 | !Z !N !C DI | mem[AR]: OUT 16
+    t375  | AC -> OUT                     | AC: 108, IP: 20, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 19 | !Z !N !C DI | mem[AR]: OUT 16
+
+    t376  | IP -> AR                      | AC: 108, IP: 20, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 20 | !Z !N !C DI | mem[AR]: JZ 25
+    t377  | IP + 1 -> IP; mem[AR] -> DR   | AC: 108, IP: 21, CR: OUT 16, PS:  0, SP: 1024, DR: 25, AR: 20 | !Z !N !C DI | mem[AR]: JZ 25
+    t378  | DR -> CR                      | AC: 108, IP: 21, CR:  JZ 25, PS:  0, SP: 1024, DR: 25, AR: 20 | !Z !N !C DI | mem[AR]: JZ 25
+
+    t379  | IP -> AR                      | AC: 108, IP: 21, CR:  JZ 25, PS:  0, SP: 1024, DR: 25, AR: 21 | !Z !N !C DI | mem[AR]: LD 14
+    t380  | IP + 1 -> IP; mem[AR] -> DR   | AC: 108, IP: 22, CR:  JZ 25, PS:  0, SP: 1024, DR: 14, AR: 21 | !Z !N !C DI | mem[AR]: LD 14
+    t381  | DR -> CR                      | AC: 108, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 21 | !Z !N !C DI | mem[AR]: LD 14
+    t382  | DR -> AR                      | AC: 108, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 10
+    t383  | mem[AR] -> DR                 | AC: 108, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR: 10, AR: 14 | !Z !N !C DI | mem[AR]: 10
+    t384  | DR -> AC                      | AC: 10, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR: 10, AR: 14 | !Z !N !C DI | mem[AR]: 10
+
+    t385  | IP -> AR                      | AC: 10, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR: 10, AR: 22 | !Z !N !C DI | mem[AR]: INC
+    t386  | IP + 1 -> IP; mem[AR] -> DR   | AC: 10, IP: 23, CR:  LD 14, PS:  0, SP: 1024, DR:  0, AR: 22 | !Z !N !C DI | mem[AR]: INC
+    t387  | DR -> CR                      | AC: 10, IP: 23, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 22 | !Z !N !C DI | mem[AR]: INC
+    t388  | AC + 1 -> AC                  | AC: 11, IP: 23, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 22 | !Z !N !C DI | mem[AR]: INC
+
+    t389  | IP -> AR                      | AC: 11, IP: 23, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 23 | !Z !N !C DI | mem[AR]: ST 14
+    t390  | IP + 1 -> IP; mem[AR] -> DR   | AC: 11, IP: 24, CR:   INC, PS:  0, SP: 1024, DR: 14, AR: 23 | !Z !N !C DI | mem[AR]: ST 14
+    t391  | DR -> CR                      | AC: 11, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 23 | !Z !N !C DI | mem[AR]: ST 14
+    t392  | DR -> AR                      | AC: 11, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 10
+    t393  | mem[AR] -> DR                 | AC: 11, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR: 10, AR: 14 | !Z !N !C DI | mem[AR]: 10
+    t394  | AC -> DR                      | AC: 11, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR: 11, AR: 14 | !Z !N !C DI | mem[AR]: 10
+    t395  | DR -> mem[AR]                 | AC: 11, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR: 11, AR: 14 | !Z !N !C DI | mem[AR]: 11
+
+    t396  | IP -> AR                      | AC: 11, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR: 11, AR: 24 | !Z !N !C DI | mem[AR]: JMP 18
+    t397  | IP + 1 -> IP; mem[AR] -> DR   | AC: 11, IP: 25, CR:  ST 14, PS:  0, SP: 1024, DR: 18, AR: 24 | !Z !N !C DI | mem[AR]: JMP 18
+    t398  | DR -> CR                      | AC: 11, IP: 25, CR: JMP 18, PS:  0, SP: 1024, DR: 18, AR: 24 | !Z !N !C DI | mem[AR]: JMP 18
+    t399  | DR -> IP                      | AC: 11, IP: 18, CR: JMP 18, PS:  0, SP: 1024, DR: 18, AR: 24 | !Z !N !C DI | mem[AR]: JMP 18
+
+    t400  | IP -> AR                      | AC: 11, IP: 18, CR: JMP 18, PS:  0, SP: 1024, DR: 18, AR: 18 | !Z !N !C DI | mem[AR]: LD 14
+    t401  | IP + 1 -> IP; mem[AR] -> DR   | AC: 11, IP: 19, CR: JMP 18, PS:  0, SP: 1024, DR: 14, AR: 18 | !Z !N !C DI | mem[AR]: LD 14
+    t402  | DR -> CR                      | AC: 11, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 18 | !Z !N !C DI | mem[AR]: LD 14
+    t403  | DR -> AR                      | AC: 11, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 11
+    t404  | mem[AR] -> DR                 | AC: 11, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 11, AR: 14 | !Z !N !C DI | mem[AR]: 11
+    t405  | DR -> AR                      | AC: 11, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 11, AR: 11 | !Z !N !C DI | mem[AR]: 'd'
+    t406  | mem[AR] -> DR                 | AC: 11, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 100, AR: 11 | !Z !N !C DI | mem[AR]: 'd'
+    t407  | DR -> AC                      | AC: 100, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 100, AR: 11 | !Z !N !C DI | mem[AR]: 'd'
+
+    t408  | IP -> AR                      | AC: 100, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 100, AR: 19 | !Z !N !C DI | mem[AR]: OUT 16
+    t409  | IP + 1 -> IP; mem[AR] -> DR   | AC: 100, IP: 20, CR:  LD 14, PS:  0, SP: 1024, DR: 16, AR: 19 | !Z !N !C DI | mem[AR]: OUT 16
+    t410  | DR -> CR                      | AC: 100, IP: 20, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 19 | !Z !N !C DI | mem[AR]: OUT 16
+    t411  | AC -> OUT                     | AC: 100, IP: 20, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 19 | !Z !N !C DI | mem[AR]: OUT 16
+
+    t412  | IP -> AR                      | AC: 100, IP: 20, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 20 | !Z !N !C DI | mem[AR]: JZ 25
+    t413  | IP + 1 -> IP; mem[AR] -> DR   | AC: 100, IP: 21, CR: OUT 16, PS:  0, SP: 1024, DR: 25, AR: 20 | !Z !N !C DI | mem[AR]: JZ 25
+    t414  | DR -> CR                      | AC: 100, IP: 21, CR:  JZ 25, PS:  0, SP: 1024, DR: 25, AR: 20 | !Z !N !C DI | mem[AR]: JZ 25
+
+    t415  | IP -> AR                      | AC: 100, IP: 21, CR:  JZ 25, PS:  0, SP: 1024, DR: 25, AR: 21 | !Z !N !C DI | mem[AR]: LD 14
+    t416  | IP + 1 -> IP; mem[AR] -> DR   | AC: 100, IP: 22, CR:  JZ 25, PS:  0, SP: 1024, DR: 14, AR: 21 | !Z !N !C DI | mem[AR]: LD 14
+    t417  | DR -> CR                      | AC: 100, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 21 | !Z !N !C DI | mem[AR]: LD 14
+    t418  | DR -> AR                      | AC: 100, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 11
+    t419  | mem[AR] -> DR                 | AC: 100, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR: 11, AR: 14 | !Z !N !C DI | mem[AR]: 11
+    t420  | DR -> AC                      | AC: 11, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR: 11, AR: 14 | !Z !N !C DI | mem[AR]: 11
+
+    t421  | IP -> AR                      | AC: 11, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR: 11, AR: 22 | !Z !N !C DI | mem[AR]: INC
+    t422  | IP + 1 -> IP; mem[AR] -> DR   | AC: 11, IP: 23, CR:  LD 14, PS:  0, SP: 1024, DR:  0, AR: 22 | !Z !N !C DI | mem[AR]: INC
+    t423  | DR -> CR                      | AC: 11, IP: 23, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 22 | !Z !N !C DI | mem[AR]: INC
+    t424  | AC + 1 -> AC                  | AC: 12, IP: 23, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 22 | !Z !N !C DI | mem[AR]: INC
+
+    t425  | IP -> AR                      | AC: 12, IP: 23, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 23 | !Z !N !C DI | mem[AR]: ST 14
+    t426  | IP + 1 -> IP; mem[AR] -> DR   | AC: 12, IP: 24, CR:   INC, PS:  0, SP: 1024, DR: 14, AR: 23 | !Z !N !C DI | mem[AR]: ST 14
+    t427  | DR -> CR                      | AC: 12, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 23 | !Z !N !C DI | mem[AR]: ST 14
+    t428  | DR -> AR                      | AC: 12, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 11
+    t429  | mem[AR] -> DR                 | AC: 12, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR: 11, AR: 14 | !Z !N !C DI | mem[AR]: 11
+    t430  | AC -> DR                      | AC: 12, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR: 12, AR: 14 | !Z !N !C DI | mem[AR]: 11
+    t431  | DR -> mem[AR]                 | AC: 12, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR: 12, AR: 14 | !Z !N !C DI | mem[AR]: 12
+
+    t432  | IP -> AR                      | AC: 12, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR: 12, AR: 24 | !Z !N !C DI | mem[AR]: JMP 18
+    t433  | IP + 1 -> IP; mem[AR] -> DR   | AC: 12, IP: 25, CR:  ST 14, PS:  0, SP: 1024, DR: 18, AR: 24 | !Z !N !C DI | mem[AR]: JMP 18
+    t434  | DR -> CR                      | AC: 12, IP: 25, CR: JMP 18, PS:  0, SP: 1024, DR: 18, AR: 24 | !Z !N !C DI | mem[AR]: JMP 18
+    t435  | DR -> IP                      | AC: 12, IP: 18, CR: JMP 18, PS:  0, SP: 1024, DR: 18, AR: 24 | !Z !N !C DI | mem[AR]: JMP 18
+
+    t436  | IP -> AR                      | AC: 12, IP: 18, CR: JMP 18, PS:  0, SP: 1024, DR: 18, AR: 18 | !Z !N !C DI | mem[AR]: LD 14
+    t437  | IP + 1 -> IP; mem[AR] -> DR   | AC: 12, IP: 19, CR: JMP 18, PS:  0, SP: 1024, DR: 14, AR: 18 | !Z !N !C DI | mem[AR]: LD 14
+    t438  | DR -> CR                      | AC: 12, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 18 | !Z !N !C DI | mem[AR]: LD 14
+    t439  | DR -> AR                      | AC: 12, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 12
+    t440  | mem[AR] -> DR                 | AC: 12, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 12, AR: 14 | !Z !N !C DI | mem[AR]: 12
+    t441  | DR -> AR                      | AC: 12, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 12, AR: 12 | !Z !N !C DI | mem[AR]: '!'
+    t442  | mem[AR] -> DR                 | AC: 12, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 33, AR: 12 | !Z !N !C DI | mem[AR]: '!'
+    t443  | DR -> AC                      | AC: 33, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 33, AR: 12 | !Z !N !C DI | mem[AR]: '!'
+
+    t444  | IP -> AR                      | AC: 33, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 33, AR: 19 | !Z !N !C DI | mem[AR]: OUT 16
+    t445  | IP + 1 -> IP; mem[AR] -> DR   | AC: 33, IP: 20, CR:  LD 14, PS:  0, SP: 1024, DR: 16, AR: 19 | !Z !N !C DI | mem[AR]: OUT 16
+    t446  | DR -> CR                      | AC: 33, IP: 20, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 19 | !Z !N !C DI | mem[AR]: OUT 16
+    t447  | AC -> OUT                     | AC: 33, IP: 20, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 19 | !Z !N !C DI | mem[AR]: OUT 16
+
+    t448  | IP -> AR                      | AC: 33, IP: 20, CR: OUT 16, PS:  0, SP: 1024, DR: 16, AR: 20 | !Z !N !C DI | mem[AR]: JZ 25
+    t449  | IP + 1 -> IP; mem[AR] -> DR   | AC: 33, IP: 21, CR: OUT 16, PS:  0, SP: 1024, DR: 25, AR: 20 | !Z !N !C DI | mem[AR]: JZ 25
+    t450  | DR -> CR                      | AC: 33, IP: 21, CR:  JZ 25, PS:  0, SP: 1024, DR: 25, AR: 20 | !Z !N !C DI | mem[AR]: JZ 25
+
+    t451  | IP -> AR                      | AC: 33, IP: 21, CR:  JZ 25, PS:  0, SP: 1024, DR: 25, AR: 21 | !Z !N !C DI | mem[AR]: LD 14
+    t452  | IP + 1 -> IP; mem[AR] -> DR   | AC: 33, IP: 22, CR:  JZ 25, PS:  0, SP: 1024, DR: 14, AR: 21 | !Z !N !C DI | mem[AR]: LD 14
+    t453  | DR -> CR                      | AC: 33, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 21 | !Z !N !C DI | mem[AR]: LD 14
+    t454  | DR -> AR                      | AC: 33, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 12
+    t455  | mem[AR] -> DR                 | AC: 33, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR: 12, AR: 14 | !Z !N !C DI | mem[AR]: 12
+    t456  | DR -> AC                      | AC: 12, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR: 12, AR: 14 | !Z !N !C DI | mem[AR]: 12
+
+    t457  | IP -> AR                      | AC: 12, IP: 22, CR:  LD 14, PS:  0, SP: 1024, DR: 12, AR: 22 | !Z !N !C DI | mem[AR]: INC
+    t458  | IP + 1 -> IP; mem[AR] -> DR   | AC: 12, IP: 23, CR:  LD 14, PS:  0, SP: 1024, DR:  0, AR: 22 | !Z !N !C DI | mem[AR]: INC
+    t459  | DR -> CR                      | AC: 12, IP: 23, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 22 | !Z !N !C DI | mem[AR]: INC
+    t460  | AC + 1 -> AC                  | AC: 13, IP: 23, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 22 | !Z !N !C DI | mem[AR]: INC
+
+    t461  | IP -> AR                      | AC: 13, IP: 23, CR:   INC, PS:  0, SP: 1024, DR:  0, AR: 23 | !Z !N !C DI | mem[AR]: ST 14
+    t462  | IP + 1 -> IP; mem[AR] -> DR   | AC: 13, IP: 24, CR:   INC, PS:  0, SP: 1024, DR: 14, AR: 23 | !Z !N !C DI | mem[AR]: ST 14
+    t463  | DR -> CR                      | AC: 13, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 23 | !Z !N !C DI | mem[AR]: ST 14
+    t464  | DR -> AR                      | AC: 13, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 12
+    t465  | mem[AR] -> DR                 | AC: 13, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR: 12, AR: 14 | !Z !N !C DI | mem[AR]: 12
+    t466  | AC -> DR                      | AC: 13, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR: 13, AR: 14 | !Z !N !C DI | mem[AR]: 12
+    t467  | DR -> mem[AR]                 | AC: 13, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR: 13, AR: 14 | !Z !N !C DI | mem[AR]: 13
+
+    t468  | IP -> AR                      | AC: 13, IP: 24, CR:  ST 14, PS:  0, SP: 1024, DR: 13, AR: 24 | !Z !N !C DI | mem[AR]: JMP 18
+    t469  | IP + 1 -> IP; mem[AR] -> DR   | AC: 13, IP: 25, CR:  ST 14, PS:  0, SP: 1024, DR: 18, AR: 24 | !Z !N !C DI | mem[AR]: JMP 18
+    t470  | DR -> CR                      | AC: 13, IP: 25, CR: JMP 18, PS:  0, SP: 1024, DR: 18, AR: 24 | !Z !N !C DI | mem[AR]: JMP 18
+    t471  | DR -> IP                      | AC: 13, IP: 18, CR: JMP 18, PS:  0, SP: 1024, DR: 18, AR: 24 | !Z !N !C DI | mem[AR]: JMP 18
+
+    t472  | IP -> AR                      | AC: 13, IP: 18, CR: JMP 18, PS:  0, SP: 1024, DR: 18, AR: 18 | !Z !N !C DI | mem[AR]: LD 14
+    t473  | IP + 1 -> IP; mem[AR] -> DR   | AC: 13, IP: 19, CR: JMP 18, PS:  0, SP: 1024, DR: 14, AR: 18 | !Z !N !C DI | mem[AR]: LD 14
+    t474  | DR -> CR                      | AC: 13, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 18 | !Z !N !C DI | mem[AR]: LD 14
+    t475  | DR -> AR                      | AC: 13, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 14, AR: 14 | !Z !N !C DI | mem[AR]: 13
+    t476  | mem[AR] -> DR                 | AC: 13, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 13, AR: 14 | !Z !N !C DI | mem[AR]: 13
+    t477  | DR -> AR                      | AC: 13, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR: 13, AR: 13 | !Z !N !C DI | mem[AR]: 0
+    t478  | mem[AR] -> DR                 | AC: 13, IP: 19, CR:  LD 14, PS:  0, SP: 1024, DR:  0, AR: 13 | !Z !N !C DI | mem[AR]: 0
+    t479  | DR -> AC                      | AC:  0, IP: 19, CR:  LD 14, PS:  4, SP: 1024, DR:  0, AR: 13 | Z !N !C DI | mem[AR]: 0
+
+    t480  | IP -> AR                      | AC:  0, IP: 19, CR:  LD 14, PS:  4, SP: 1024, DR:  0, AR: 19 | Z !N !C DI | mem[AR]: OUT 16
+    t481  | IP + 1 -> IP; mem[AR] -> DR   | AC:  0, IP: 20, CR:  LD 14, PS:  4, SP: 1024, DR: 16, AR: 19 | Z !N !C DI | mem[AR]: OUT 16
+    t482  | DR -> CR                      | AC:  0, IP: 20, CR: OUT 16, PS:  4, SP: 1024, DR: 16, AR: 19 | Z !N !C DI | mem[AR]: OUT 16
+    t483  | AC -> OUT                     | AC:  0, IP: 20, CR: OUT 16, PS:  4, SP: 1024, DR: 16, AR: 19 | Z !N !C DI | mem[AR]: OUT 16
+
+    t484  | IP -> AR                      | AC:  0, IP: 20, CR: OUT 16, PS:  4, SP: 1024, DR: 16, AR: 20 | Z !N !C DI | mem[AR]: JZ 25
+    t485  | IP + 1 -> IP; mem[AR] -> DR   | AC:  0, IP: 21, CR: OUT 16, PS:  4, SP: 1024, DR: 25, AR: 20 | Z !N !C DI | mem[AR]: JZ 25
+    t486  | DR -> CR                      | AC:  0, IP: 21, CR:  JZ 25, PS:  4, SP: 1024, DR: 25, AR: 20 | Z !N !C DI | mem[AR]: JZ 25
+    t487  | DR -> IP                      | AC:  0, IP: 25, CR:  JZ 25, PS:  4, SP: 1024, DR: 25, AR: 20 | Z !N !C DI | mem[AR]: JZ 25
+
+    t488  | IP -> AR                      | AC:  0, IP: 25, CR:  JZ 25, PS:  4, SP: 1024, DR: 25, AR: 25 | Z !N !C DI | mem[AR]: HLT
+    t489  | IP + 1 -> IP; mem[AR] -> DR   | AC:  0, IP: 26, CR:  JZ 25, PS:  4, SP: 1024, DR:  0, AR: 25 | Z !N !C DI | mem[AR]: HLT
+    t490  | DR -> CR                      | AC:  0, IP: 26, CR:   HLT, PS:  4, SP: 1024, DR:  0, AR: 25 | Z !N !C DI | mem[AR]: HLT
+    t491  | HLT                           | AC:  0, IP: 26, CR:   HLT, PS:  4, SP: 1024, DR:  0, AR: 25 | Z !N !C DI | mem[AR]: HLT

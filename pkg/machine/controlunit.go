@@ -186,7 +186,7 @@ func (cu *ControlUnit) decodeAndExecuteAddressInstruction(instruction isa.Machin
 		cu.doInOneTick("AC -> DR", cu.SigLatchRegFunc(DR, cu.dataPath.SigExecuteAluOp(*cu.aluRegisterPassthrough(AC))))
 		cu.doInOneTick("DR -> mem[AR]", cu.SigWriteMemoryFunc())
 	case opcode == isa.OpcodeCmp:
-		cu.doInOneTick("AC - DR -> AC", cu.SigLatchRegFunc(AC, cu.dataPath.SigExecuteAluOp(*cu.toAluOp(AC, DR, instruction.Opcode).UpdateRegisters(true))))
+		cu.doInOneTick("AC - DR -> NZC", func() { cu.dataPath.SigExecuteAluOp(*cu.toAluOp(AC, DR, instruction.Opcode).UpdateRegisters(true)) })
 	default:
 		// арифметическая
 		cu.doInOneTick("AC +- DR -> AC", cu.SigLatchRegFunc(AC, cu.dataPath.SigExecuteAluOp(*cu.toAluOp(AC, DR, instruction.Opcode).UpdateRegisters(true))))
@@ -231,7 +231,7 @@ func (cu *ControlUnit) decodeAndExecuteBranchInstruction(instruction isa.Machine
 
 	condition := opcode == isa.OpcodeJc && flags.CARRY || opcode == isa.OpcodeJnc && !flags.CARRY || opcode == isa.OpcodeJn && flags.NEGATIVE || opcode == isa.OpcodeJnneg && !flags.NEGATIVE || opcode == isa.OppcodeJz && flags.ZERO || opcode == isa.OpcodeJnz && !flags.ZERO
 
-	if condition {
+	if condition || opcode == isa.OpcodeJmp {
 		cu.doInOneTick("DR -> IP", cu.SigLatchRegFunc(IP, cu.dataPath.SigExecuteAluOp(*cu.aluRegisterPassthrough(DR))))
 	}
 	return nil

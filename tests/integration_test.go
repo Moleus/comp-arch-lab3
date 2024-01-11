@@ -60,6 +60,12 @@ func TestHelloOutput(t *testing.T) {
 	runTest(t, input, goldenFilename)
 }
 
+func TestHelloUserInput(t *testing.T) {
+	input := parseInputFile(t, "hello_user.yml")
+	goldenFilename := "golden/hello_user.yml"
+	runTest(t, input, goldenFilename)
+}
+
 func parseInputFile(t *testing.T, filename string) TestInput {
 	inputContent, err := os.ReadFile("inputs/" + filename)
 	if err != nil {

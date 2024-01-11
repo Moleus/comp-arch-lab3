@@ -4,13 +4,12 @@ translator_input: |-
   zero: word: 0
   out_port: word: 1
 
-  start: ld pointer
-    dec
-    st pointer
-    loop: ld pointer
+  start: nop
+    loop: ld (pointer)
+      out out_port
+      jz end
+      ld pointer
       inc
       st pointer
-      ld (pointer)
-      out out_port
-      jnz loop
-    hlt
+      jmp loop
+    end: hlt
