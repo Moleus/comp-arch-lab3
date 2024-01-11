@@ -4,8 +4,6 @@ import (
 	"github.com/Moleus/comp-arch-lab3/pkg/isa"
 )
 
-type BinaryOperationExec func(left int, right int) int
-
 type AluOperation int
 
 const (
@@ -13,10 +11,8 @@ const (
 	AluOperationAdd
 	AluOperationSub
 	AluOperationMul
-	AluOperationDiv
 	AluOperationMod
 	AluOperationRight
-	AluOperationLeft
 	AluOperationOr
 	AluOperationAnd
 )
@@ -30,6 +26,8 @@ var (
 		isa.OpcodeMod: AluOperationMod,
 	}
 )
+
+type BinaryOperationExec func(left int, right int) int
 
 type Alu struct {
 	bitFlags       BitFlags
@@ -48,10 +46,6 @@ func mul(left int, right int) int {
 	return left * right
 }
 
-func div(left int, right int) int {
-	return left / right
-}
-
 func mod(left int, right int) int {
 	return left % right
 }
@@ -68,20 +62,14 @@ func takeRight(_ int, right int) int {
 	return right
 }
 
-func takeLeft(left int, _ int) int {
-	return left
-}
-
 func NewAlu() *Alu {
 	return &Alu{
 		operation2func: map[AluOperation]BinaryOperationExec{
 			AluOperationAdd:   add,
 			AluOperationSub:   sub,
 			AluOperationMul:   mul,
-			AluOperationDiv:   div,
 			AluOperationMod:   mod,
 			AluOperationRight: takeRight,
-			AluOperationLeft:  takeLeft,
 			AluOperationOr:    or,
 			AluOperationAnd:   and,
 		},

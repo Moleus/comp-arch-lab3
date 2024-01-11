@@ -21,8 +21,6 @@ BR - буферный регистр
 PS - регистр флагов (состояния)
 
 //TODO: написать набор функций, который позволят удобно читать из памяти в нужные регистры и обратно
-
-
 // TODO: как будет выглядеть DataPath на Golang?
 
 подумать про адресацию...
@@ -59,10 +57,6 @@ const (
 	StatusRegisterZeroBit            = 1 << 2
 	StatusRegisterNegativeBit        = 1 << 3
 	StatusRegisterEnableInterruptBit = 1 << 5
-)
-
-const (
-	AccumulatorIOReadyBit = 1 << 6
 )
 
 type BitFlags struct {
@@ -111,9 +105,7 @@ func (r Register) String() string {
 }
 
 type DataPath struct {
-	// TODO: maybe move out from isa
-	inputBuffer []isa.IoData
-	// TODO: handle outputBuffer
+	inputBuffer  []isa.IoData
 	outputBuffer io.Writer
 	registers    map[Register]isa.MachineWord
 	memory       []isa.MachineWord
@@ -190,13 +182,10 @@ func (dp *DataPath) ReadMemory(address int) isa.MachineWord {
 }
 
 func (dp *DataPath) WriteMemory() {
-	// we need to store u8 bytes in memory
-	// we need to store instructions and their parameters in memory
 	dp.memory[dp.GetRegister(AR).Value] = dp.GetRegister(DR)
 }
 
 func (dp *DataPath) SigExecuteAluOp(aluParams ExecutionParams) isa.MachineWord {
-	// TODO: fix nzvc flags
 	result, bitFlags := dp.Alu.Execute(aluParams)
 	oldPs := dp.registers[PS]
 	oldPs.Value = updatePsWithBitFlags(oldPs.Value, bitFlags)
@@ -205,19 +194,16 @@ func (dp *DataPath) SigExecuteAluOp(aluParams ExecutionParams) isa.MachineWord {
 }
 
 func updatePsWithBitFlags(oldPs int, bitFlags BitFlags) int {
-	// update carry
 	if bitFlags.CARRY {
 		oldPs |= StatusRegisterCarryBit
 	} else {
 		oldPs &= ^StatusRegisterCarryBit
 	}
-	// update zero
 	if bitFlags.ZERO {
 		oldPs |= StatusRegisterZeroBit
 	} else {
 		oldPs &= ^StatusRegisterZeroBit
 	}
-	// update negative
 	if bitFlags.NEGATIVE {
 		oldPs |= StatusRegisterNegativeBit
 	} else {

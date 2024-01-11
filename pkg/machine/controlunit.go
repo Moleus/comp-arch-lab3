@@ -42,15 +42,12 @@ func (e *ControlUnitError) Error() string {
 	return e.message
 }
 
-// TODO: implement interfacte Debuggable to dump current CPU state
 type ControlUnit struct {
 	program  isa.Program
 	dataPath *DataPath
 
-	// Счетчик команд
 	instructionsCounter int
-	// Счетчик тактов
-	clock *Clock
+	clock               *Clock
 
 	inputPointer int
 
@@ -171,7 +168,6 @@ func (cu *ControlUnit) OperandFetch() {
 	// значение лежит в DR
 }
 
-// Пробуем реализовать без косвенной адресации. Только прямая абсолютная.
 func (cu *ControlUnit) decodeAndExecuteAddressInstruction(instruction isa.MachineWord) error {
 	if instruction.ValueType == isa.ValueTypeAddressIndirect {
 		cu.AddressFetch()
@@ -250,7 +246,7 @@ func (cu *ControlUnit) processInterrupt() {
 	cu.pushOnStack(IP)
 	cu.pushOnStack(PS)
 
-	// читаем по адресу ветора прерывания
+	// читаем по адресу вектора прерывания
 	cu.doInOneTick("intVec -> AR", cu.SigLatchRegFunc(AR, cu.dataPath.SigExecuteAluOp(*NewAluOp(AluOperationAdd).SetLeftValue(InterruptVectorFirst))))
 	cu.doInOneTick("mem[AR] -> DR", cu.SigReadMemoryFunc())
 
@@ -291,7 +287,6 @@ func (cu *ControlUnit) aluDecrement(register Register) *ExecutionParams {
 }
 
 func (cu *ControlUnit) aluRegisterPassthrough(register Register) *ExecutionParams {
-	// called for DR for address commands
 	return NewAluOp(AluOperationAdd).SetLeft(cu.GetReg(register))
 }
 
