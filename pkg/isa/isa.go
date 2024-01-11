@@ -313,10 +313,10 @@ func SerializeCode(program Program) ([]byte, error) {
 }
 
 func ReadIoData(input io.Reader) ([]IoData, error) {
-	var ioData []IoData
+	var ioData = make([]IoData, 0)
 	decoder := json.NewDecoder(input)
 	err := decoder.Decode(&ioData)
-	if err != nil {
+	if err != nil && err != io.EOF {
 		return []IoData{}, err
 	}
 	return ioData, nil

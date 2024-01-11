@@ -14,6 +14,3 @@ translator_input: |-
       out out_port
       jnz loop
     hlt
-
-machine_input: |-
-  [{ "arrivesAt": 1, "char": "a"}, { "arrivesAt": 2, "char": "b"},  {"arrivesAt": 85, "char": "\n"}]

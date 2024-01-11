@@ -13,7 +13,7 @@ import (
 
 type TestInput struct {
 	TranslatorInput string `yaml:"translator_input"`
-	MachineInput    string `yaml:"machine_input"`
+	MachineInput    string `yaml:"machine_input,omitempty"`
 }
 
 type TestOutput struct {
