@@ -273,7 +273,7 @@ start: cla
 
 - Цикл симуляции осуществляется в функции `simulation`.
 - Шаг моделирования соответствует одному такту процессора с выводом состояния в журнал (каждая запись в журнале
-  соответствует состоянию процессора после выполнения инструкции)
+  соответствует состоянию процессора после выполнения каждого такта)
 - Для журнала состояний процессора используется поле структуры `stateOutput` типа `io.Writer`
 - Количество инструкций для моделирования лимитировано.
 - Остановка моделирования осуществляется при:
@@ -300,11 +300,11 @@ start: cla
 
 Реализованные програмы
 
-1. [hello world](tests/inputs/hello.yml) -- вывести на экран строку `'Hello World!'`
-2. [cat](tests/inputs/cat.yml) -- программа `cat`, повторяем ввод на выводе.
-3. [hello_user](tests/inputs/hello_user.yml) -- программа `hello_user` -- запросить у пользователя его имя, считать его,
+1. [hello world](tests/assembly/hello.asm) -- вывести на экран строку `'Hello World!'`
+2. [cat](tests/assembly/cat.asm) -- программа `cat`, повторяем ввод на выводе.
+3. [hello_user](tests/assembly/hello_user.asm) -- программа `hello_user` -- запросить у пользователя его имя, считать его,
    вывести на экран приветствие
-4. [prob5](tests/inputs/prob5.yml): найти наименьшее число, которое делится на все числа от 1 до 20.
+4. [prob5](tests/assembly/prob5.asm): найти наименьшее число, которое делится на все числа от 1 до 20.
 
 Интеграционные тесты реализованы тут [integration_test.go](./tests/integration_test.go):
 
@@ -348,68 +348,322 @@ jobs:
 
 ``` shell
 ➜ sem5/archCom/lab3 git:(main) ✗ go build -o translator ./cmd/translator/main.go
-➜ sem5/archCom/lab3 git:(main) ✗ cat tests/inputs/cat.yml
-translator_input: |-
-  vector: word: interrupt
-  in_port: word: 0
-  out_port: word: 1
-  flag: word: 0
-  line_feed: word: 10
+➜ sem5/archCom/lab3 git:(main) ✗ cat tests/assembly/cat.asm
+vector: word: interrupt
+in_port: word: 0
+out_port: word: 1
+flag: word: 0
+line_feed: word: 10
 
-  start: ei
-  spin_loop: ld flag
-    jz spin_loop
-    hlt
+start: ei
+spin_loop: ld flag
+  jz spin_loop
+  hlt
 
-  interrupt: in in_port
-    out out_port
-    cmp line_feed
-    jnz returning
-    ld flag
-    inc
-    st flag
-    returning: iret
+interrupt: in in_port
+  out out_port
+  cmp line_feed
+  jnz returning
+  ld flag
+  inc
+  st flag
+  returning: iret
 
-machine_input: |-
-  [{ "arrivesAt": 1, "char": "a"}, { "arrivesAt": 2, "char": "b"},  {"arrivesAt": 85, "char": "\n"}]%
+➜ sem5/archCom/lab3 git:(main) ✗ ./translator -input tests/assembly/cat.asm -target /tmp/cat.asm
+➜ sem5/archCom/lab3 git:(main) ✗ cat /tmp/cat.asm
+{
+  "StartAddress": 5,
+  "Instructions": [
+    {
+      "index": 0,
+      "label": "vector",
+      "opcode": "NOP",
+      "operand": 9,
+      "operand_type": 3,
+      "term_info": {
+        "line_num": 1,
+        "original_content": "vector: word: interrupt"
+      }
+    },
+    {
+      "index": 1,
+      "label": "in_port",
+      "opcode": "NOP",
+      "operand": 0,
+      "operand_type": 1,
+      "term_info": {
+        "line_num": 2,
+        "original_content": "in_port: word: 0"
+      }
+    },
+    {
+      "index": 2,
+      "label": "out_port",
+      "opcode": "NOP",
+      "operand": 1,
+      "operand_type": 1,
+      "term_info": {
+        "line_num": 3,
+        "original_content": "out_port: word: 1"
+      }
+    },
+    {
+      "index": 3,
+      "label": "flag",
+      "opcode": "NOP",
+      "operand": 0,
+      "operand_type": 1,
+      "term_info": {
+        "line_num": 4,
+        "original_content": "flag: word: 0"
+      }
+    },
+    {
+      "index": 4,
+      "label": "line_feed",
+      "opcode": "NOP",
+      "operand": 10,
+      "operand_type": 1,
+      "term_info": {
+        "line_num": 5,
+        "original_content": "line_feed: word: 10"
+      }
+    },
+    {
+      "index": 5,
+      "label": "start",
+      "opcode": "EI",
+      "term_info": {
+        "line_num": 7,
+        "original_content": "start: ei"
+      }
+    },
+    {
+      "index": 6,
+      "label": "spin_loop",
+      "opcode": "LD",
+      "operand": 3,
+      "operand_type": 3,
+      "term_info": {
+        "line_num": 8,
+        "original_content": "spin_loop: ld flag"
+      }
+    },
+    ...
+  ]
+}
 
+➜ sem5/archCom/lab3 git:(main) ✗ go build -o machine ./cmd/simulation/main.go
+➜ sem5/archCom/lab3 git:(main) ✗ ./machine -io-data ./tests/inputs/cat.json -program /tmp/cat.asm
+2024/01/12 19:53:03 starting simulation
+t0    | IP -> AR                      | AC:  0, IP:  5, CR: NOP 0, PS:  0, SP: 2048, DR:  0, AR:  5 | !Z !N !C DI | mem[AR]: EI
+t1    | IP + 1 -> IP; mem[AR] -> DR   | AC:  0, IP:  6, CR: NOP 0, PS:  0, SP: 2048, DR:  0, AR:  5 | !Z !N !C DI | mem[AR]: EI
+t2    | DR -> CR                      | AC:  0, IP:  6, CR:    EI, PS:  0, SP: 2048, DR:  0, AR:  5 | !Z !N !C DI | mem[AR]: EI
+t3    | 1 -> PS[EI]                   | AC:  0, IP:  6, CR:    EI, PS: 32, SP: 2048, DR:  0, AR:  5 | !Z !N !C EI | mem[AR]: EI
+t4    | 0 -> PS[EI]                   | AC:  0, IP:  6, CR:    EI, PS:  0, SP: 2048, DR:  0, AR:  5 | !Z !N !C DI | mem[AR]: EI
+t5    | SP - 1 -> SP                  | AC:  0, IP:  6, CR:    EI, PS:  0, SP: 2047, DR:  0, AR:  5 | !Z !N !C DI | mem[AR]: EI
+t6    | SP -> AR                      | AC:  0, IP:  6, CR:    EI, PS:  0, SP: 2047, DR:  0, AR: 2047 | !Z !N !C DI | mem[AR]: 0
+t7    | IP -> DR                      | AC:  0, IP:  6, CR:    EI, PS:  0, SP: 2047, DR:  6, AR: 2047 | !Z !N !C DI | mem[AR]: 0
+t8    | DR -> mem[AR]                 | AC:  0, IP:  6, CR:    EI, PS:  0, SP: 2047, DR:  6, AR: 2047 | !Z !N !C DI | mem[AR]: 6
+t9    | SP - 1 -> SP                  | AC:  0, IP:  6, CR:    EI, PS:  0, SP: 2046, DR:  6, AR: 2047 | !Z !N !C DI | mem[AR]: 6
+t10   | SP -> AR                      | AC:  0, IP:  6, CR:    EI, PS:  0, SP: 2046, DR:  6, AR: 2046 | !Z !N !C DI | mem[AR]: 0
+t11   | PS -> DR                      | AC:  0, IP:  6, CR:    EI, PS:  0, SP: 2046, DR:  0, AR: 2046 | !Z !N !C DI | mem[AR]: 0
+t12   | DR -> mem[AR]                 | AC:  0, IP:  6, CR:    EI, PS:  0, SP: 2046, DR:  0, AR: 2046 | !Z !N !C DI | mem[AR]: 0
+t13   | intVec -> AR                  | AC:  0, IP:  6, CR:    EI, PS:  0, SP: 2046, DR:  0, AR:  0 | !Z !N !C DI | mem[AR]: 9
+t14   | mem[AR] -> DR                 | AC:  0, IP:  6, CR:    EI, PS:  0, SP: 2046, DR:  9, AR:  0 | !Z !N !C DI | mem[AR]: 9
+t15   | DR -> IP                      | AC:  0, IP:  9, CR:    EI, PS:  0, SP: 2046, DR:  9, AR:  0 | !Z !N !C DI | mem[AR]: 9
+t16   | IP -> AR                      | AC:  0, IP:  9, CR:    EI, PS:  0, SP: 2046, DR:  9, AR:  9 | !Z !N !C DI | mem[AR]: IN 1
+t17   | IP + 1 -> IP; mem[AR] -> DR   | AC:  0, IP: 10, CR:    EI, PS:  0, SP: 2046, DR:  1, AR:  9 | !Z !N !C DI | mem[AR]: IN 1
+t18   | DR -> CR                      | AC:  0, IP: 10, CR:  IN 1, PS:  0, SP: 2046, DR:  1, AR:  9 | !Z !N !C DI | mem[AR]: IN 1
+t19   | IN -> AC                      | AC: 97, IP: 10, CR:  IN 1, PS:  0, SP: 2046, DR:  1, AR:  9 | !Z !N !C DI | mem[AR]: IN 1
 
-```
+t20   | IP -> AR                      | AC: 97, IP: 10, CR:  IN 1, PS:  0, SP: 2046, DR:  1, AR: 10 | !Z !N !C DI | mem[AR]: OUT 2
+t21   | IP + 1 -> IP; mem[AR] -> DR   | AC: 97, IP: 11, CR:  IN 1, PS:  0, SP: 2046, DR:  2, AR: 10 | !Z !N !C DI | mem[AR]: OUT 2
+t22   | DR -> CR                      | AC: 97, IP: 11, CR: OUT 2, PS:  0, SP: 2046, DR:  2, AR: 10 | !Z !N !C DI | mem[AR]: OUT 2
+at23   | AC -> OUT                     | AC: 97, IP: 11, CR: OUT 2, PS:  0, SP: 2046, DR:  2, AR: 10 | !Z !N !C DI | mem[AR]: OUT 2
 
-Пример использования для моего языка:
+t24   | IP -> AR                      | AC: 97, IP: 11, CR: OUT 2, PS:  0, SP: 2046, DR:  2, AR: 11 | !Z !N !C DI | mem[AR]: CMP 4
+t25   | IP + 1 -> IP; mem[AR] -> DR   | AC: 97, IP: 12, CR: OUT 2, PS:  0, SP: 2046, DR:  4, AR: 11 | !Z !N !C DI | mem[AR]: CMP 4
+t26   | DR -> CR                      | AC: 97, IP: 12, CR: CMP 4, PS:  0, SP: 2046, DR:  4, AR: 11 | !Z !N !C DI | mem[AR]: CMP 4
+t27   | DR -> AR                      | AC: 97, IP: 12, CR: CMP 4, PS:  0, SP: 2046, DR:  4, AR:  4 | !Z !N !C DI | mem[AR]: 10
+t28   | mem[AR] -> DR                 | AC: 97, IP: 12, CR: CMP 4, PS:  0, SP: 2046, DR: 10, AR:  4 | !Z !N !C DI | mem[AR]: 10
+t29   | AC - DR -> NZC                | AC: 97, IP: 12, CR: CMP 4, PS:  0, SP: 2046, DR: 10, AR:  4 | !Z !N !C DI | mem[AR]: 10
 
-TODO
+t30   | IP -> AR                      | AC: 97, IP: 12, CR: CMP 4, PS:  0, SP: 2046, DR: 10, AR: 12 | !Z !N !C DI | mem[AR]: JNZ 16
+t31   | IP + 1 -> IP; mem[AR] -> DR   | AC: 97, IP: 13, CR: CMP 4, PS:  0, SP: 2046, DR: 16, AR: 12 | !Z !N !C DI | mem[AR]: JNZ 16
+t32   | DR -> CR                      | AC: 97, IP: 13, CR: JNZ 16, PS:  0, SP: 2046, DR: 16, AR: 12 | !Z !N !C DI | mem[AR]: JNZ 16
+t33   | DR -> IP                      | AC: 97, IP: 16, CR: JNZ 16, PS:  0, SP: 2046, DR: 16, AR: 12 | !Z !N !C DI | mem[AR]: JNZ 16
 
-```shell
-TODO
-$ ./mv_translator.py examples/pushpop.myasm target.out
-$ ./mv_machine.py target.out examples/input/pushpop.txt
+t34   | IP -> AR                      | AC: 97, IP: 16, CR: JNZ 16, PS:  0, SP: 2046, DR: 16, AR: 16 | !Z !N !C DI | mem[AR]: IRET
+t35   | IP + 1 -> IP; mem[AR] -> DR   | AC: 97, IP: 17, CR: JNZ 16, PS:  0, SP: 2046, DR:  0, AR: 16 | !Z !N !C DI | mem[AR]: IRET
+t36   | DR -> CR                      | AC: 97, IP: 17, CR:  IRET, PS:  0, SP: 2046, DR:  0, AR: 16 | !Z !N !C DI | mem[AR]: IRET
+t37   | SP -> AR                      | AC: 97, IP: 17, CR:  IRET, PS:  0, SP: 2046, DR:  0, AR: 2046 | !Z !N !C DI | mem[AR]: 0
+t38   | mem[AR] -> DR; SP + 1 -> SP   | AC: 97, IP: 17, CR:  IRET, PS:  0, SP: 2047, DR:  0, AR: 2046 | !Z !N !C DI | mem[AR]: 0
+t39   | DR -> PS                      | AC: 97, IP: 17, CR:  IRET, PS:  0, SP: 2047, DR:  0, AR: 2046 | !Z !N !C DI | mem[AR]: 0
+t40   | SP -> AR                      | AC: 97, IP: 17, CR:  IRET, PS:  0, SP: 2047, DR:  0, AR: 2047 | !Z !N !C DI | mem[AR]: 6
+t41   | mem[AR] -> DR; SP + 1 -> SP   | AC: 97, IP: 17, CR:  IRET, PS:  0, SP: 2048, DR:  6, AR: 2047 | !Z !N !C DI | mem[AR]: 6
+t42   | DR -> IP                      | AC: 97, IP:  6, CR:  IRET, PS:  0, SP: 2048, DR:  6, AR: 2047 | !Z !N !C DI | mem[AR]: 6
+t43   | 1 -> PS[EI]                   | AC: 97, IP:  6, CR:  IRET, PS: 32, SP: 2048, DR:  6, AR: 2047 | !Z !N !C EI | mem[AR]: 6
+t44   | 0 -> PS[EI]                   | AC: 97, IP:  6, CR:  IRET, PS:  0, SP: 2048, DR:  6, AR: 2047 | !Z !N !C DI | mem[AR]: 6
+t45   | SP - 1 -> SP                  | AC: 97, IP:  6, CR:  IRET, PS:  0, SP: 2047, DR:  6, AR: 2047 | !Z !N !C DI | mem[AR]: 6
+t46   | SP -> AR                      | AC: 97, IP:  6, CR:  IRET, PS:  0, SP: 2047, DR:  6, AR: 2047 | !Z !N !C DI | mem[AR]: 6
+t47   | IP -> DR                      | AC: 97, IP:  6, CR:  IRET, PS:  0, SP: 2047, DR:  6, AR: 2047 | !Z !N !C DI | mem[AR]: 6
+t48   | DR -> mem[AR]                 | AC: 97, IP:  6, CR:  IRET, PS:  0, SP: 2047, DR:  6, AR: 2047 | !Z !N !C DI | mem[AR]: 6
+t49   | SP - 1 -> SP                  | AC: 97, IP:  6, CR:  IRET, PS:  0, SP: 2046, DR:  6, AR: 2047 | !Z !N !C DI | mem[AR]: 6
+t50   | SP -> AR                      | AC: 97, IP:  6, CR:  IRET, PS:  0, SP: 2046, DR:  6, AR: 2046 | !Z !N !C DI | mem[AR]: 0
+t51   | PS -> DR                      | AC: 97, IP:  6, CR:  IRET, PS:  0, SP: 2046, DR:  0, AR: 2046 | !Z !N !C DI | mem[AR]: 0
+t52   | DR -> mem[AR]                 | AC: 97, IP:  6, CR:  IRET, PS:  0, SP: 2046, DR:  0, AR: 2046 | !Z !N !C DI | mem[AR]: 0
+t53   | intVec -> AR                  | AC: 97, IP:  6, CR:  IRET, PS:  0, SP: 2046, DR:  0, AR:  0 | !Z !N !C DI | mem[AR]: 9
+t54   | mem[AR] -> DR                 | AC: 97, IP:  6, CR:  IRET, PS:  0, SP: 2046, DR:  9, AR:  0 | !Z !N !C DI | mem[AR]: 9
+t55   | DR -> IP                      | AC: 97, IP:  9, CR:  IRET, PS:  0, SP: 2046, DR:  9, AR:  0 | !Z !N !C DI | mem[AR]: 9
+t56   | IP -> AR                      | AC: 97, IP:  9, CR:  IRET, PS:  0, SP: 2046, DR:  9, AR:  9 | !Z !N !C DI | mem[AR]: IN 1
+t57   | IP + 1 -> IP; mem[AR] -> DR   | AC: 97, IP: 10, CR:  IRET, PS:  0, SP: 2046, DR:  1, AR:  9 | !Z !N !C DI | mem[AR]: IN 1
+t58   | DR -> CR                      | AC: 97, IP: 10, CR:  IN 1, PS:  0, SP: 2046, DR:  1, AR:  9 | !Z !N !C DI | mem[AR]: IN 1
+t59   | IN -> AC                      | AC: 98, IP: 10, CR:  IN 1, PS:  0, SP: 2046, DR:  1, AR:  9 | !Z !N !C DI | mem[AR]: IN 1
 
-```
+t60   | IP -> AR                      | AC: 98, IP: 10, CR:  IN 1, PS:  0, SP: 2046, DR:  1, AR: 10 | !Z !N !C DI | mem[AR]: OUT 2
+t61   | IP + 1 -> IP; mem[AR] -> DR   | AC: 98, IP: 11, CR:  IN 1, PS:  0, SP: 2046, DR:  2, AR: 10 | !Z !N !C DI | mem[AR]: OUT 2
+t62   | DR -> CR                      | AC: 98, IP: 11, CR: OUT 2, PS:  0, SP: 2046, DR:  2, AR: 10 | !Z !N !C DI | mem[AR]: OUT 2
+bt63   | AC -> OUT                     | AC: 98, IP: 11, CR: OUT 2, PS:  0, SP: 2046, DR:  2, AR: 10 | !Z !N !C DI | mem[AR]: OUT 2
 
-Выводится листинг всех регистров.
+t64   | IP -> AR                      | AC: 98, IP: 11, CR: OUT 2, PS:  0, SP: 2046, DR:  2, AR: 11 | !Z !N !C DI | mem[AR]: CMP 4
+t65   | IP + 1 -> IP; mem[AR] -> DR   | AC: 98, IP: 12, CR: OUT 2, PS:  0, SP: 2046, DR:  4, AR: 11 | !Z !N !C DI | mem[AR]: CMP 4
+t66   | DR -> CR                      | AC: 98, IP: 12, CR: CMP 4, PS:  0, SP: 2046, DR:  4, AR: 11 | !Z !N !C DI | mem[AR]: CMP 4
+t67   | DR -> AR                      | AC: 98, IP: 12, CR: CMP 4, PS:  0, SP: 2046, DR:  4, AR:  4 | !Z !N !C DI | mem[AR]: 10
+t68   | mem[AR] -> DR                 | AC: 98, IP: 12, CR: CMP 4, PS:  0, SP: 2046, DR: 10, AR:  4 | !Z !N !C DI | mem[AR]: 10
+t69   | AC - DR -> NZC                | AC: 98, IP: 12, CR: CMP 4, PS:  0, SP: 2046, DR: 10, AR:  4 | !Z !N !C DI | mem[AR]: 10
 
-- Значения всех регистров, кроме PS и CR выводятся в десятичном формате
-- Значение регистра `PS` выводится в двоичном формате для удобного определения флагов, наличия запроса прерываний и тд.
-- В качестве значения регистра `CR`выводятся код оператора и операнд (при наличии)
-- Если в какой-то регистр записан символ, в листинге выводится его код
+t70   | IP -> AR                      | AC: 98, IP: 12, CR: CMP 4, PS:  0, SP: 2046, DR: 10, AR: 12 | !Z !N !C DI | mem[AR]: JNZ 16
+t71   | IP + 1 -> IP; mem[AR] -> DR   | AC: 98, IP: 13, CR: CMP 4, PS:  0, SP: 2046, DR: 16, AR: 12 | !Z !N !C DI | mem[AR]: JNZ 16
+t72   | DR -> CR                      | AC: 98, IP: 13, CR: JNZ 16, PS:  0, SP: 2046, DR: 16, AR: 12 | !Z !N !C DI | mem[AR]: JNZ 16
+t73   | DR -> IP                      | AC: 98, IP: 16, CR: JNZ 16, PS:  0, SP: 2046, DR: 16, AR: 12 | !Z !N !C DI | mem[AR]: JNZ 16
 
-Также в лог выводятся события вида `INPUT symbol` и `OUTPUT symbol`
+t74   | IP -> AR                      | AC: 98, IP: 16, CR: JNZ 16, PS:  0, SP: 2046, DR: 16, AR: 16 | !Z !N !C DI | mem[AR]: IRET
+t75   | IP + 1 -> IP; mem[AR] -> DR   | AC: 98, IP: 17, CR: JNZ 16, PS:  0, SP: 2046, DR:  0, AR: 16 | !Z !N !C DI | mem[AR]: IRET
+t76   | DR -> CR                      | AC: 98, IP: 17, CR:  IRET, PS:  0, SP: 2046, DR:  0, AR: 16 | !Z !N !C DI | mem[AR]: IRET
+t77   | SP -> AR                      | AC: 98, IP: 17, CR:  IRET, PS:  0, SP: 2046, DR:  0, AR: 2046 | !Z !N !C DI | mem[AR]: 0
+t78   | mem[AR] -> DR; SP + 1 -> SP   | AC: 98, IP: 17, CR:  IRET, PS:  0, SP: 2047, DR:  0, AR: 2046 | !Z !N !C DI | mem[AR]: 0
+t79   | DR -> PS                      | AC: 98, IP: 17, CR:  IRET, PS:  0, SP: 2047, DR:  0, AR: 2046 | !Z !N !C DI | mem[AR]: 0
+t80   | SP -> AR                      | AC: 98, IP: 17, CR:  IRET, PS:  0, SP: 2047, DR:  0, AR: 2047 | !Z !N !C DI | mem[AR]: 6
+t81   | mem[AR] -> DR; SP + 1 -> SP   | AC: 98, IP: 17, CR:  IRET, PS:  0, SP: 2048, DR:  6, AR: 2047 | !Z !N !C DI | mem[AR]: 6
+t82   | DR -> IP                      | AC: 98, IP:  6, CR:  IRET, PS:  0, SP: 2048, DR:  6, AR: 2047 | !Z !N !C DI | mem[AR]: 6
+t83   | 1 -> PS[EI]                   | AC: 98, IP:  6, CR:  IRET, PS: 32, SP: 2048, DR:  6, AR: 2047 | !Z !N !C EI | mem[AR]: 6
 
-``` shell
-TODO
+t84   | IP -> AR                      | AC: 98, IP:  6, CR:  IRET, PS: 32, SP: 2048, DR:  6, AR:  6 | !Z !N !C EI | mem[AR]: LD 3
+t85   | IP + 1 -> IP; mem[AR] -> DR   | AC: 98, IP:  7, CR:  IRET, PS: 32, SP: 2048, DR:  3, AR:  6 | !Z !N !C EI | mem[AR]: LD 3
+t86   | DR -> CR                      | AC: 98, IP:  7, CR:  LD 3, PS: 32, SP: 2048, DR:  3, AR:  6 | !Z !N !C EI | mem[AR]: LD 3
+t87   | DR -> AR                      | AC: 98, IP:  7, CR:  LD 3, PS: 32, SP: 2048, DR:  3, AR:  3 | !Z !N !C EI | mem[AR]: 0
+t88   | mem[AR] -> DR                 | AC: 98, IP:  7, CR:  LD 3, PS: 32, SP: 2048, DR:  0, AR:  3 | !Z !N !C EI | mem[AR]: 0
+t89   | DR -> AC                      | AC:  0, IP:  7, CR:  LD 3, PS: 36, SP: 2048, DR:  0, AR:  3 | Z !N !C EI | mem[AR]: 0
+t90   | 0 -> PS[EI]                   | AC:  0, IP:  7, CR:  LD 3, PS:  4, SP: 2048, DR:  0, AR:  3 | Z !N !C DI | mem[AR]: 0
+t91   | SP - 1 -> SP                  | AC:  0, IP:  7, CR:  LD 3, PS:  4, SP: 2047, DR:  0, AR:  3 | Z !N !C DI | mem[AR]: 0
+t92   | SP -> AR                      | AC:  0, IP:  7, CR:  LD 3, PS:  4, SP: 2047, DR:  0, AR: 2047 | Z !N !C DI | mem[AR]: 6
+t93   | IP -> DR                      | AC:  0, IP:  7, CR:  LD 3, PS:  4, SP: 2047, DR:  7, AR: 2047 | Z !N !C DI | mem[AR]: 6
+t94   | DR -> mem[AR]                 | AC:  0, IP:  7, CR:  LD 3, PS:  4, SP: 2047, DR:  7, AR: 2047 | Z !N !C DI | mem[AR]: 7
+t95   | SP - 1 -> SP                  | AC:  0, IP:  7, CR:  LD 3, PS:  4, SP: 2046, DR:  7, AR: 2047 | Z !N !C DI | mem[AR]: 7
+t96   | SP -> AR                      | AC:  0, IP:  7, CR:  LD 3, PS:  4, SP: 2046, DR:  7, AR: 2046 | Z !N !C DI | mem[AR]: 0
+t97   | PS -> DR                      | AC:  0, IP:  7, CR:  LD 3, PS:  4, SP: 2046, DR:  4, AR: 2046 | Z !N !C DI | mem[AR]: 0
+t98   | DR -> mem[AR]                 | AC:  0, IP:  7, CR:  LD 3, PS:  4, SP: 2046, DR:  4, AR: 2046 | Z !N !C DI | mem[AR]: 4
+t99   | intVec -> AR                  | AC:  0, IP:  7, CR:  LD 3, PS:  4, SP: 2046, DR:  4, AR:  0 | Z !N !C DI | mem[AR]: 9
+t100  | mem[AR] -> DR                 | AC:  0, IP:  7, CR:  LD 3, PS:  4, SP: 2046, DR:  9, AR:  0 | Z !N !C DI | mem[AR]: 9
+t101  | DR -> IP                      | AC:  0, IP:  9, CR:  LD 3, PS:  4, SP: 2046, DR:  9, AR:  0 | Z !N !C DI | mem[AR]: 9
+t102  | IP -> AR                      | AC:  0, IP:  9, CR:  LD 3, PS:  4, SP: 2046, DR:  9, AR:  9 | Z !N !C DI | mem[AR]: IN 1
+t103  | IP + 1 -> IP; mem[AR] -> DR   | AC:  0, IP: 10, CR:  LD 3, PS:  4, SP: 2046, DR:  1, AR:  9 | Z !N !C DI | mem[AR]: IN 1
+t104  | DR -> CR                      | AC:  0, IP: 10, CR:  IN 1, PS:  4, SP: 2046, DR:  1, AR:  9 | Z !N !C DI | mem[AR]: IN 1
+t105  | IN -> AC                      | AC: 10, IP: 10, CR:  IN 1, PS:  4, SP: 2046, DR:  1, AR:  9 | Z !N !C DI | mem[AR]: IN 1
+
+t106  | IP -> AR                      | AC: 10, IP: 10, CR:  IN 1, PS:  4, SP: 2046, DR:  1, AR: 10 | Z !N !C DI | mem[AR]: OUT 2
+t107  | IP + 1 -> IP; mem[AR] -> DR   | AC: 10, IP: 11, CR:  IN 1, PS:  4, SP: 2046, DR:  2, AR: 10 | Z !N !C DI | mem[AR]: OUT 2
+t108  | DR -> CR                      | AC: 10, IP: 11, CR: OUT 2, PS:  4, SP: 2046, DR:  2, AR: 10 | Z !N !C DI | mem[AR]: OUT 2
+
+t109  | AC -> OUT                     | AC: 10, IP: 11, CR: OUT 2, PS:  4, SP: 2046, DR:  2, AR: 10 | Z !N !C DI | mem[AR]: OUT 2
+
+t110  | IP -> AR                      | AC: 10, IP: 11, CR: OUT 2, PS:  4, SP: 2046, DR:  2, AR: 11 | Z !N !C DI | mem[AR]: CMP 4
+t111  | IP + 1 -> IP; mem[AR] -> DR   | AC: 10, IP: 12, CR: OUT 2, PS:  4, SP: 2046, DR:  4, AR: 11 | Z !N !C DI | mem[AR]: CMP 4
+t112  | DR -> CR                      | AC: 10, IP: 12, CR: CMP 4, PS:  4, SP: 2046, DR:  4, AR: 11 | Z !N !C DI | mem[AR]: CMP 4
+t113  | DR -> AR                      | AC: 10, IP: 12, CR: CMP 4, PS:  4, SP: 2046, DR:  4, AR:  4 | Z !N !C DI | mem[AR]: 10
+t114  | mem[AR] -> DR                 | AC: 10, IP: 12, CR: CMP 4, PS:  4, SP: 2046, DR: 10, AR:  4 | Z !N !C DI | mem[AR]: 10
+t115  | AC - DR -> NZC                | AC: 10, IP: 12, CR: CMP 4, PS:  4, SP: 2046, DR: 10, AR:  4 | Z !N !C DI | mem[AR]: 10
+
+t116  | IP -> AR                      | AC: 10, IP: 12, CR: CMP 4, PS:  4, SP: 2046, DR: 10, AR: 12 | Z !N !C DI | mem[AR]: JNZ 16
+t117  | IP + 1 -> IP; mem[AR] -> DR   | AC: 10, IP: 13, CR: CMP 4, PS:  4, SP: 2046, DR: 16, AR: 12 | Z !N !C DI | mem[AR]: JNZ 16
+t118  | DR -> CR                      | AC: 10, IP: 13, CR: JNZ 16, PS:  4, SP: 2046, DR: 16, AR: 12 | Z !N !C DI | mem[AR]: JNZ 16
+
+t119  | IP -> AR                      | AC: 10, IP: 13, CR: JNZ 16, PS:  4, SP: 2046, DR: 16, AR: 13 | Z !N !C DI | mem[AR]: LD 3
+t120  | IP + 1 -> IP; mem[AR] -> DR   | AC: 10, IP: 14, CR: JNZ 16, PS:  4, SP: 2046, DR:  3, AR: 13 | Z !N !C DI | mem[AR]: LD 3
+t121  | DR -> CR                      | AC: 10, IP: 14, CR:  LD 3, PS:  4, SP: 2046, DR:  3, AR: 13 | Z !N !C DI | mem[AR]: LD 3
+t122  | DR -> AR                      | AC: 10, IP: 14, CR:  LD 3, PS:  4, SP: 2046, DR:  3, AR:  3 | Z !N !C DI | mem[AR]: 0
+t123  | mem[AR] -> DR                 | AC: 10, IP: 14, CR:  LD 3, PS:  4, SP: 2046, DR:  0, AR:  3 | Z !N !C DI | mem[AR]: 0
+t124  | DR -> AC                      | AC:  0, IP: 14, CR:  LD 3, PS:  4, SP: 2046, DR:  0, AR:  3 | Z !N !C DI | mem[AR]: 0
+
+t125  | IP -> AR                      | AC:  0, IP: 14, CR:  LD 3, PS:  4, SP: 2046, DR:  0, AR: 14 | Z !N !C DI | mem[AR]: INC
+t126  | IP + 1 -> IP; mem[AR] -> DR   | AC:  0, IP: 15, CR:  LD 3, PS:  4, SP: 2046, DR:  0, AR: 14 | Z !N !C DI | mem[AR]: INC
+t127  | DR -> CR                      | AC:  0, IP: 15, CR:   INC, PS:  4, SP: 2046, DR:  0, AR: 14 | Z !N !C DI | mem[AR]: INC
+t128  | AC + 1 -> AC                  | AC:  1, IP: 15, CR:   INC, PS:  0, SP: 2046, DR:  0, AR: 14 | !Z !N !C DI | mem[AR]: INC
+
+t129  | IP -> AR                      | AC:  1, IP: 15, CR:   INC, PS:  0, SP: 2046, DR:  0, AR: 15 | !Z !N !C DI | mem[AR]: ST 3
+t130  | IP + 1 -> IP; mem[AR] -> DR   | AC:  1, IP: 16, CR:   INC, PS:  0, SP: 2046, DR:  3, AR: 15 | !Z !N !C DI | mem[AR]: ST 3
+t131  | DR -> CR                      | AC:  1, IP: 16, CR:  ST 3, PS:  0, SP: 2046, DR:  3, AR: 15 | !Z !N !C DI | mem[AR]: ST 3
+t132  | DR -> AR                      | AC:  1, IP: 16, CR:  ST 3, PS:  0, SP: 2046, DR:  3, AR:  3 | !Z !N !C DI | mem[AR]: 0
+t133  | mem[AR] -> DR                 | AC:  1, IP: 16, CR:  ST 3, PS:  0, SP: 2046, DR:  0, AR:  3 | !Z !N !C DI | mem[AR]: 0
+t134  | AC -> DR                      | AC:  1, IP: 16, CR:  ST 3, PS:  0, SP: 2046, DR:  1, AR:  3 | !Z !N !C DI | mem[AR]: 0
+t135  | DR -> mem[AR]                 | AC:  1, IP: 16, CR:  ST 3, PS:  0, SP: 2046, DR:  1, AR:  3 | !Z !N !C DI | mem[AR]: 1
+
+t136  | IP -> AR                      | AC:  1, IP: 16, CR:  ST 3, PS:  0, SP: 2046, DR:  1, AR: 16 | !Z !N !C DI | mem[AR]: IRET
+t137  | IP + 1 -> IP; mem[AR] -> DR   | AC:  1, IP: 17, CR:  ST 3, PS:  0, SP: 2046, DR:  0, AR: 16 | !Z !N !C DI | mem[AR]: IRET
+t138  | DR -> CR                      | AC:  1, IP: 17, CR:  IRET, PS:  0, SP: 2046, DR:  0, AR: 16 | !Z !N !C DI | mem[AR]: IRET
+t139  | SP -> AR                      | AC:  1, IP: 17, CR:  IRET, PS:  0, SP: 2046, DR:  0, AR: 2046 | !Z !N !C DI | mem[AR]: 4
+t140  | mem[AR] -> DR; SP + 1 -> SP   | AC:  1, IP: 17, CR:  IRET, PS:  0, SP: 2047, DR:  4, AR: 2046 | !Z !N !C DI | mem[AR]: 4
+t141  | DR -> PS                      | AC:  1, IP: 17, CR:  IRET, PS:  4, SP: 2047, DR:  4, AR: 2046 | Z !N !C DI | mem[AR]: 4
+t142  | SP -> AR                      | AC:  1, IP: 17, CR:  IRET, PS:  0, SP: 2047, DR:  4, AR: 2047 | !Z !N !C DI | mem[AR]: 7
+t143  | mem[AR] -> DR; SP + 1 -> SP   | AC:  1, IP: 17, CR:  IRET, PS:  0, SP: 2048, DR:  7, AR: 2047 | !Z !N !C DI | mem[AR]: 7
+t144  | DR -> IP                      | AC:  1, IP:  7, CR:  IRET, PS:  0, SP: 2048, DR:  7, AR: 2047 | !Z !N !C DI | mem[AR]: 7
+t145  | 1 -> PS[EI]                   | AC:  1, IP:  7, CR:  IRET, PS: 32, SP: 2048, DR:  7, AR: 2047 | !Z !N !C EI | mem[AR]: 7
+
+t146  | IP -> AR                      | AC:  1, IP:  7, CR:  IRET, PS: 32, SP: 2048, DR:  7, AR:  7 | !Z !N !C EI | mem[AR]: JZ 6
+t147  | IP + 1 -> IP; mem[AR] -> DR   | AC:  1, IP:  8, CR:  IRET, PS: 32, SP: 2048, DR:  6, AR:  7 | !Z !N !C EI | mem[AR]: JZ 6
+t148  | DR -> CR                      | AC:  1, IP:  8, CR:  JZ 6, PS: 32, SP: 2048, DR:  6, AR:  7 | !Z !N !C EI | mem[AR]: JZ 6
+
+t149  | IP -> AR                      | AC:  1, IP:  8, CR:  JZ 6, PS: 32, SP: 2048, DR:  6, AR:  8 | !Z !N !C EI | mem[AR]: HLT
+t150  | IP + 1 -> IP; mem[AR] -> DR   | AC:  1, IP:  9, CR:  JZ 6, PS: 32, SP: 2048, DR:  0, AR:  8 | !Z !N !C EI | mem[AR]: HLT
+t151  | DR -> CR                      | AC:  1, IP:  9, CR:   HLT, PS: 32, SP: 2048, DR:  0, AR:  8 | !Z !N !C EI | mem[AR]: HLT
+2024/01/12 19:53:03 simulation finished
 ```
 
 Пример проверки исходного кода:
 
 ``` shell
-TODO
-
+➜ sem5/archCom/lab3 git:(main) ✗ go test -v ./...
+?       github.com/Moleus/comp-arch-lab3/cmd/simulation [no test files]
+?       github.com/Moleus/comp-arch-lab3/cmd/translator [no test files]
+?       github.com/Moleus/comp-arch-lab3/pkg/isa        [no test files]
+?       github.com/Moleus/comp-arch-lab3/pkg/machine    [no test files]
+=== RUN   TestParseConstant
+=== RUN   TestParseConstant/parse_numeric_constant
+=== RUN   TestParseConstant/parse_string_constant
+--- PASS: TestParseConstant (0.00s)
+    --- PASS: TestParseConstant/parse_numeric_constant (0.00s)
+    --- PASS: TestParseConstant/parse_string_constant (0.00s)
+PASS
+ok      github.com/Moleus/comp-arch-lab3/pkg/translator (cached)
+=== RUN   TestTranslationAndSimulation
+=== RUN   TestTranslationAndSimulation/cat.yml
+2024/01/12 20:00:48 starting simulation
+2024/01/12 20:00:48 simulation finished
+=== RUN   TestTranslationAndSimulation/hello.yml
+2024/01/12 20:00:48 starting simulation
+2024/01/12 20:00:48 simulation finished
+=== RUN   TestTranslationAndSimulation/hello_user.yml
+2024/01/12 20:00:48 starting simulation
+2024/01/12 20:00:48 simulation finished
+=== RUN   TestTranslationAndSimulation/prob5.yml
+2024/01/12 20:00:48 starting simulation
+2024/01/12 20:00:49 simulation finished
+--- PASS: TestTranslationAndSimulation (0.52s)
+    --- PASS: TestTranslationAndSimulation/cat.yml (0.00s)
+    --- PASS: TestTranslationAndSimulation/hello.yml (0.01s)
+    --- PASS: TestTranslationAndSimulation/hello_user.yml (0.02s)
+    --- PASS: TestTranslationAndSimulation/prob5.yml (0.48s)
+PASS
+ok      github.com/Moleus/comp-arch-lab3/tests  0.521s
 ```
-
-```text
-TODO
-
-
-```
-
