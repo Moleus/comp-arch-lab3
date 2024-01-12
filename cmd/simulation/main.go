@@ -12,6 +12,7 @@ import (
 var (
 	programCodeFilename = flag.String("program", "", "Path to program file")
 	dataInputFilename   = flag.String("io-data", "", "Path to IO data file")
+	stdout              = flag.String("stdout", "/tmp/dataPathOut.txt", "Path to data path output file")
 )
 
 func main() {
@@ -51,7 +52,12 @@ func main() {
 		os.Exit(1)
 	}
 
-	dataPathOutput := os.Stdout
+	dataPathOutput, err := os.Create(*stdout)
+	if err != nil {
+		_, _ = fmt.Fprintf(os.Stderr, "Error while opening data path output file: %s", err.Error())
+		os.Exit(1)
+	}
+
 	controlUnitStateOutput := os.Stdout
 
 	err = machine.RunSimulation(ioData, program, dataPathOutput, controlUnitStateOutput)
