@@ -1,15 +1,3 @@
-/*
-Package isa: Instruction Set Architecture (Система команд)
-Фон-Неймановская архитектура
-
-Задачи:
-- читает машинный код из файла
-- записывает машинный код в файл
-
-# По сути занимается сериализацией и десериализаций программы в JSON
-
-Используется в machine.go, controlunit.go и datapath.go
-*/
 package isa
 
 import (
@@ -182,14 +170,17 @@ var (
 	}
 )
 
+//goland:noinspection GoMixedReceiverTypes
 func (o Opcode) Type() OpcodeType {
 	return opcodeToInfo[o].instructionType
 }
 
+//goland:noinspection GoMixedReceiverTypes
 func (o Opcode) String() string {
 	return opcodeToInfo[o].stringRepresentation
 }
 
+//goland:noinspection GoMixedReceiverTypes
 func (o Opcode) MarshalJSON() ([]byte, error) {
 	return json.Marshal(o.String())
 }
@@ -211,7 +202,7 @@ func (o *Opcode) UnmarshalJSON(data []byte) error {
 
 func GetOpcodeFromString(opcode string) (Opcode, error) {
 	for opcodeObj, opcodeInfo := range opcodeToInfo {
-		if strings.ToLower(opcodeInfo.stringRepresentation) == strings.ToLower(opcode) {
+		if strings.EqualFold(opcodeInfo.stringRepresentation, opcode) {
 			return opcodeObj, nil
 		}
 	}
@@ -290,7 +281,6 @@ type IoData struct {
 	Char      string
 }
 
-// TODO: think about dependencies and move MachineCodeTerm in ISA
 func ReadCode(input io.Reader) (Program, error) {
 	var program Program
 	decoder := json.NewDecoder(input)

@@ -230,7 +230,7 @@ start: cla
 
 Интерфейс командной строки: `simulation -program <machine-code-file> -io-data <file-with-data>`
 
-Реализовано в модуле: [machine](./pkg/machine/).
+Реализовано в модуле: [machine](./pkg/machine/machine.go).
 
 ### DataPath
 
@@ -262,7 +262,7 @@ start: cla
 
 Реализован в классе `ControlUnit`.
 
-![Control Unit](./control_unit.png)
+![Control Unit](./img/controlUnit.png)
 
 - Метод `RunInstructionCycle` моделирует выполнение полного цикла инструкции (цикл выборки инструкции, операнда,
   исполнения)
@@ -311,36 +311,49 @@ start: cla
 - через golden tests, конфигурация которых лежит в папке [tests/testdata](./tests/testdata)
 
 CI:
-TODO
 
 ``` yaml
-lab3-example:
-  stage: test
-  image:
-    name: ryukzak/python-tools
-    entrypoint: [""]
-  script:
-    - cd src/brainfuck
-    - poetry install
-    - coverage run -m pytest --verbose
-    - find . -type f -name "*.py" | xargs -t coverage report
-    - ruff format --check .
+name: Linter and Tests
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+  pull-requests: read
+  checks: write
+
+jobs:
+  golangci:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+          cache: false
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: v1.54
 ```
 
-где:
-
-- `ryukzak/python-tools` -- docker образ, который содержит все необходимые для проверки утилиты.
-  Подробнее: [Dockerfile](/src/brailfuck/Dockerfile)
-- `poetry` -- управления зависимостями для языка программирования Python.
-- `coverage` -- формирование отчёта об уровне покрытия исходного кода.
-- `pytest` -- утилита для запуска тестов.
-- `ruff` -- утилита для форматирования и проверки стиля кодирования.
+`golangci-lint` -- проверка кода на соответствие стандартам
 
 Пример использования и журнал работы процессора на примере `cat`:
 
+TODO
+
 Пример использования для моего языка:
 
+TODO
+
 ```shell
+TODO
 $ ./mv_translator.py examples/pushpop.myasm target.out
 $ ./mv_machine.py target.out examples/input/pushpop.txt
 
@@ -356,6 +369,7 @@ $ ./mv_machine.py target.out examples/input/pushpop.txt
 Также в лог выводятся события вида `INPUT symbol` и `OUTPUT symbol`
 
 ``` shell
+TODO
 ```
 
 Пример проверки исходного кода:

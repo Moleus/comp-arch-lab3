@@ -78,16 +78,10 @@ func NewAlu() *Alu {
 
 type FlagBit int
 
-const (
-	ZERO FlagBit = iota
-	NEGATIVE
-	CARRY
-)
-
 func (a *Alu) setFlags(value int) {
-	a.bitFlags.CARRY = value > isa.WordMaxValue || value < isa.WordMinValue
-	a.bitFlags.ZERO = value == 0
-	a.bitFlags.NEGATIVE = value < 0
+	a.bitFlags.Carry = value > isa.WordMaxValue || value < isa.WordMinValue
+	a.bitFlags.Zero = value == 0
+	a.bitFlags.Negative = value < 0
 }
 
 type ExecutionParams struct {
