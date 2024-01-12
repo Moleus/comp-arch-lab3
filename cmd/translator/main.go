@@ -32,11 +32,6 @@ func writeMachineCode(machineCode []byte, targetFile string) error {
 	return os.WriteFile(targetFile, machineCode, 0644)
 }
 
-/*
-<!-- TODO: описание CLI -->
-Консольное приложение cli
-input: `translator -input <input_file> -target <target_file>`
-*/
 func main() {
 	flag.Parse()
 

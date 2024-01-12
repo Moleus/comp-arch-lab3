@@ -28,7 +28,6 @@ func main() {
 	}
 
 	f, err := os.Open(*programCodeFilename)
-	// print error and exit
 	if err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "Error while opening program file: %s", err.Error())
 		os.Exit(1)
@@ -52,7 +51,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	// TODO: read program, read data, flags etc
 	dataPathOutput := os.Stdout
 	controlUnitStateOutput := os.Stdout
 
