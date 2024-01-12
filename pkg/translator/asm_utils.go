@@ -2,7 +2,6 @@ package translator
 
 import "strings"
 
-// <label>: word: <value>
 func isConstantDeclaration(parts []string) bool {
 	return hasLabel(parts) && parts[1] == "word:"
 }

@@ -184,6 +184,7 @@ func (o Opcode) MarshalJSON() ([]byte, error) {
 	return json.Marshal(o.String())
 }
 
+//goland:noinspection GoMixedReceiverTypes
 func (o *Opcode) UnmarshalJSON(data []byte) error {
 	var opcode string
 	err := json.Unmarshal(data, &opcode)
