@@ -12,38 +12,34 @@ import (
 	"testing"
 )
 
-type TestInput struct {
-	TranslatorInput string `yaml:"translator_input"`
-	MachineInput    string `yaml:"machine_input,omitempty"`
-}
-
-type TestOutput struct {
+type GoldenContents struct {
+	TranslatorInput  string `yaml:"translator_input"`
 	TranslatorOutput string `yaml:"translator_output"`
+	MachineInput     string `yaml:"stdin"`
 	MachineStdout    string `yaml:"stdout"`
 	MachineLog       string `yaml:"log"`
 }
 
 func TestTranslationAndSimulation(t *testing.T) {
-	dir, err := os.ReadDir("inputs")
+	dir, err := os.ReadDir("testdata")
 	if err != nil {
 		t.Fatal(err)
 	}
 	for _, file := range dir {
 		t.Run(file.Name(), func(t *testing.T) {
-			input := parseInputFile(t, file.Name())
 			goldenFile := file.Name()
-			runTest(t, input, goldenFile)
+			runTest(t, goldenFile)
 		})
 	}
 }
 
-func parseInputFile(t *testing.T, filename string) TestInput {
-	inputContent, err := os.ReadFile("inputs/" + filename)
+func parseGoldenFile(t *testing.T, filename string) GoldenContents {
+	inputContent, err := os.ReadFile("testdata/" + filename)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	input := TestInput{}
+	input := GoldenContents{}
 	err = yaml.Unmarshal(inputContent, &input)
 	if err != nil {
 		t.Fatal(err)
@@ -51,19 +47,21 @@ func parseInputFile(t *testing.T, filename string) TestInput {
 	return input
 }
 
-func runTest(t *testing.T, input TestInput, goldenFile string) {
-	// translate input to program
+func runTest(t *testing.T, goldenFile string) {
+	goldenContents := parseGoldenFile(t, goldenFile)
+
 	translator := translator2.NewTranslator()
-	program, err := translator.Translate(input.TranslatorInput)
+	program, err := translator.Translate(goldenContents.TranslatorInput)
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	serializedMachineCode, err := isa.SerializeCode(program)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	ioData, err := isa.ReadIoData(strings.NewReader(input.MachineInput))
+	ioData, err := isa.ReadIoData(strings.NewReader(goldenContents.MachineInput))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -76,8 +74,10 @@ func runTest(t *testing.T, input TestInput, goldenFile string) {
 		t.Fatal(err)
 	}
 
-	testOutput := TestOutput{
+	testOutput := GoldenContents{
+		TranslatorInput:  goldenContents.TranslatorInput,
 		TranslatorOutput: string(serializedMachineCode),
+		MachineInput:     goldenContents.MachineInput,
 		MachineStdout:    dataPathOutputBuffer.String(),
 		MachineLog:       controlUnitStateOutputBuffer.String(),
 	}
@@ -86,9 +86,5 @@ func runTest(t *testing.T, input TestInput, goldenFile string) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	//cmp := golden.Bytes(yamlOutput, goldenFile)
 	golden.Assert(t, string(yamlOutput), goldenFile)
-	//if !cmp().Success() {
-	//	t.Errorf("Golden file %s doesn't match the actual output", goldenFile)
-	//}
 }

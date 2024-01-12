@@ -347,7 +347,31 @@ jobs:
 Пример использования и журнал работы процессора на примере `cat`:
 
 ``` shell
-$
+➜ sem5/archCom/lab3 git:(main) ✗ go build -o translator ./cmd/translator/main.go
+➜ sem5/archCom/lab3 git:(main) ✗ cat tests/inputs/cat.yml
+translator_input: |-
+  vector: word: interrupt
+  in_port: word: 0
+  out_port: word: 1
+  flag: word: 0
+  line_feed: word: 10
+
+  start: ei
+  spin_loop: ld flag
+    jz spin_loop
+    hlt
+
+  interrupt: in in_port
+    out out_port
+    cmp line_feed
+    jnz returning
+    ld flag
+    inc
+    st flag
+    returning: iret
+
+machine_input: |-
+  [{ "arrivesAt": 1, "char": "a"}, { "arrivesAt": 2, "char": "b"},  {"arrivesAt": 85, "char": "\n"}]%
 
 
 ```

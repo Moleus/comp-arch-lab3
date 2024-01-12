@@ -1,3 +1,18 @@
+translator_input: |-
+    message: word: 'Hello, World!'
+    pointer: word: message
+    zero: word: 0
+    out_port: word: 1
+
+    start: nop
+      loop: ld (pointer)
+        out out_port
+        jz end
+        ld pointer
+        inc
+        st pointer
+        jmp loop
+      end: hlt
 translator_output: |-
     {
       "StartAddress": 17,
@@ -265,6 +280,7 @@ translator_output: |-
         }
       ]
     }
+stdin: ""
 stdout: "Hello, World!\0"
 log: |
     t0    | IP -> AR                      | AC:  0, IP: 17, CR: NOP 0, PS:  0, SP: 2048, DR:  0, AR: 17 | !Z !N !C DI | mem[AR]: 0

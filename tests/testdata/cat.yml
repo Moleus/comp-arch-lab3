@@ -1,3 +1,23 @@
+translator_input: |-
+    vector: word: interrupt
+    in_port: word: 0
+    out_port: word: 1
+    flag: word: 0
+    line_feed: word: 10
+
+    start: ei
+    spin_loop: ld flag
+      jz spin_loop
+      hlt
+
+    interrupt: in in_port
+      out out_port
+      cmp line_feed
+      jnz returning
+      ld flag
+      inc
+      st flag
+      returning: iret
 translator_output: |-
     {
       "StartAddress": 5,
@@ -175,6 +195,8 @@ translator_output: |-
         }
       ]
     }
+stdin: |
+    [{ "arrivesAt": 1, "char": "a"}, { "arrivesAt": 2, "char": "b"},  {"arrivesAt": 85, "char": "\n"}]
 stdout: |
     ab
 log: |
