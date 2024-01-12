@@ -11,7 +11,7 @@ func hasLabel(parts []string) bool {
 	return strings.HasSuffix(parts[0], ":")
 }
 
-func addIndicies(instructions []ParsedInstruction) []ParsedInstruction {
+func addIndices(instructions []ParsedInstruction) []ParsedInstruction {
 	for i, instruction := range instructions {
 		instruction.Index = i
 	}

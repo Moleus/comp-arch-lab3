@@ -18,20 +18,15 @@ import (
 )
 
 type Machine struct {
-	dataPath    DataPath
-	controlUnit ControlUnit
 }
 
 type SimulationStatistics struct {
-	programOutput      string
-	instructionCounter int
-	currentTick        int
 }
 
 func RunSimulation(dataInput []isa.IoData, program isa.Program, dataPathOutput io.Writer, controlUnitStateOutput io.Writer) error {
 	clock := &Clock{currentTick: 0}
-	datapath := NewDataPath(dataInput, dataPathOutput, clock)
-	controlUnit := NewControlUnit(program, datapath, controlUnitStateOutput, clock)
+	dataPath := NewDataPath(dataInput, dataPathOutput, clock)
+	controlUnit := NewControlUnit(program, dataPath, controlUnitStateOutput, clock)
 
 	log.Println("starting simulation")
 

@@ -44,26 +44,26 @@ func main() {
 
 	assemblyCode, err := readAssemblyCode(*inputFile)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error while reading input file: %s", err.Error())
+		_, _ = fmt.Fprintf(os.Stderr, "Error while reading input file: %s", err.Error())
 		os.Exit(1)
 	}
 
 	translator := t.NewTranslator()
 	translationOutput, err := translator.Translate(string(assemblyCode))
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error while translating assembly code: %s", err.Error())
+		_, _ = fmt.Fprintf(os.Stderr, "Error while translating assembly code: %s", err.Error())
 		os.Exit(1)
 	}
 
 	serializationOutput, err := isa.SerializeCode(translationOutput)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error while serializing machine code: %s", err.Error())
+		_, _ = fmt.Fprintf(os.Stderr, "Error while serializing machine code: %s", err.Error())
 		os.Exit(1)
 	}
 
 	err = writeMachineCode(serializationOutput, *targetFile)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error while writing machine code: %s", err.Error())
+		_, _ = fmt.Fprintf(os.Stderr, "Error while writing machine code: %s", err.Error())
 		os.Exit(1)
 	}
 }

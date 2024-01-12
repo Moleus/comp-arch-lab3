@@ -1,36 +1,3 @@
-/*
-DataPath - принимает поток данных. Работает с вводом-выводом
-Управляется ControlUnit-ом через сигналы.
-
-Реализуем аккумуляторную архитектуру.
-
-состояние аккумулятора может понядобиться выгружать и загружать обратно из памяти.
-
-DataPath - работа через аккумулятор
-
-шагает по памяти по одному слову за такт
-
-данные + команды хранятся в одной памяти
-
-Регистры:
-AC - аккумулятор
-IP - счетчик команд
-SP - указатель стека
-DR - регистр данных
-BR - буферный регистр
-PS - регистр флагов (состояния)
-
-//TODO: написать набор функций, который позволят удобно читать из памяти в нужные регистры и обратно
-// TODO: как будет выглядеть DataPath на Golang?
-
-подумать про адресацию...
-
-# Реализация
-Есть набор функций с префиксом signal, которые вызываются из ControlUnit-а
-
-Должна быть реализовано строковое предствление состояние процессора.
-*/
-
 package machine
 
 import (
@@ -60,27 +27,10 @@ const (
 )
 
 type BitFlags struct {
-	ZERO              bool
-	NEGATIVE          bool
-	CARRY             bool
-	ENABLE_INTERRUPTS bool
-}
-
-func (b *BitFlags) toByte() byte {
-	var result byte
-	if b.ZERO {
-		result |= StatusRegisterZeroBit
-	}
-	if b.NEGATIVE {
-		result |= StatusRegisterNegativeBit
-	}
-	if b.CARRY {
-		result |= StatusRegisterCarryBit
-	}
-	if b.ENABLE_INTERRUPTS {
-		result |= StatusRegisterEnableInterruptBit
-	}
-	return result
+	Zero             bool
+	Negative         bool
+	Carry            bool
+	EnableInterrupts bool
 }
 
 func (r Register) String() string {
@@ -128,10 +78,10 @@ func NewDataPath(dataInput []isa.IoData, output io.Writer, clock TickProvider) *
 
 func (dp *DataPath) GetFlags() BitFlags {
 	return BitFlags{
-		ZERO:              dp.registers[PS].Value&StatusRegisterZeroBit > 0,
-		NEGATIVE:          dp.registers[PS].Value&StatusRegisterNegativeBit > 0,
-		CARRY:             dp.registers[PS].Value&StatusRegisterCarryBit > 0,
-		ENABLE_INTERRUPTS: dp.registers[PS].Value&StatusRegisterEnableInterruptBit > 0,
+		Zero:             dp.registers[PS].Value&StatusRegisterZeroBit > 0,
+		Negative:         dp.registers[PS].Value&StatusRegisterNegativeBit > 0,
+		Carry:            dp.registers[PS].Value&StatusRegisterCarryBit > 0,
+		EnableInterrupts: dp.registers[PS].Value&StatusRegisterEnableInterruptBit > 0,
 	}
 }
 
@@ -187,17 +137,17 @@ func (dp *DataPath) SigExecuteAluOp(aluParams ExecutionParams) isa.MachineWord {
 }
 
 func updatePsWithBitFlags(oldPs int, bitFlags BitFlags) int {
-	if bitFlags.CARRY {
+	if bitFlags.Carry {
 		oldPs |= StatusRegisterCarryBit
 	} else {
 		oldPs &= ^StatusRegisterCarryBit
 	}
-	if bitFlags.ZERO {
+	if bitFlags.Zero {
 		oldPs |= StatusRegisterZeroBit
 	} else {
 		oldPs &= ^StatusRegisterZeroBit
 	}
-	if bitFlags.NEGATIVE {
+	if bitFlags.Negative {
 		oldPs |= StatusRegisterNegativeBit
 	} else {
 		oldPs &= ^StatusRegisterNegativeBit
