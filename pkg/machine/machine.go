@@ -1,13 +1,3 @@
-/*
-Machine
-представляет модель процессора.
-Включает ControlUnit и DataPath
-
-Принимает машинный код и запускает симуляцию
-
-ControlUnit и DataPath находятся в отдельных файлах
-*/
-
 package machine
 
 import (
@@ -39,6 +29,6 @@ func RunSimulation(dataInput []isa.IoData, program isa.Program, dataPathOutput i
 		return err
 	}
 
-	log.Println("simulation finished")
+	log.Printf("simulation finished. Instructions executed: %d, ticks: %d", controlUnit.ExecutedInstructions, clock.GetCurrentTick())
 	return nil
 }

@@ -7,7 +7,6 @@ import (
 	"strings"
 )
 
-// Instruction represents all supported instructions for our architecture
 const (
 	WordWidth    = 32
 	WordMaxValue = 1<<(WordWidth-1) - 1

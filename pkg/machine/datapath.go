@@ -109,7 +109,6 @@ func (dp *DataPath) SigWritePortOut() {
 			panic(err)
 		}
 	} else {
-		// print number
 		if _, err := dp.outputBuffer.Write([]byte(fmt.Sprintf("%d", ac.Value))); err != nil {
 			panic(err)
 		}

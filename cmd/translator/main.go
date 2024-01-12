@@ -14,7 +14,6 @@ import (
 var (
 	inputFile  = flag.String("input", "", "Input file with assembly code (stdin if not specified)")
 	targetFile = flag.String("target", "", "Target file for machine code (stdout if not specified)")
-	// flags
 )
 
 func readAssemblyCode(inputFile string) ([]byte, error) {
@@ -49,6 +48,8 @@ func main() {
 		_, _ = fmt.Fprintf(os.Stderr, "Error while translating assembly code: %s", err.Error())
 		os.Exit(1)
 	}
+
+	fmt.Printf("LoC: %d; instructions count: %d\n", translator.GetLinesOfCode(), len(translationOutput.Instructions))
 
 	serializationOutput, err := isa.SerializeCode(translationOutput)
 	if err != nil {

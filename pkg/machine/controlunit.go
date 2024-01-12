@@ -28,8 +28,8 @@ type ControlUnit struct {
 	program  isa.Program
 	dataPath *DataPath
 
-	instructionsCounter int
-	clock               *Clock
+	ExecutedInstructions int
+	clock                *Clock
 
 	stateOutput io.Writer
 }
@@ -71,7 +71,7 @@ func (cu *ControlUnit) GetReg(register Register) isa.MachineWord {
 }
 
 func (cu *ControlUnit) RunInstructionCycle() error {
-	for cu.instructionsCounter < MaxInstructions {
+	for cu.ExecutedInstructions < MaxInstructions {
 		err := cu.DecodeAndExecuteInstruction()
 		if err != nil {
 			return err
@@ -81,7 +81,7 @@ func (cu *ControlUnit) RunInstructionCycle() error {
 		if err != nil {
 			return err
 		}
-		cu.instructionsCounter++
+		cu.ExecutedInstructions++
 	}
 	return errors.New("instructions limit exceeded")
 }
@@ -129,7 +129,6 @@ func (cu *ControlUnit) popFromStack(target Register) {
 }
 
 func (cu *ControlUnit) InstructionFetch() {
-	// цикл выборки команды
 	cu.doInOneTick("IP -> AR", cu.SigLatchRegFunc(AR, cu.dataPath.SigExecuteAluOp(*cu.aluRegisterPassThrough(IP))))
 	cu.doInOneTick("IP + 1 -> IP; mem[AR] -> DR", cu.SigLatchRegFunc(IP, cu.dataPath.SigExecuteAluOp(*cu.aluIncrement(IP))), cu.SigLatchRegFunc(DR, cu.dataPath.ReadMemory(cu.GetReg(AR).Value)))
 	cu.doInOneTick("DR -> CR", cu.SigLatchRegFunc(CR, cu.dataPath.SigExecuteAluOp(*cu.aluRegisterPassThrough(DR))))
@@ -141,10 +140,8 @@ func (cu *ControlUnit) AddressFetch() {
 }
 
 func (cu *ControlUnit) OperandFetch() {
-	// цикл выборки операнда
 	cu.doInOneTick("DR -> AR", cu.SigLatchRegFunc(AR, cu.dataPath.SigExecuteAluOp(*cu.aluRegisterPassThrough(DR))))
 	cu.doInOneTick("mem[AR] -> DR", cu.SigLatchRegFunc(DR, cu.dataPath.ReadMemory(cu.GetReg(AR).Value)))
-	// значение лежит в DR
 }
 
 func (cu *ControlUnit) decodeAndExecuteAddressInstruction(instruction isa.MachineWord) error {
@@ -163,7 +160,6 @@ func (cu *ControlUnit) decodeAndExecuteAddressInstruction(instruction isa.Machin
 	case opcode == isa.OpcodeCmp:
 		cu.doInOneTick("AC - DR -> NZC", func() { cu.dataPath.SigExecuteAluOp(*cu.toAluOp(AC, DR, instruction.Opcode).UpdateFlags(true)) })
 	default:
-		// арифметическая
 		cu.doInOneTick("AC +- DR -> AC", cu.SigLatchRegFunc(AC, cu.dataPath.SigExecuteAluOp(*cu.toAluOp(AC, DR, instruction.Opcode).UpdateFlags(true))))
 	}
 	return nil
@@ -222,7 +218,6 @@ func (cu *ControlUnit) processInterrupt() {
 	cu.pushOnStack(IP)
 	cu.pushOnStack(PS)
 
-	// читаем по адресу вектора прерывания
 	cu.doInOneTick("intVec -> AR", cu.SigLatchRegFunc(AR, cu.dataPath.SigExecuteAluOp(*NewAluOp(AluOperationAdd).SetLeftValue(InterruptVectorFirst))))
 	cu.doInOneTick("mem[AR] -> DR", cu.SigReadMemoryFunc())
 
@@ -238,7 +233,6 @@ func (cu *ControlUnit) processInterrupt() {
 	cu.popFromStack(PS)
 	cu.popFromStack(IP)
 
-	// enable interrupts
 	cu.doInOneTick("1 -> PS[EI]", cu.SigLatchRegFunc(PS, cu.dataPath.SigExecuteAluOp(*NewAluOp(AluOperationOr).SetLeft(cu.GetReg(PS)).SetRightValue(StatusRegisterEnableInterruptBit))))
 }
 
@@ -276,7 +270,6 @@ func (cu *ControlUnit) toAluOp(left Register, right Register, operation isa.Opco
 
 func (cu *ControlUnit) PresetInstructionCounter(value int) {
 	cu.dataPath.SigLatchRegister(IP, isa.NewConstantNumber(value))
-	cu.instructionsCounter = value
 }
 
 func (cu *ControlUnit) doInOneTick(description string, singleTickOperation ...SingleTickOperation) {
@@ -294,8 +287,6 @@ func (cu *ControlUnit) tick() {
 }
 
 func (cu *ControlUnit) dumpState(currentOperationDescription string) error {
-	// tick number.
-	// PS: NZC
 	tick := cu.clock.GetCurrentTick()
 	memByAR := cu.formatMemByAR(cu.GetReg(AR))
 	statusFlags := cu.dataPath.GetFlags()
@@ -380,7 +371,6 @@ func (cu *ControlUnit) formatMemByAR(arRegister isa.MachineWord) string {
 }
 
 func printInstruction(word isa.MachineWord) string {
-	// opcode + optional value
 	if word.ValueType != isa.ValueTypeNone {
 		return fmt.Sprintf("%3s %d", word.Opcode, word.Value)
 	}

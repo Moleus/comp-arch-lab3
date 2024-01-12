@@ -11,16 +11,23 @@ import (
 
 type Translator interface {
 	Translate(input string) (isa.Program, error)
+	GetLinesOfCode() int
 }
 
 type AsmTranslator struct {
 	instructions []ParsedInstruction
 	currentIndex int
+
+	LinesOfCode int
 }
 
 func NewTranslator() Translator {
 	instructions := make([]ParsedInstruction, 0)
 	return &AsmTranslator{instructions: instructions, currentIndex: 0}
+}
+
+func (t *AsmTranslator) GetLinesOfCode() int {
+	return t.LinesOfCode
 }
 
 type ParsedInstruction struct {
@@ -89,6 +96,8 @@ func (t *AsmTranslator) parseLine(line string, lineNumber int) error {
 		return NewParseError("Don't use `word` as a label. It's reserved", line, 0)
 	}
 
+	t.LinesOfCode++
+
 	if isConstantDeclaration(parts) {
 		instructions, err := parseConstantDeclaration(parts)
 		if err != nil {
@@ -108,11 +117,6 @@ func (t *AsmTranslator) parseLine(line string, lineNumber int) error {
 }
 
 func parseConstantDeclaration(parts []string) ([]ParsedInstruction, error) {
-	// 3 variants:
-	// 1. [<label>] word: <number>
-	// 2. [<label>] word: '<string>'
-	// 3. [<label>] word: address
-
 	label := strings.Split(parts[0], ":")[0]
 	argument := strings.TrimSpace(parts[2])
 
@@ -236,7 +240,6 @@ func (t *AsmTranslator) inferOperand(instruction ParsedInstruction) (*int, error
 		*operand = instruction.Operand
 		return operand, nil
 	case isa.ValueTypeAddressDirect, isa.ValueTypeAddressIndirect:
-		// label
 		if instruction.LabelOperand == "" {
 			panic(fmt.Sprintf("label operand is empty: %s", instruction.Opcode))
 		}

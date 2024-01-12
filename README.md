@@ -667,3 +667,5 @@ ok      github.com/Moleus/comp-arch-lab3/pkg/translator (cached)
 PASS
 ok      github.com/Moleus/comp-arch-lab3/tests  0.521s
 ```
+
+TODO: last table with statistics
