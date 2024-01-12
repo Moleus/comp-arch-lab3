@@ -10,7 +10,6 @@ import (
 )
 
 var (
-	logLevel            = flag.String("log-level", "info", "Log level (debug, info, warn, error)")
 	programCodeFilename = flag.String("program", "", "Path to program file")
 	dataInputFilename   = flag.String("io-data", "", "Path to IO data file")
 )

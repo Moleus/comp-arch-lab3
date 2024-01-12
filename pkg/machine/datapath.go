@@ -139,13 +139,6 @@ func (dp *DataPath) IsInterruptEnabled() bool {
 	return dp.registers[PS].Value&StatusRegisterEnableInterruptBit > 0
 }
 
-func (dp *DataPath) WriteOutput(character rune) {
-	_, err := dp.outputBuffer.Write([]byte(string(character)))
-	if err != nil {
-		panic(err)
-	}
-}
-
 func (dp *DataPath) SigLatchRegister(register Register, value isa.MachineWord) {
 	dp.registers[register] = value
 }

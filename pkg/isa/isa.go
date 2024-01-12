@@ -19,23 +19,19 @@ import (
 	"strings"
 )
 
-/* accumulator based ISA */
-
 // Instruction represents all supported instructions for our architecture
 const (
-	WordWidth    = 16
+	WordWidth    = 32
 	WordMaxValue = 1<<(WordWidth-1) - 1
 	WordMinValue = -1 << (WordWidth - 1)
 	AddrWidth    = 11
-	AddrMaxValue = 1<<(AddrWidth-1) - 1
+	AddrMaxValue = 1<<(AddrWidth) - 1
 )
 
 type Opcode int
 
 const (
 	OpcodeNop Opcode = iota
-	OpcodeAnd
-	OpcodeOr
 	OpcodeAdd
 	OpcodeSub
 	OpcodeCmp
@@ -83,14 +79,6 @@ type OpcodeInfo struct {
 
 var (
 	opcodeToInfo = map[Opcode]OpcodeInfo{
-		OpcodeAnd: {
-			instructionType:      OpcodeTypeAddress,
-			stringRepresentation: "AND",
-		},
-		OpcodeOr: {
-			instructionType:      OpcodeTypeAddress,
-			stringRepresentation: "OR",
-		},
 		OpcodeAdd: {
 			instructionType:      OpcodeTypeAddress,
 			stringRepresentation: "ADD",
@@ -325,16 +313,4 @@ func ReadIoData(input io.Reader) ([]IoData, error) {
 		return []IoData{}, err
 	}
 	return ioData, nil
-}
-
-func WriteIoData(target io.Writer, ioData []IoData) error {
-	encodedData, err := json.MarshalIndent(ioData, "", "  ")
-	if err != nil {
-		return err
-	}
-	_, err = target.Write(encodedData)
-	if err != nil {
-		return err
-	}
-	return nil
 }

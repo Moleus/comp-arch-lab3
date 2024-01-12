@@ -76,13 +76,6 @@ func NewAlu() *Alu {
 	}
 }
 
-func wrapOverflow(value int) int {
-	if value > isa.WordMaxValue || value < isa.WordMinValue {
-		return (value+(isa.WordMaxValue+1))%(2*(isa.WordMaxValue+1)) - isa.WordMaxValue - 1
-	}
-	return value
-}
-
 type FlagBit int
 
 const (
@@ -98,18 +91,18 @@ func (a *Alu) setFlags(value int) {
 }
 
 type ExecutionParams struct {
-	operation       AluOperation
-	left            isa.MachineWord
-	right           isa.MachineWord
-	updateRegisters bool
+	operation   AluOperation
+	left        isa.MachineWord
+	right       isa.MachineWord
+	updateFlags bool
 }
 
 func NewAluOp(operation AluOperation) *ExecutionParams {
 	return &ExecutionParams{
-		operation:       operation,
-		left:            isa.NewConstantNumber(0),
-		right:           isa.NewConstantNumber(0),
-		updateRegisters: false,
+		operation:   operation,
+		left:        isa.NewConstantNumber(0),
+		right:       isa.NewConstantNumber(0),
+		updateFlags: false,
 	}
 }
 
@@ -133,8 +126,8 @@ func (p *ExecutionParams) SetRightValue(right int) *ExecutionParams {
 	return p
 }
 
-func (p *ExecutionParams) UpdateRegisters(updateRegisters bool) *ExecutionParams {
-	p.updateRegisters = updateRegisters
+func (p *ExecutionParams) UpdateFlags(updateFlags bool) *ExecutionParams {
+	p.updateFlags = updateFlags
 	return p
 }
 
@@ -145,8 +138,7 @@ func (a *Alu) Execute(executionParams ExecutionParams) (isa.MachineWord, BitFlag
 	output := a.operation2func[executionParams.operation](executionParams.left.Value, executionParams.right.Value)
 	result := executionParams.left
 	result.Value = output
-	wrapOverflow(output)
-	if executionParams.updateRegisters {
+	if executionParams.updateFlags {
 		a.setFlags(output)
 	}
 	return result, a.bitFlags
