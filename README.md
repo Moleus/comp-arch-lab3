@@ -627,7 +627,7 @@ t148  | DR -> CR                      | AC:  1, IP:  8, CR:  JZ 6, PS: 32, SP: 2
 t149  | IP -> AR                      | AC:  1, IP:  8, CR:  JZ 6, PS: 32, SP: 2048, DR:  6, AR:  8 | !Z !N !C EI | mem[AR]: HLT
 t150  | IP + 1 -> IP; mem[AR] -> DR   | AC:  1, IP:  9, CR:  JZ 6, PS: 32, SP: 2048, DR:  0, AR:  8 | !Z !N !C EI | mem[AR]: HLT
 t151  | DR -> CR                      | AC:  1, IP:  9, CR:   HLT, PS: 32, SP: 2048, DR:  0, AR:  8 | !Z !N !C EI | mem[AR]: HLT
-2024/01/12 19:53:03 simulation finished
+2024/01/12 20:23:06 simulation finished. Instructions executed: 18, ticks: 152
 ```
 
 Пример проверки исходного кода:
@@ -669,3 +669,9 @@ ok      github.com/Moleus/comp-arch-lab3/tests  0.521s
 ```
 
 TODO: last table with statistics
+
+| ФИО                      | алг             | LoC | code байт | code инстр. | инстр. | такт. | вариант                                                                  |
+| Соловьев Павел Андреевич | hello           | 13  | -         | 26          | 95     | 491   | asm | acc | neum | hw | tick | struct | trap | port | cstr | prob5 | spi |
+| Соловьев Павел Андреевич | cat             | 17  | -         | 17          | 18     | 152   | asm | acc | neum | hw | tick | struct | trap | port | cstr | prob5 | spi |
+| Соловьев Павел Андреевич | hello_user      | 57  | -         | 83          | 267    | 1528  | asm | acc | neum | hw | tick | struct | trap | port | cstr | prob5 | spi |
+| Соловьев Павел Андреевич | prob5           | 23  | -         | 23          | 6026   | 33051 | asm | acc | neum | hw | tick | struct | trap | port | cstr | prob5 | spi |
