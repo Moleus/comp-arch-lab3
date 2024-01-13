@@ -153,14 +153,18 @@ func (cu *ControlUnit) decodeAndExecuteAddressInstruction(instruction isa.Machin
 	opcode := instruction.Opcode
 	switch {
 	case opcode == isa.OpcodeLoad:
-		cu.doInOneTick("DR -> AC", cu.SigLatchRegFunc(AC, cu.dataPath.SigExecuteAluOp(*cu.aluRegisterPassThrough(DR).UpdateFlags(true))))
+		cu.doInOneTick("DR -> AC", func() {
+			cu.dataPath.SigLatchAC(cu.dataPath.SigExecuteAluOp(*cu.aluRegisterPassThrough(DR).UpdateFlags(true)), AccumulatorSelAlu)
+		})
 	case opcode == isa.OpcodeStore:
 		cu.doInOneTick("AC -> DR", cu.SigLatchRegFunc(DR, cu.dataPath.SigExecuteAluOp(*cu.aluRegisterPassThrough(AC))))
 		cu.doInOneTick("DR -> mem[AR]", cu.SigWriteMemoryFunc())
 	case opcode == isa.OpcodeCmp:
 		cu.doInOneTick("AC - DR -> NZC", func() { cu.dataPath.SigExecuteAluOp(*cu.toAluOp(AC, DR, instruction.Opcode).UpdateFlags(true)) })
 	default:
-		cu.doInOneTick("AC +- DR -> AC", cu.SigLatchRegFunc(AC, cu.dataPath.SigExecuteAluOp(*cu.toAluOp(AC, DR, instruction.Opcode).UpdateFlags(true))))
+		cu.doInOneTick("AC +- DR -> AC", func() {
+			cu.dataPath.SigLatchAC(cu.dataPath.SigExecuteAluOp(*cu.toAluOp(AC, DR, instruction.Opcode).UpdateFlags(true)), AccumulatorSelAlu)
+		})
 	}
 	return nil
 }
@@ -180,13 +184,19 @@ func (cu *ControlUnit) decodeAndExecuteAddresslessInstruction(instruction isa.Ma
 	case isa.OpcodeDi:
 		cu.doInOneTick("0 -> PS[EI]", cu.SigLatchRegFunc(PS, cu.dataPath.SigExecuteAluOp(*NewAluOp(AluOperationAnd).SetLeft(cu.GetReg(PS)).SetRightValue(^(StatusRegisterEnableInterruptBit)))))
 	case isa.OpcodeCla:
-		cu.doInOneTick("0 -> AC", cu.SigLatchRegFunc(AC, cu.dataPath.SigExecuteAluOp(*cu.toAluOp(AC, 0, instruction.Opcode).UpdateFlags(true))))
+		cu.doInOneTick("0 -> AC", func() {
+			cu.dataPath.SigLatchAC(cu.dataPath.SigExecuteAluOp(*cu.toAluOp(AC, 0, instruction.Opcode).UpdateFlags(true)), AccumulatorSelAlu)
+		})
 	case isa.OpcodeNop:
 		cu.doInOneTick("NOP", func() {})
 	case isa.OpcodeInc:
-		cu.doInOneTick("AC + 1 -> AC", cu.SigLatchRegFunc(AC, cu.dataPath.SigExecuteAluOp(*cu.aluIncrement(AC).UpdateFlags(true))))
+		cu.doInOneTick("AC + 1 -> AC", func() {
+			cu.dataPath.SigLatchAC(cu.dataPath.SigExecuteAluOp(*cu.aluIncrement(AC).UpdateFlags(true)), AccumulatorSelAlu)
+		})
 	case isa.OpcodeDec:
-		cu.doInOneTick("AC - 1 -> AC", cu.SigLatchRegFunc(AC, cu.dataPath.SigExecuteAluOp(*cu.aluDecrement(AC).UpdateFlags(true))))
+		cu.doInOneTick("AC - 1 -> AC", func() {
+			cu.dataPath.SigLatchAC(cu.dataPath.SigExecuteAluOp(*cu.aluDecrement(AC).UpdateFlags(true)), AccumulatorSelAlu)
+		})
 	default:
 		panic(fmt.Sprintf("unknown addressless instruction: %s", instruction.Opcode))
 	}
@@ -239,7 +249,7 @@ func (cu *ControlUnit) processInterrupt() {
 func (cu *ControlUnit) executeIOInstruction(instruction isa.MachineWord) error {
 	switch instruction.Opcode {
 	case isa.OpcodeIn:
-		cu.doInOneTick("IN -> AC", cu.dataPath.SigLatchACInput)
+		cu.doInOneTick("IN -> AC", func() { cu.dataPath.SigLatchAC(cu.GetReg(DR), AccumulatorSelInput) })
 	case isa.OpcodeOut:
 		cu.doInOneTick("AC -> OUT", cu.dataPath.SigWritePortOut)
 	default:

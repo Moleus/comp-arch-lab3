@@ -10,6 +10,13 @@ import (
 type Register int
 
 const (
+	StatusRegisterCarryBit           = 1 << 0
+	StatusRegisterZeroBit            = 1 << 2
+	StatusRegisterNegativeBit        = 1 << 3
+	StatusRegisterEnableInterruptBit = 1 << 5
+)
+
+const (
 	AC Register = iota
 	IP
 	CR
@@ -18,20 +25,6 @@ const (
 	DR
 	AR
 )
-
-const (
-	StatusRegisterCarryBit           = 1 << 0
-	StatusRegisterZeroBit            = 1 << 2
-	StatusRegisterNegativeBit        = 1 << 3
-	StatusRegisterEnableInterruptBit = 1 << 5
-)
-
-type BitFlags struct {
-	Zero             bool
-	Negative         bool
-	Carry            bool
-	EnableInterrupts bool
-}
 
 func (r Register) String() string {
 	switch r {
@@ -53,6 +46,20 @@ func (r Register) String() string {
 		panic(fmt.Sprintf("unknown register: %d", r))
 	}
 }
+
+type BitFlags struct {
+	Zero             bool
+	Negative         bool
+	Carry            bool
+	EnableInterrupts bool
+}
+
+type AccumulatorSel int
+
+const (
+	AccumulatorSelInput AccumulatorSel = iota
+	AccumulatorSelAlu
+)
 
 type DataPath struct {
 	inputBuffer  []isa.IoData
@@ -93,9 +100,13 @@ func (dp *DataPath) SigLatchRegister(register Register, value isa.MachineWord) {
 	dp.registers[register] = value
 }
 
-func (dp *DataPath) SigLatchACInput() {
-	dp.registers[AC] = isa.NewMemoryWordFromIO(dp.inputBuffer[0])
-	dp.inputBuffer = dp.inputBuffer[1:]
+func (dp *DataPath) SigLatchAC(aluData isa.MachineWord, sel AccumulatorSel) {
+	if sel == AccumulatorSelInput {
+		dp.registers[AC] = isa.NewMemoryWordFromIO(dp.inputBuffer[0])
+		dp.inputBuffer = dp.inputBuffer[1:]
+	} else {
+		dp.registers[AC] = aluData
+	}
 }
 
 func (dp *DataPath) isInputReady() bool {
